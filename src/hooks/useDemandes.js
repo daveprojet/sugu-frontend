@@ -32,7 +32,7 @@ export function useCreateDemande() {
         qc.invalidateQueries('demandes')
         toast.success('Demande envoyée avec succès !')
       },
-      onError: () => toast.error('Erreur lors de l\'envoi'),
+      onError: (e) => toast.error('Erreur lors de l\'envoi de la demande '),
     }
   )
 }

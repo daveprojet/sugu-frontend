@@ -74,4 +74,9 @@ export const avisService = {
   repondre: (id, data) => api.patch(`/avis/${id}/reponse/`, data),
 }
 
+// ── Contacts ──────────────────────────────────────────
+export const contactService = {
+  create: (data) => api.post('/contacts/', data),
+}
+
 export default api
