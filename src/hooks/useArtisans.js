@@ -10,32 +10,46 @@ export function useArtisans(filters = {}) {
   )
 }
 
-export function useArtisan(id) {
+export function useArtisan(uid) {
   return useQuery(
-    ['artisan', id],
-    () => artisanService.detail(id).then(r => r.data),
-    { enabled: !!id }
+    ['artisan', uid],
+    () => artisanService.detail(uid).then(r => r.data),
+    { enabled: !!uid }
   )
 }
 
-export function useArtisanAvis(id) {
+export function useArtisanAvis(uid) {
   return useQuery(
-    ['artisan-avis', id],
-    () => artisanService.avis(id).then(r => r.data),
-    { enabled: !!id }
+    ['artisan-avis', uid],
+    () => artisanService.avis(uid).then(r => r.data),
+    { enabled: !!uid }
   )
 }
 
 export function useUpdateArtisan() {
   const qc = useQueryClient()
   return useMutation(
-    ({ id, data }) => artisanService.update(id, data),
+    ({ uid, data }) => artisanService.update(uid, data),
     {
-      onSuccess: (_, { id }) => {
-        qc.invalidateQueries(['artisan', id])
+      onSuccess: (_, { uid }) => {
+        qc.invalidateQueries(['artisan', uid])
         toast.success('Profil mis à jour !')
       },
       onError: () => toast.error('Erreur lors de la mise à jour'),
+    }
+  )
+}
+
+export function useUploadArtisanPhoto() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ uid, file }) => artisanService.uploadPhoto(uid, file),
+    {
+      onSuccess: (_, { uid }) => {
+        qc.invalidateQueries(['artisan', uid])
+        toast.success('Photo de profil mise à jour !')
+      },
+      onError: () => toast.error('Erreur lors du téléchargement'),
     }
   )
 }

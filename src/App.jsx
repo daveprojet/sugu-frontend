@@ -43,7 +43,7 @@ function AppRoutes() {
           <Route path="/a-propos"          element={<AboutPage />} />
           <Route path="/contact"           element={<ContactPage />} />
           <Route path="/artisans"          element={<ArtisansPage />} />
-          <Route path="/artisans/:id"      element={<ArtisanDetailPage />} />
+          <Route path="/artisans/:uid"      element={<ArtisanDetailPage />} />
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />

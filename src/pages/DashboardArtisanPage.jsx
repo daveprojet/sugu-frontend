@@ -9,8 +9,8 @@ import { STATUTS_DEMANDE } from '@/utils/constants'
 
 export default function DashboardArtisanPage() {
   const { user } = useAuth()
-  const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_id })
-  const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_id)
+  const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
+  const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
   const updateDemande  = useUpdateDemande()
   const updateArtisan  = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
@@ -21,7 +21,7 @@ export default function DashboardArtisanPage() {
   const toggleDispo = async () => {
     const next = !disponible
     setDisponible(next)
-    await updateArtisan.mutateAsync({ id: user.artisan_id, data: { disponible: next } })
+    await updateArtisan.mutateAsync({ uid: user.artisan_uid, data: { disponible: next } })
   }
 
   const stats = {
@@ -39,7 +39,7 @@ export default function DashboardArtisanPage() {
     e.preventDefault()
     await repondreAvis.mutateAsync({
       id: item.id,
-      artisanId: user.artisan_id,
+      artisanId: user.artisan_uid,
       data: { reponse_artisan: replyText },
     })
     setReplyOpen(null)

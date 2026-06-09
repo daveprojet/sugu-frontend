@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { toast } from 'react-toastify'
+import { useCreateContact } from '@/hooks/useContacts'
 
 const contactEmail = 'contact@sugu.sn'
 const contactPhone = '+221770000000'
@@ -7,25 +8,22 @@ const contactPhone = '+221770000000'
 export default function ContactPage() {
   const [form, setForm] = useState({
     nom: '',
+    email: '',
     telephone: '',
     sujet: '',
     message: '',
   })
 
+  const [loading, setLoading] = useState(false)
+  const createContact = useCreateContact()
   const set = (key, value) => {
     setForm(current => ({ ...current, [key]: value }))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const subject = encodeURIComponent(form.sujet || 'Contact Sugu.sn')
-    const body = encodeURIComponent(
-      `Nom: ${form.nom}\nTelephone: ${form.telephone}\n\n${form.message}`
-    )
-
-    window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`
-    toast.success('Votre client mail va s ouvrir avec le message prepare.')
-  }
+const handleSubmit = (e) => {
+  e.preventDefault()
+  createContact.mutate(form)
+}
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-10">
@@ -41,7 +39,7 @@ export default function ContactPage() {
         <section className="card p-6">
           <h2 className="font-display font-semibold text-gray-900 mb-4">Envoyer un message</h2>
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom complet</label>
               <input
                 value={form.nom}
@@ -49,6 +47,16 @@ export default function ContactPage() {
                 required
                 className="input-field"
                 placeholder="Moussa Diallo"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={e => set('email', e.target.value)}
+                className="input-field"
+                placeholder="moussa@diallo.sn"
               />
             </div>
             <div>
@@ -83,7 +91,9 @@ export default function ContactPage() {
               />
             </div>
             <div className="md:col-span-2 flex justify-end">
-              <button type="submit" className="btn-primary">Envoyer</button>
+              <button type="submit" className="btn-primary" disabled={createContact.isLoading}>
+                {createContact.isLoading ? 'Envoi en cours...' : 'Envoyer'}
+              </button>
             </div>
           </form>
         </section>
