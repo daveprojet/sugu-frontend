@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
 import { useArtisanAvis, useUpdateArtisan } from '@/hooks/useArtisans'
@@ -6,13 +7,23 @@ import { useRepondreAvis } from '@/hooks/useAvis'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import { STATUTS_DEMANDE } from '@/utils/constants'
+import {
+  Inbox,
+  Clock,
+  CheckCircle,
+  ThumbsUp,
+  XCircle,
+  MessageSquare,
+  Calendar,
+  User,
+} from 'lucide-react'
 
 export default function DashboardArtisanPage() {
   const { user } = useAuth()
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
   const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
-  const updateDemande  = useUpdateDemande()
-  const updateArtisan  = useUpdateArtisan()
+  const updateDemande = useUpdateDemande()
+  const updateArtisan = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
   const [disponible, setDisponible] = useState(user?.disponible ?? true)
   const [replyOpen, setReplyOpen] = useState(null)
@@ -25,9 +36,9 @@ export default function DashboardArtisanPage() {
   }
 
   const stats = {
-    total:    demandes.length,
-    enAttente: demandes.filter(d => d.statut === 'EN_ATTENTE').length,
-    terminees: demandes.filter(d => d.statut === 'TERMINEE').length,
+    total: demandes.length,
+    enAttente: demandes.filter((d) => d.statut === 'EN_ATTENTE').length,
+    terminees: demandes.filter((d) => d.statut === 'TERMINEE').length,
   }
 
   const openReply = (item) => {
@@ -46,178 +57,326 @@ export default function DashboardArtisanPage() {
     setReplyText('')
   }
 
+  // Mapping des couleurs pour les cartes de statistiques
+  const statCards = [
+    { label: 'Total demandes', value: stats.total, icon: Inbox, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'En attente', value: stats.enAttente, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Terminées', value: stats.terminees, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  ]
+
+  // Animations Framer Motion
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+  }
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
+
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-gray-900">
-            Bonjour, {user?.prenom} 👋
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">Voici un aperçu de votre activité</p>
-        </div>
-        <button
-          onClick={toggleDispo}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all ${
-            disponible ? 'bg-accent-100 text-accent-700 hover:bg-accent-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-          }`}
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+      <div className="max-w-6xl mx-auto space-y-10">
+        
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
-          <span className={`w-2 h-2 rounded-full ${disponible ? 'bg-accent-500' : 'bg-gray-400'}`} />
-          {disponible ? 'Disponible' : 'Indisponible'}
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {[
-          { label: 'Total demandes', value: stats.total,     color: 'text-gray-900' },
-          { label: 'En attente',     value: stats.enAttente, color: 'text-amber-600' },
-          { label: 'Terminées',      value: stats.terminees, color: 'text-accent-600' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="card p-5 text-center">
-            <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
-            <p className="text-xs text-gray-500 mt-1">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Demandes */}
-      <h2 className="font-display font-semibold text-gray-900 mb-4">Demandes reçues</h2>
-
-      {isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
-      ) : demandes.length === 0 ? (
-        <div className="card p-10 text-center text-gray-400">
-          <p className="text-3xl mb-3">📭</p>
-          <p className="font-medium">Aucune demande pour le moment</p>
-          <p className="text-sm mt-1">Complétez votre profil pour être mieux visible</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {demandes.map(d => (
-            <div key={d.id} className="card p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-gray-900">{d.client_nom}</span>
-                    <span className={`badge ${STATUTS_DEMANDE[d.statut]?.color}`}>
-                      {STATUTS_DEMANDE[d.statut]?.label}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600">{d.description}</p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    {new Date(d.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-
-                {d.statut === 'EN_ATTENTE' && (
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ACCEPTEE' } })}
-                      className="btn-primary text-xs py-1.5 px-3"
-                    >
-                      Accepter
-                    </button>
-                    <button
-                      onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
-                      className="btn-secondary text-xs py-1.5 px-3 text-red-500"
-                    >
-                      Refuser
-                    </button>
-                  </div>
-                )}
-                {d.statut === 'ACCEPTEE' && (
-                  <button
-                    onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'TERMINEE' } })}
-                    className="btn-secondary text-xs py-1.5 px-3 text-accent-600 flex-shrink-0"
-                  >
-                    Marquer terminé
-                  </button>
-                )}
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-indigo-500/30">
+              {user?.prenom?.charAt(0) || 'A'}
             </div>
-          ))}
-        </div>
-      )}
+            <div>
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
+                Bonjour, {user?.prenom} 👋
+              </h1>
+              <p className="text-gray-500 text-sm font-medium mt-0.5">Voici un aperçu de votre activité</p>
+            </div>
+          </div>
 
-      <h2 className="font-display font-semibold text-gray-900 mt-10 mb-4">Avis clients</h2>
+          {/* Toggle Dispo Premium */}
+          <button
+            onClick={toggleDispo}
+            className={`group relative flex items-center gap-3 px-6 py-2.5 rounded-full border-2 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md
+              ${disponible 
+                ? 'border-emerald-500 text-emerald-700 bg-white hover:bg-emerald-50' 
+                : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'
+              }`}
+          >
+            <span className="relative flex h-3 w-3">
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                  disponible ? 'bg-emerald-400' : 'bg-gray-400'
+                }`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-3 w-3 ${
+                  disponible ? 'bg-emerald-500' : 'bg-gray-400'
+                }`}
+              />
+            </span>
+            {disponible ? 'Disponible' : 'Indisponible'}
+          </button>
+        </motion.div>
 
-      {avisLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
-      ) : avis.length === 0 ? (
-        <div className="card p-8 text-center text-gray-400">
-          <p className="font-medium">Aucun avis pour le moment</p>
-          <p className="text-sm mt-1">Les commentaires apparaitront apres les prestations terminees.</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {avis.map(item => (
-            <div key={item.id} className="card p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <div>
-                      <p className="font-medium text-gray-900">{item.client_nom}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(item.created_at).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <StarRating note={item.note} size="sm" showNote={false} />
+        {/* Stats Cards avec animations */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          {statCards.map(({ label, value, icon: Icon, color, bg }) => (
+            <motion.div
+              key={label}
+              variants={itemVariants}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 border border-gray-100 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <Icon className={`w-6 h-6 ${color}`} />
                   </div>
+                  <div>
+                    <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
+                    <p className="text-xs text-gray-500 font-medium">{label}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
-                  {item.commentaire ? (
-                    <p className="text-sm text-gray-600">{item.commentaire}</p>
-                  ) : (
-                    <p className="text-sm text-gray-400 italic">Aucun commentaire ajoute.</p>
-                  )}
+        {/* Demandes */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="font-display text-xl font-bold text-gray-900">Demandes reçues</h2>
+            {!isLoading && demandes.length > 0 && (
+              <span className="inline-flex items-center justify-center bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                {demandes.length}
+              </span>
+            )}
+          </div>
 
-                  {item.reponse_artisan && replyOpen !== item.id && (
-                    <div className="mt-4 rounded-xl bg-sand-50 border border-sand-100 p-4">
-                      <p className="text-xs font-medium text-gray-500 mb-1">Votre reponse</p>
-                      <p className="text-sm text-gray-700">{item.reponse_artisan}</p>
-                      {item.reponse_artisan_at && (
-                        <p className="text-xs text-gray-400 mt-2">
-                          {new Date(item.reponse_artisan_at).toLocaleDateString('fr-FR')}
-                        </p>
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
+          ) : demandes.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+              <Inbox className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="font-medium text-gray-500">Aucune demande pour le moment</p>
+              <p className="text-sm text-gray-400 mt-1">Complétez votre profil pour être mieux visible</p>
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-4"
+            >
+              {demandes.map((d) => {
+                // Couleur du statut basée sur la constante
+                const statusColor = STATUTS_DEMANDE[d.statut]?.color || 'bg-gray-100 text-gray-600';
+                return (
+                  <motion.div
+                    key={d.id}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.005 }}
+                    className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 p-5 md:p-6 transition-all duration-200"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                          <span className="font-medium text-gray-900 text-base">{d.client_nom}</span>
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}
+                          >
+                            {STATUTS_DEMANDE[d.statut]?.label || d.statut}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">{d.description}</p>
+                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {new Date(d.created_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          </span>
+                          {d.statut === 'TERMINEE' && (
+                            <span className="flex items-center gap-1.5 text-emerald-600">
+                              <CheckCircle className="w-3.5 h-3.5" /> Terminée
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 flex-shrink-0 mt-2 md:mt-0">
+                        {d.statut === 'EN_ATTENTE' && (
+                          <>
+                            <button
+                              onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ACCEPTEE' } })}
+                              className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <ThumbsUp className="w-3.5 h-3.5" /> Accepter
+                            </button>
+                            <button
+                              onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                              className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <XCircle className="w-3.5 h-3.5" /> Refuser
+                            </button>
+                          </>
+                        )}
+                        {d.statut === 'ACCEPTEE' && (
+                          <button
+                            onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'TERMINEE' } })}
+                            className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+        </section>
+
+        {/* Avis */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="font-display text-xl font-bold text-gray-900">Avis clients</h2>
+            {!avisLoading && avis.length > 0 && (
+              <span className="inline-flex items-center justify-center bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                {avis.length}
+              </span>
+            )}
+          </div>
+
+          {avisLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
+          ) : avis.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+              <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="font-medium text-gray-500">Aucun avis pour le moment</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Les commentaires apparaîtront après les prestations terminées.
+              </p>
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-4"
+            >
+              {avis.map((item) => (
+                <motion.div
+                  key={item.id}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.005 }}
+                  className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 p-5 md:p-6 transition-all duration-200"
+                >
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <div>
+                          <p className="font-medium text-gray-900">{item.client_nom}</p>
+                          <p className="text-xs text-gray-400 font-medium mt-0.5">
+                            {new Date(item.created_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                        <StarRating note={item.note} size="sm" showNote={false} />
+                      </div>
+
+                      {item.commentaire ? (
+                        <p className="text-sm text-gray-600 leading-relaxed">{item.commentaire}</p>
+                      ) : (
+                        <p className="text-sm text-gray-400 italic">Aucun commentaire ajouté.</p>
+                      )}
+
+                      {/* Réponse existante */}
+                      {item.reponse_artisan && replyOpen !== item.id && (
+                        <div className="mt-4 bg-indigo-50 border border-indigo-200/60 rounded-xl p-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <MessageSquare className="w-4 h-4 text-indigo-400" />
+                            <p className="text-xs font-semibold text-indigo-600">Votre réponse</p>
+                          </div>
+                          <p className="text-sm text-gray-700">{item.reponse_artisan}</p>
+                          {item.reponse_artisan_at && (
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(item.reponse_artisan_at).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Formulaire de réponse */}
+                      {replyOpen === item.id && (
+                        <form onSubmit={(e) => submitReply(e, item)} className="mt-4 flex flex-col gap-3">
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            rows={3}
+                            required
+                            className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm resize-none"
+                            placeholder="Écrivez une réponse publique au client"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium px-5 py-2 rounded-full shadow-md shadow-indigo-500/30 transition-all duration-200 text-sm disabled:opacity-70"
+                              disabled={repondreAvis.isLoading}
+                            >
+                              {repondreAvis.isLoading ? 'Envoi...' : 'Publier la réponse'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setReplyOpen(null)}
+                              className="px-5 py-2 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        </form>
                       )}
                     </div>
-                  )}
 
-                  {replyOpen === item.id && (
-                    <form onSubmit={(e) => submitReply(e, item)} className="mt-4 flex flex-col gap-3">
-                      <textarea
-                        value={replyText}
-                        onChange={e => setReplyText(e.target.value)}
-                        rows={3}
-                        required
-                        className="input-field resize-none"
-                        placeholder="Ecrivez une reponse publique au client"
-                      />
-                      <div className="flex gap-2">
-                        <button type="submit" className="btn-primary text-sm" disabled={repondreAvis.isLoading}>
-                          {repondreAvis.isLoading ? 'Envoi...' : 'Publier la reponse'}
-                        </button>
-                        <button type="button" onClick={() => setReplyOpen(null)} className="btn-secondary text-sm">
-                          Annuler
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-
-                {replyOpen !== item.id && (
-                  <button
-                    type="button"
-                    onClick={() => openReply(item)}
-                    className="btn-secondary text-xs py-1.5 px-3 flex-shrink-0"
-                  >
-                    {item.reponse_artisan ? 'Modifier' : 'Repondre'}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                    {replyOpen !== item.id && (
+                      <button
+                        type="button"
+                        onClick={() => openReply(item)}
+                        className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full text-xs font-medium transition-colors flex-shrink-0 shadow-sm"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        {item.reponse_artisan ? 'Modifier' : 'Répondre'}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </section>
+      </div>
     </main>
   )
 }

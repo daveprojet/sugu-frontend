@@ -1,47 +1,124 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { Wrench, HelpCircle, Scale, Heart } from 'lucide-react'
 
 export default function Footer() {
+  // Animation d'entrée en cascade
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  }
+
   return (
-    <footer className="bg-white border-t border-sand-100 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 bg-primary-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">S</span>
+    <motion.footer 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      variants={containerVariants}
+      className="bg-white/90 backdrop-blur-md border-t border-gray-200/80 shadow-sm mt-auto"
+    >
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <motion.div 
+          variants={containerVariants}
+          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12"
+        >
+          {/* Colonne 1 : Branding */}
+          <motion.div variants={itemVariants} className="col-span-2 md:col-span-1">
+            <Link to="/" className="flex items-center gap-2.5 mb-3 group">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/30 transform group-hover:scale-105 transition-all duration-200">
+                <span className="text-white font-bold text-lg">S</span>
               </div>
-              <span className="font-display font-bold text-lg">Sugu.sn</span>
-            </div>
+              <span className="font-display font-bold text-xl text-gray-900">
+                Sugu<span className="text-indigo-600">.</span>sn
+              </span>
+            </Link>
             <p className="text-sm text-gray-500 leading-relaxed">
               Trouvez les meilleurs artisans près de chez vous au Sénégal.
             </p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3 text-sm">Services</h4>
-            <ul className="space-y-2 text-sm text-gray-500">
-              <li><Link to="/artisans" className="hover:text-primary-500">Chercher un artisan</Link></li>
-              <li><Link to="/inscription-artisan" className="hover:text-primary-500">Devenir artisan</Link></li>
+          </motion.div>
+
+          {/* Colonne 2 : Services */}
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center gap-2 mb-4">
+              <Wrench className="w-4 h-4 text-indigo-500" />
+              <h4 className="font-semibold text-gray-900 text-sm tracking-wide">Services</h4>
+            </div>
+            <ul className="space-y-2.5 text-sm text-gray-500">
+              <li>
+                <Link to="/artisans" className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200">
+                  Chercher un artisan
+                </Link>
+              </li>
+              <li>
+                <Link to="/inscription-artisan" className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200">
+                  Devenir artisan
+                </Link>
+              </li>
             </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3 text-sm">Aide</h4>
-            <ul className="space-y-2 text-sm text-gray-500">
-              <li><Link to="/a-propos#comment-ca-marche" className="hover:text-primary-500">Comment ça marche ?</Link></li>
-              <li><Link to="/contact" className="hover:text-primary-500">Nous contacter</Link></li>
+          </motion.div>
+
+          {/* Colonne 3 : Aide */}
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center gap-2 mb-4">
+              <HelpCircle className="w-4 h-4 text-indigo-500" />
+              <h4 className="font-semibold text-gray-900 text-sm tracking-wide">Aide</h4>
+            </div>
+            <ul className="space-y-2.5 text-sm text-gray-500">
+              <li>
+                <Link to="/a-propos#comment-ca-marche" className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200">
+                  Comment ça marche ?
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200">
+                  Nous contacter
+                </Link>
+              </li>
             </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3 text-sm">Légal</h4>
-            <ul className="space-y-2 text-sm text-gray-500">
-              <li><Link to="/cgu" className="hover:text-primary-500">CGU</Link></li>
-              <li><Link to="/confidentialite" className="hover:text-primary-500">Confidentialité</Link></li>
+          </motion.div>
+
+          {/* Colonne 4 : Légal */}
+          <motion.div variants={itemVariants}>
+            <div className="flex items-center gap-2 mb-4">
+              <Scale className="w-4 h-4 text-indigo-500" />
+              <h4 className="font-semibold text-gray-900 text-sm tracking-wide">Légal</h4>
+            </div>
+            <ul className="space-y-2.5 text-sm text-gray-500">
+              <li>
+                <Link to="/cgu" className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200">
+                  CGU
+                </Link>
+              </li>
+              <li>
+                <Link to="/confidentialite" className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200">
+                  Confidentialité
+                </Link>
+              </li>
             </ul>
-          </div>
-        </div>
-        <div className="border-t border-sand-100 mt-8 pt-6 text-center text-xs text-gray-400">
-          © {new Date().getFullYear()} Sugu.sn — Fait avec ❤️ au Sénégal
-        </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Separator & Copyright */}
+        <motion.div 
+          variants={itemVariants}
+          className="border-t border-gray-200/60 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400"
+        >
+          <span>
+            © {new Date().getFullYear()} Sugu.sn
+          </span>
+          <span className="flex items-center gap-1">
+            Fait avec <Heart className="w-3 h-3 text-red-400 fill-red-400" /> au Sénégal
+          </span>
+        </motion.div>
       </div>
-    </footer>
+    </motion.footer>
   )
 }
