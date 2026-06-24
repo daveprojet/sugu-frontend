@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { METIERS, QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
 import { toast } from "react-toastify";
@@ -31,7 +31,8 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const isArtisanFlow = params.get("role") === "artisan";
+  const { pathname } = useLocation();
+  const isArtisanFlow = params.get("role") === "artisan" || pathname === "/inscription-artisan";
 
   const [form, setForm] = useState({
     prenom: "",
@@ -45,6 +46,7 @@ export default function RegisterPage() {
     bio: "",
   });
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -289,9 +291,28 @@ export default function RegisterPage() {
               )}
             </AnimatePresence>
 
+            <label className="flex items-start gap-3 text-sm text-indigo-200">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
+              />
+              <span>
+                J&apos;accepte les{" "}
+                <Link to="/cgu" target="_blank" className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors">
+                  Conditions Générales d&apos;Utilisation
+                </Link>{" "}
+                et la{" "}
+                <Link to="/confidentialite" target="_blank" className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors">
+                  Politique de Confidentialité
+                </Link>
+              </span>
+            </label>
+
             <motion.button
               type="submit"
-              disabled={loading}
+              disabled={loading || !acceptedTerms}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="w-full mt-4 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"

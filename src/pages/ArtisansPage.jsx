@@ -26,7 +26,7 @@ export default function ArtisansPage() {
     const params = {}
     if (filters.metier)   params.metier = filters.metier
     if (filters.quartier) params.quartier = filters.quartier
-    setSearchParams(params)
+    setSearchParams(params, { replace: true })
   }, [filters, setSearchParams])
 
   const handleFilter = (key, value) => setFilters(f => ({ ...f, [key]: value }))

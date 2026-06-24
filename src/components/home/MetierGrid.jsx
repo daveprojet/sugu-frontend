@@ -7,58 +7,30 @@ import {
   Hammer,
   PaintBucket,
   Drill,
-  HardHat,
-  Cog,
-  GlassWater,
+  Grid,
+  Snowflake,
+  Flame,
+  Sprout,
+  Sparkles,
+  Car,
+  Monitor,
   ArrowRight,
 } from "lucide-react";
 
-// 1. On pointe directement vers le dossier public avec des chaînes de caractères
 const metierAssets = {
-  plombier: { 
-    icon: Wrench, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-blue-500 to-indigo-600" 
-  },
-  electricien: { 
-    icon: Zap, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-yellow-500 to-orange-500" 
-  },
-  macon: { 
-    icon: Hammer, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-orange-500 to-red-500" 
-  },
-  peintre: { 
-    icon: PaintBucket, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-pink-500 to-rose-500" 
-  },
-  menuisier: { 
-    icon: Drill, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-amber-500 to-yellow-600" 
-  },
-  couvreur: { 
-    icon: HardHat, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-emerald-500 to-teal-600" 
-  },
-  climaticien: { 
-    icon: Cog, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-indigo-500 to-purple-600" 
-  },
-  vitrier: { 
-    icon: GlassWater, 
-    image: "/images/metiers/plombier.jpg", 
-    color: "from-cyan-500 to-blue-600" 
-  },
+  plombier:      { icon: Wrench,      gradient: "from-blue-500 to-cyan-600",        iconColor: "text-blue-600",      bgLight: "bg-blue-50",    image: "https://images.unsplash.com/photo-1676210133055-eab6ef033ce3?q=80&w=800&auto=format&fit=crop" },
+  electricien:   { icon: Zap,         gradient: "from-yellow-500 to-orange-500",     iconColor: "text-amber-600",     bgLight: "bg-amber-50",   image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800&auto=format&fit=crop" },
+  menuisier:     { icon: Drill,       gradient: "from-amber-700 to-yellow-700",      iconColor: "text-amber-700",     bgLight: "bg-amber-50",   image: "https://images.unsplash.com/photo-1756736668332-e921516c1305?q=80&w=800&auto=format&fit=crop" },
+  macon:         { icon: Hammer,      gradient: "from-orange-500 to-red-500",        iconColor: "text-orange-600",    bgLight: "bg-orange-50",  image: "https://images.unsplash.com/photo-1780849328094-228dc15a6e10?q=80&w=800&auto=format&fit=crop" },
+  peintre:       { icon: PaintBucket, gradient: "from-pink-500 to-rose-500",         iconColor: "text-pink-600",      bgLight: "bg-pink-50",    image: "https://images.unsplash.com/photo-1522600579804-c66aa476298e?q=80&w=800&auto=format&fit=crop" },
+  carreleur:     { icon: Grid,        gradient: "from-teal-500 to-emerald-600",      iconColor: "text-teal-600",      bgLight: "bg-teal-50",    image: "https://images.unsplash.com/photo-1747729495628-e38c438f619b?q=80&w=800&auto=format&fit=crop" },
+  climatisation: { icon: Snowflake,   gradient: "from-sky-500 to-cyan-600",          iconColor: "text-sky-600",       bgLight: "bg-sky-50",     image: "https://images.unsplash.com/photo-1558382689-c1c29cc9b37e?q=80&w=800&auto=format&fit=crop" },
+  soudeur:       { icon: Flame,       gradient: "from-red-600 to-rose-700",          iconColor: "text-red-600",       bgLight: "bg-red-50",     image: "https://images.unsplash.com/photo-1641893823219-38b433f736c0?q=80&w=800&auto=format&fit=crop" },
+  jardinier:     { icon: Sprout,      gradient: "from-green-500 to-emerald-600",     iconColor: "text-green-600",     bgLight: "bg-green-50",   image: "https://images.unsplash.com/photo-1758798482337-bd7c38e94186?q=80&w=800&auto=format&fit=crop" },
+  menage:        { icon: Sparkles,    gradient: "from-violet-500 to-purple-600",     iconColor: "text-violet-600",    bgLight: "bg-violet-50",  image: "https://images.unsplash.com/photo-Y3vDCL7_das?q=80&w=800&auto=format&fit=crop" },
+  chauffeur:     { icon: Car,         gradient: "from-cyan-500 to-blue-600",         iconColor: "text-cyan-600",      bgLight: "bg-cyan-50",    image: "https://images.unsplash.com/photo-1482029255085-35a4a48b7084?q=80&w=800&auto=format&fit=crop" },
+  informatique:  { icon: Monitor,     gradient: "from-slate-600 to-gray-800",        iconColor: "text-slate-600",     bgLight: "bg-slate-50",   image: "https://images.unsplash.com/photo-1654778747238-12314fb5a4aa?q=80&w=800&auto=format&fit=crop" },
 };
-
-// Image de secours (au cas où)
-const fallbackImage = "/images/metiers/plombier.jpg";
 
 export default function MetierGrid() {
   const navigate = useNavigate();
@@ -68,8 +40,9 @@ export default function MetierGrid() {
       {METIERS.map((m, idx) => {
         const asset = metierAssets[m.id] || {
           icon: Wrench,
-          image: fallbackImage,
-          color: "from-gray-500 to-gray-600"
+          gradient: "from-gray-500 to-gray-600",
+          iconColor: "text-gray-600",
+          bgLight: "bg-gray-50",
         };
         const Icon = asset.icon;
 
@@ -82,25 +55,29 @@ export default function MetierGrid() {
             viewport={{ once: true }}
             transition={{ delay: idx * 0.07, duration: 0.4 }}
             whileHover={{ 
-              y: -10, 
+              y: -8, 
               transition: { duration: 0.25, type: "spring", stiffness: 300 } 
             }}
-            className="group relative bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-300 cursor-pointer border border-gray-100"
+            className="group relative bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-100"
           >
-            {/* Zone de l'image locale */}
-            <div className="relative h-48 w-full overflow-hidden bg-gray-50">
-              <img
-                src={asset.image}
-                alt={m.label}
-                loading="lazy"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              {/* Superposition dégradée premium */}
-              <div className={`absolute inset-0 bg-gradient-to-t ${asset.color} opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
-              
-              {/* Icône flottante en bas de carte */}
-              <div className="absolute -bottom-6 left-6 w-14 h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center border border-gray-100 text-indigo-600 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                <Icon className="w-7 h-7" />
+            {/* Zone image ou dégradé avec icône */}
+            <div className={`relative h-48 w-full overflow-hidden ${asset.image ? '' : `bg-gradient-to-br ${asset.gradient}`}`}>
+              {asset.image ? (
+                <>
+                  <img src={asset.image} alt={m.label} className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                  <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+                </>
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                  <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
+                </>
+              )}
+              <div className="absolute -bottom-6 left-6 w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-white/80 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                <Icon className={`w-7 h-7 ${asset.iconColor}`} />
               </div>
             </div>
 
@@ -110,8 +87,6 @@ export default function MetierGrid() {
                 <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">
                   {m.label}
                 </h3>
-                
-                {/* Flèche qui glisse au survol */}
                 <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
                   <ArrowRight className="w-4 h-4" />
                 </div>

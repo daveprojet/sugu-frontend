@@ -17,6 +17,8 @@ import LoginPage          from '@/pages/LoginPage'
 import RegisterPage       from '@/pages/RegisterPage'
 import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
 import DashboardClientPage from '@/pages/DashboardClientPage'
+import TermsPage from '@/pages/TermsPage'
+import ConfidentialitePage from '@/pages/ConfidentialitePage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,7 +58,8 @@ function AppRoutes() {
           <Route path="/dashboard-client" element={
             <PrivateRoute role="client"><DashboardClientPage /></PrivateRoute>
           } />
-          {/* TODO: DashboardClientPage, MonProfilPage */}
+          <Route path="/cgu"              element={<TermsPage />} />
+          <Route path="/confidentialite"  element={<ConfidentialitePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
