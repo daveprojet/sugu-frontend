@@ -25,7 +25,7 @@ export default function HomePage() {
         style={{
           backgroundImage: `
             linear-gradient(to bottom right, rgba(67, 56, 202, 0.85), rgba(147, 51, 234, 0.75)),
-            url('https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1200&q=80')
+            url('https://images.unsplash.com/photo-1621905251918-48416bd8575a?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')
           `,
           backgroundSize: "cover",
 

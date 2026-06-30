@@ -169,7 +169,7 @@ export default function ArtisanDetailPage() {
                     onClick={() => setShowDemandeForm(true)}
                     className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-4 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
                   >
-                    Envoyer une demande
+                    Demander un rendez-vous
                   </button>
                 )}
               </div>
@@ -196,7 +196,7 @@ export default function ArtisanDetailPage() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-display font-semibold text-gray-900 text-lg">
-                    Envoyer une demande
+                    Donnez une date et décrivez votre besoin 
                   </h2>
                   <button
                     type="button"
