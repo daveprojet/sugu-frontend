@@ -35,4 +35,4 @@ export const STATUTS_DEMANDE = {
   ANNULEE:    { label: 'Annulée',     color: 'bg-red-100 text-red-800' },
 }
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend.bricolibe.com/api'
