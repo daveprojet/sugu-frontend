@@ -1,0 +1,27 @@
+Nouveau champ disponible sur les artisans : est_verifie
+Endpoint liste (GET /api/artisans/)
+Chaque artisan retourne désormais :
+{
+  "uid": "uuid",
+  "prenom": "Jean",
+  "nom": "Dupont",
+  "photo": "http://...",
+  "est_verifie": true,
+  "note_moyenne": 4.5,
+  "nb_avis": 12,
+  ...
+}
+Filtre disponible
+GET /api/artisans/?est_verifie=true    → artisans vérifiés uniquement
+GET /api/artisans/?est_verifie=false   → artisans non vérifiés
+Affichage recommandé
+- Si est_verifie === true → afficher un badge vert "Vérifié" sur la carte de l'artisan (icône check + texte)
+- Si est_verifie === false → ne rien afficher (pas de badge)
+Endpoint détail (GET /api/artisans/:uid/)
+Le champ est_verifie est aussi présent dans la réponse du détail, au même niveau que les autres champs.
+Mise à jour en temps réel
+Le badge est automatiquement mis à jour côté backend dès que l'admin :
+- Vérifie la pièce d'identité → est_verifie passe à true
+- Rejette la pièce d'identité → est_verifie repasse à false
+- L'artisan supprime sa pièce → est_verifie repasse à false
+Aucune action frontend nécessaire pour déclencher ces changements — rechargez simplement les données.

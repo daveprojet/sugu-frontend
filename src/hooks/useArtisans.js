@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import { artisanService } from '@/services/api'
+import { artisanService, identiteService } from '@/services/api'
 import { toast } from 'react-toastify'
 
 export function useArtisans(filters = {}) {
@@ -36,6 +36,36 @@ export function useUpdateArtisan() {
         toast.success('Profil mis à jour !')
       },
       onError: () => toast.error('Erreur lors de la mise à jour'),
+    }
+  )
+}
+
+export function useIdentite(uid) {
+  return useQuery(
+    ['artisan-identite', uid],
+    () => identiteService.get(uid).then(r => r.data),
+    { enabled: !!uid }
+  )
+}
+
+export function useUploadIdentite() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ uid, formData }) => identiteService.upsert(uid, formData),
+    {
+      onSuccess: (_, { uid }) => {
+        qc.invalidateQueries(['artisan-identite', uid])
+        qc.invalidateQueries(['artisan', uid])
+        toast.success('Pièce d\'identité mise à jour !')
+      },
+      onError: (error) => {
+        const msg = error.response?.data?.detail
+          || error.response?.data?.recto?.[0]
+          || error.response?.data?.verso?.[0]
+          || error.response?.data?.type_piece?.[0]
+          || 'Erreur lors du téléchargement'
+        toast.error(msg)
+      },
     }
   )
 }
