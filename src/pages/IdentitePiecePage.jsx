@@ -10,6 +10,7 @@ import {
   Clock,
   ArrowLeft,
   FileImage,
+  Camera,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useIdentite, useUploadIdentite } from '@/hooks/useArtisans'
@@ -32,6 +33,8 @@ export default function IdentitePiecePage() {
   const [versoFile, setVersoFile] = useState(null)
   const [rectoPreview, setRectoPreview] = useState(null)
   const [versoPreview, setVersoPreview] = useState(null)
+  const [selfieFile, setSelfieFile] = useState(null)
+  const [selfiePreview, setSelfiePreview] = useState(null)
 
   useEffect(() => {
     if (identite) {
@@ -72,24 +75,41 @@ export default function IdentitePiecePage() {
     setVersoPreview(null)
   }
 
+  const handleSelfieChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const error = validateIdentityFile(file)
+    if (error) { toast.error(error); return }
+    setSelfieFile(file)
+    setSelfiePreview(URL.createObjectURL(file))
+  }
+
+  const removeSelfie = () => {
+    setSelfieFile(null)
+    setSelfiePreview(null)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!rectoFile && !hasIdentity) {
-      toast.error('Veuillez sélectionner un fichier pour le recto.')
+    if (!rectoFile && !selfieFile && !hasIdentity) {
+      toast.error('Veuillez sélectionner un fichier pour le recto et le selfie.')
       return
     }
 
     const formData = new FormData()
     formData.append('type_piece', typePiece)
     if (rectoFile) formData.append('recto', rectoFile)
+    if (selfieFile) formData.append('selfie', selfieFile)
     if (versoFile) formData.append('verso', versoFile)
 
     try {
       await uploadIdentite.mutateAsync({ uid, formData })
       setRectoFile(null)
       setVersoFile(null)
+      setSelfieFile(null)
       setRectoPreview(null)
       setVersoPreview(null)
+      setSelfiePreview(null)
     } catch {
       // handled by mutation onError
     }
@@ -194,7 +214,7 @@ export default function IdentitePiecePage() {
           className="space-y-6"
         >
           {/* Current Documents Preview */}
-          {hasIdentity && (identite.recto || identite.verso) && (
+          {hasIdentity && (identite.recto || identite.verso || identite.selfie) && (
             <motion.div variants={itemVariants} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -204,13 +224,23 @@ export default function IdentitePiecePage() {
                   Documents actuels
                 </h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {identite.recto && (
                   <div>
                     <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Recto</p>
                     <img
                       src={rectoPreview || resolveImageUrl(identite.recto)}
                       alt="Recto pièce d'identité"
+                      className="w-full rounded-xl border border-gray-200 shadow-sm object-cover max-h-64"
+                    />
+                  </div>
+                )}
+                {identite.selfie && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Selfie</p>
+                    <img
+                      src={selfiePreview || resolveImageUrl(identite.selfie)}
+                      alt="Selfie avec pièce d'identité"
                       className="w-full rounded-xl border border-gray-200 shadow-sm object-cover max-h-64"
                     />
                   </div>
@@ -289,6 +319,48 @@ export default function IdentitePiecePage() {
                         <button
                           type="button"
                           onClick={removeRecto}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Selfie */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Selfie avec votre pièce d'identité <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-400 mb-3 ml-1">
+                    Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage
+                  </p>
+                  <div className="flex items-start gap-4">
+                    <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group">
+                      <Camera className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 transition-colors mb-2" />
+                      <span className="text-sm font-medium text-gray-500 group-hover:text-indigo-600">
+                        {selfieFile ? selfieFile.name : 'Prendre une photo ou sélectionner'}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-1">JPG, PNG — max 5 Mo</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png"
+                        capture="user"
+                        onChange={handleSelfieChange}
+                        className="hidden"
+                      />
+                    </label>
+                    {selfiePreview && (
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={selfiePreview}
+                          alt="Aperçu selfie"
+                          className="h-40 w-32 rounded-xl border border-gray-200 object-cover shadow-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeSelfie}
                           className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors"
                         >
                           ✕

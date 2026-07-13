@@ -1,27 +1,26 @@
-Nouveau champ disponible sur les artisans : est_verifie
-Endpoint liste (GET /api/artisans/)
-Chaque artisan retourne désormais :
+Ajout d'un selfie obligatoire dans l'upload de la pièce d'identité
+Endpoint mis à jour
+PUT /api/artisans/{uid}/identite/
+Headers: Authorization: Bearer <token>
+Content-Type: multipart/form-data
+Champs :
+Champ	Type	Requis	Description
+type_piece	string	oui	cni, passeport ou permis
+recto	file	oui	JPG/PNG, max 5 Mo
+selfie	file	oui	Selfie avec la pièce d'identité visible à côté, JPG/PNG, max 5 Mo
+verso	file	non	JPG/PNG, max 5 Mo
+Modifications dans le formulaire
+- Ajouter un champ de téléchargement "Selfie avec votre pièce d'identité" avec la consigne : "Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage"
+- Le champ est obligatoire — le formulaire ne peut pas être soumis sans
+- Mêmes validations que les autres images (formats JPG/PNG, max 5 Mo)
+Réponse (GET / PUT)
 {
   "uid": "uuid",
-  "prenom": "Jean",
-  "nom": "Dupont",
-  "photo": "http://...",
-  "est_verifie": true,
-  "note_moyenne": 4.5,
-  "nb_avis": 12,
+  "type_piece": "cni",
+  "recto": "https://.../recto.jpg",
+  "selfie": "https://.../selfie.jpg",
+  "verso": "https://.../verso.jpg",
+  "statut": "EN_ATTENTE",
   ...
 }
-Filtre disponible
-GET /api/artisans/?est_verifie=true    → artisans vérifiés uniquement
-GET /api/artisans/?est_verifie=false   → artisans non vérifiés
-Affichage recommandé
-- Si est_verifie === true → afficher un badge vert "Vérifié" sur la carte de l'artisan (icône check + texte)
-- Si est_verifie === false → ne rien afficher (pas de badge)
-Endpoint détail (GET /api/artisans/:uid/)
-Le champ est_verifie est aussi présent dans la réponse du détail, au même niveau que les autres champs.
-Mise à jour en temps réel
-Le badge est automatiquement mis à jour côté backend dès que l'admin :
-- Vérifie la pièce d'identité → est_verifie passe à true
-- Rejette la pièce d'identité → est_verifie repasse à false
-- L'artisan supprime sa pièce → est_verifie repasse à false
-Aucune action frontend nécessaire pour déclencher ces changements — rechargez simplement les données.
+Le champ selfie est présent dans la réponse de consultation comme dans la réponse après upload.
