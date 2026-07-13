@@ -13,6 +13,7 @@ import ContactPage        from '@/pages/ContactPage'
 import ArtisansPage       from '@/pages/ArtisansPage'
 import ArtisanDetailPage  from '@/pages/ArtisanDetailPage'
 import MonProfil from '@/pages/MonProfil'
+import IdentitePiecePage from '@/pages/IdentitePiecePage'
 import LoginPage          from '@/pages/LoginPage'
 import RegisterPage       from '@/pages/RegisterPage'
 import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
@@ -51,6 +52,9 @@ function AppRoutes() {
           <Route path="/inscription-artisan" element={<RegisterPage />} />
           <Route path="/mon-profil" element={
             <PrivateRoute><MonProfil /></PrivateRoute>
+          } />
+          <Route path="/mon-profil/identite" element={
+            <PrivateRoute role="artisan"><IdentitePiecePage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan" element={
             <PrivateRoute role="artisan"><DashboardArtisanPage /></PrivateRoute>

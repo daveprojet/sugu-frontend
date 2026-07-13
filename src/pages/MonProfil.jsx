@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Camera, Check, Pencil, User } from "lucide-react";
+import { Camera, Check, Pencil, User, IdCard } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
   useArtisan,
@@ -221,8 +221,28 @@ export default function MonProfil() {
               {isArtisan ? "Artisan" : "Client"}
             </div>
 
+            {isArtisan && (
+              <Link
+                to="/mon-profil/identite"
+                className="mt-6 flex items-center gap-3 w-full rounded-xl border border-gray-100 bg-gradient-to-r from-amber-50/50 to-orange-50/50 hover:from-amber-100 hover:to-orange-100 px-4 py-3 transition-all duration-200 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors">
+                  <IdCard className="w-4 h-4" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-amber-700 transition-colors">
+                    Pièce d'identité
+                  </p>
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    Gérer et vérifier mon identité
+                  </p>
+                </div>
+                <span className="text-xs text-gray-400 group-hover:text-amber-500 transition-colors">→</span>
+              </Link>
+            )}
+
             {isArtisan && artisan && (
-              <div className="mt-6 pt-6 border-t border-gray-100 text-left">
+              <div className="mt-4 pt-4 border-t border-gray-100 text-left">
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {Array.isArray(artisan.metier_label) ? (
                     artisan.metier_label.map((label, idx) => (

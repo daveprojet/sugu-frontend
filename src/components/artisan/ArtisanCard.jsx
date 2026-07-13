@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { MapPin, MessageCircle, Star, ChevronRight } from "lucide-react";
+import { MapPin, MessageCircle, Star, ChevronRight, BadgeCheck } from "lucide-react";
 
 const StarRating = ({ note }) => {
   const fullStars = Math.floor(note);
@@ -105,15 +105,22 @@ export default function ArtisanCard({ artisan }) {
             {artisan.nb_avis || 0} avis
           </span>
         </div>
-        <span
-          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset ${
-            artisan.disponible
-              ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
-              : "bg-gray-100 text-gray-500 ring-gray-400/20"
-          }`}
-        >
-          {artisan.disponible ? "Disponible" : "Indisponible"}
-        </span>
+        <div className="flex items-center gap-2">
+          {artisan.est_verifie && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full ring-1 ring-inset ring-emerald-200/60">
+              <BadgeCheck className="w-3 h-3" /> Vérifié
+            </span>
+          )}
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ring-inset ${
+              artisan.disponible
+                ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                : "bg-gray-100 text-gray-500 ring-gray-400/20"
+            }`}
+          >
+            {artisan.disponible ? "Disponible" : "Indisponible"}
+          </span>
+        </div>
       </div>
 
       {/* Bio */}

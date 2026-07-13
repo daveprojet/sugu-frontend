@@ -21,17 +21,17 @@ export default function AboutPage() {
   const values = [
     {
       title: 'Des profils plus fiables',
-      text: 'Chaque artisan dispose d une fiche claire avec son metier, sa zone, ses avis et sa disponibilite.',
+      text: 'Chaque artisan dispose d\'une fiche claire avec son metier, sa zone, ses avis et sa disponibilité.',
       icon: ShieldCheck,
     },
     {
       title: 'Un suivi simple',
-      text: 'Les clients suivent leurs demandes depuis leur tableau de bord, du premier contact a la prestation terminee.',
+      text: 'Les clients suivent leurs demandes depuis leur tableau de bord, du premier contact à la prestation terminée.',
       icon: ClipboardList,
     },
     {
       title: 'Une relation plus juste',
-      text: 'Les avis clients et les reponses artisans aident chacun a expliquer son experience avec transparence.',
+      text: 'Les avis clients et les reponses artisans aident chacun à expliquer son experience avec transparence.',
       icon: Handshake,
     },
   ]
@@ -181,8 +181,8 @@ export default function AboutPage() {
           </div>
           <h2 className="font-display font-semibold text-xl text-gray-900 mb-3">Notre objectif</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Donner plus de visibilite aux artisans serieux et aider les clients a faire leur choix avec
-            des informations concretes : localisation, disponibilite, notes, avis et historique des demandes.
+            Donner plus de visibilité aux artisans sérieux et aider les clients à faire leur choix avec
+            des informations concretes : localisation, disponibilité, notes, avis et historique des demandes.
           </p>
           <Link 
             to="/contact" 

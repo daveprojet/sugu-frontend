@@ -74,6 +74,14 @@ export const avisService = {
   repondre: (id, data) => api.patch(`/avis/${id}/reponse/`, data),
 }
 
+// ── Identité ──────────────────────────────────────
+export const identiteService = {
+  get:    (uid) => api.get(`/artisans/${uid}/identite/`),
+  upsert: (uid, formData) => api.put(`/artisans/${uid}/identite/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+}
+
 // ── Contacts ──────────────────────────────────────────
 export const contactService = {
   create: (data) => api.post('/contacts/', data),

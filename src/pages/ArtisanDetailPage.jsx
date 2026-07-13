@@ -13,7 +13,8 @@ import {
   MessageCircle, 
   ArrowLeft, 
   Send,
-  X
+  X,
+  BadgeCheck,
 } from "lucide-react";
 
 export default function ArtisanDetailPage() {
@@ -104,6 +105,11 @@ export default function ArtisanDetailPage() {
               <h1 className="font-display font-bold text-2xl text-gray-900">
                 {artisan.prenom} {artisan.nom}
               </h1>
+              {artisan.est_verifie && (
+                <Badge variant="success" className="mt-2">
+                  <BadgeCheck className="w-3.5 h-3.5 mr-1" /> Vérifié
+                </Badge>
+              )}
               
               <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                 {Array.isArray(artisan.metier_label) ? (

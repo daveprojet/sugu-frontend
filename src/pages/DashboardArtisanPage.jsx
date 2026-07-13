@@ -1,12 +1,13 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
-import { useArtisanAvis, useUpdateArtisan } from '@/hooks/useArtisans'
+import { useArtisanAvis, useUpdateArtisan, useIdentite } from '@/hooks/useArtisans'
 import { useRepondreAvis } from '@/hooks/useAvis'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
-import { STATUTS_DEMANDE } from '@/utils/constants'
+import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
 import {
   Inbox,
   Clock,
@@ -16,10 +17,12 @@ import {
   MessageSquare,
   Calendar,
   User,
+  IdCard,
 } from 'lucide-react'
 
 export default function DashboardArtisanPage() {
   const { user } = useAuth()
+  const { data: identite } = useIdentite(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
   const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
   const updateDemande = useUpdateDemande()
@@ -120,6 +123,50 @@ export default function DashboardArtisanPage() {
             {disponible ? 'Disponible' : 'Indisponible'}
           </button>
         </motion.div>
+
+        {/* Identity Status */}
+        {user?.artisan_uid && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Link
+              to="/mon-profil/identite"
+              className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:shadow-md ${
+                !identite?.statut || identite.statut === 'EN_ATTENTE'
+                  ? 'bg-amber-50 border-amber-200 hover:border-amber-300'
+                  : identite.statut === 'REJETEE'
+                  ? 'bg-red-50 border-red-200 hover:border-red-300'
+                  : 'bg-emerald-50 border-emerald-200 hover:border-emerald-300'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                !identite?.statut || identite.statut === 'EN_ATTENTE'
+                  ? 'bg-amber-100 text-amber-600'
+                  : identite.statut === 'REJETEE'
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-emerald-100 text-emerald-600'
+              }`}>
+                <IdCard className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Pièce d'identité</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {!identite?.statut
+                    ? 'Aucune pièce d\'identité fournie'
+                    : STATUTS_IDENTITE[identite.statut]?.label || identite.statut}
+                </p>
+              </div>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                !identite?.statut
+                  ? 'bg-gray-100 text-gray-600'
+                  : STATUTS_IDENTITE[identite.statut]?.color || 'bg-gray-100 text-gray-600'
+              }`}>
+                {!identite?.statut ? 'À faire' : STATUTS_IDENTITE[identite.statut]?.label?.split(' ')[0] || identite.statut}
+              </span>
+            </Link>
+          </motion.div>
+        )}
 
         {/* Stats Cards avec animations */}
         <motion.div

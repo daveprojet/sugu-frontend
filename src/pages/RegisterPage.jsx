@@ -4,13 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { METIERS, QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  User,
-  Wrench,
-  Phone,
-  Lock,
-  Check,
-} from "lucide-react";
+import { User, Wrench, Phone, Lock, Check, Eye, EyeOff } from "lucide-react";
 
 // 1. IMPORT DE L'IMAGE DE FOND
 import bgImage from '/images/metiers/register-bg.jpg';
@@ -45,6 +39,7 @@ export default function RegisterPage() {
     ville: "Dakar",
     bio: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -187,14 +182,21 @@ export default function RegisterPage() {
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => set("password", e.target.value)}
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  className="w-full pl-12 pr-12 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                   placeholder="6 caractères minimum"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-indigo-400 hover:text-indigo-200 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 
