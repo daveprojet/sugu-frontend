@@ -92,9 +92,9 @@ const metierAssets = {
   },
   menage: {
     icon: Sparkles,
-    gradient: "from-violet-500 to-purple-600",
-    iconColor: "text-violet-600",
-    bgLight: "bg-violet-50",
+    gradient: "from-[#F97316]-500 to-[#1256CC]-600",
+    iconColor: "text-[#F97316]-600",
+    bgLight: "bg-[#F97316]-50",
     image:
       "https://images.unsplash.com/photo-1740657254989-42fe9c3b8cce?q=80&w=2024&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
