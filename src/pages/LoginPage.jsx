@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-toastify";
+import { extractApiError } from "@/utils/errors";
 import { Phone, Lock, Eye, EyeOff } from "lucide-react";
 
 import loginBg from "/images/metiers/register-bg.jpg";
@@ -21,8 +22,8 @@ export default function LoginPage() {
       await login(form);
       toast.success("Bienvenue !");
       navigate("/");
-    } catch {
-      toast.error("Téléphone ou mot de passe incorrect");
+    } catch (err) {
+      toast.error(extractApiError(err, "Téléphone ou mot de passe incorrect"));
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams, useLocation } from "react-router-do
 import { useAuth } from "@/context/AuthContext";
 import { METIERS, QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
 import { toast } from "react-toastify";
+import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Wrench, Phone, Lock, Check, Eye, EyeOff } from "lucide-react";
 
@@ -62,7 +63,7 @@ export default function RegisterPage() {
       toast.success("Compte créé avec succès !");
       navigate(form.role === "artisan" ? "/dashboard-artisan" : "/");
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Erreur lors de l'inscription");
+      toast.error(extractApiError(err, "Erreur lors de l'inscription"));
     } finally {
       setLoading(false);
     }
