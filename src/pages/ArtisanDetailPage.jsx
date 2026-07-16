@@ -15,6 +15,8 @@ import {
   Send,
   X,
   BadgeCheck,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function ArtisanDetailPage() {
@@ -25,6 +27,13 @@ export default function ArtisanDetailPage() {
   const createDemande = useCreateDemande();
   const [showDemandeForm, setShowDemandeForm] = useState(false);
   const [description, setDescription] = useState("");
+  const [copied, setCopied] = useState(null);
+
+  const handleCopy = async (text, type) => {
+    await navigator.clipboard.writeText(text);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
+  };
   
   // Animation variants pour un effet d'apparition en cascade
   const containerVariants = {
@@ -53,7 +62,7 @@ export default function ArtisanDetailPage() {
       </div>
     );
 
-  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour%20${artisan.prenom}%2C%20j'ai%20trouvé%20votre%20profil%20sur%20Sugu.sn%20!`;
+  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour%20${artisan.prenom}%2C%20j'ai%20trouvé%20votre%20profil%20sur%20Bricolibe%20!`;
 
   const handleDemande = async (e) => {
     e.preventDefault();
@@ -147,6 +156,52 @@ export default function ArtisanDetailPage() {
                   <Badge variant="default">Pas disponible</Badge>
                 )}
               </div>
+
+              {/* Numéros de contact avec copie */}
+              {(artisan.telephone || artisan.whatsapp) && (
+                <div className="mt-5 flex flex-col gap-2.5">
+                  {artisan.telephone && (
+                    <div className="flex items-center justify-between bg-gray-50/80 rounded-xl px-4 py-2.5 border border-gray-100">
+                      <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                        <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="font-medium select-all">{artisan.telephone}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(artisan.telephone, "tel")}
+                        className="p-1.5 rounded-lg hover:bg-gray-200/60 text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0"
+                        title="Copier le numéro"
+                      >
+                        {copied === "tel" ? (
+                          <Check className="w-4 h-4 text-emerald-500" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  )}
+                  {artisan.whatsapp && (
+                    <div className="flex items-center justify-between bg-gray-50/80 rounded-xl px-4 py-2.5 border border-gray-100">
+                      <div className="flex items-center gap-2.5 text-sm text-gray-700">
+                        <MessageCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                        <span className="font-medium select-all">{artisan.whatsapp}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(artisan.whatsapp, "whatsapp")}
+                        className="p-1.5 rounded-lg hover:bg-gray-200/60 text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0"
+                        title="Copier le numéro WhatsApp"
+                      >
+                        {copied === "whatsapp" ? (
+                          <Check className="w-4 h-4 text-emerald-500" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Contact buttons - Premium */}
               <div className="mt-6 flex flex-col gap-3">

@@ -1,15 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useArtisans } from '@/hooks/useArtisans'
 import ArtisanCard from '@/components/artisan/ArtisanCard'
 import Spinner from '@/components/common/Spinner'
 import EmptyState from '@/components/common/EmptyState'
+import Pagination from '@/components/common/Pagination'
 import { METIERS, QUARTIERS_DAKAR } from '@/utils/constants'
 import { Filter, X, MapPin, Briefcase, CheckCircle } from 'lucide-react'
 
 export default function ArtisansPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const topRef = useRef(null)
+  const [page, setPage] = useState(1)
   const [filters, setFilters] = useState({
     metier:      searchParams.get('metier') || '',
     quartier:    searchParams.get('quartier') || '',
@@ -18,10 +21,11 @@ export default function ArtisansPage() {
   })
 
   const { data, isLoading, isError } = useArtisans(
-    Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== ''))
+    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '')), page }
   )
 
   const artisans = data?.results || data || []
+  const totalPages = Math.ceil((data?.count || 0) / 12)
 
   useEffect(() => {
     const params = {}
@@ -31,7 +35,16 @@ export default function ArtisansPage() {
     setSearchParams(params, { replace: true })
   }, [filters, setSearchParams])
 
+  useEffect(() => {
+    setPage(1)
+  }, [filters])
+
   const handleFilter = (key, value) => setFilters(f => ({ ...f, [key]: value }))
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage)
+    topRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   // Animation variants pour un effet d'apparition en cascade
   const containerVariants = {
@@ -49,7 +62,7 @@ export default function ArtisansPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto" ref={topRef}>
         
         {/* Header avec animation */}
         <motion.div 
@@ -193,6 +206,10 @@ export default function ArtisansPage() {
               </motion.div>
             ))}
           </motion.div>
+        )}
+
+        {!isLoading && !isError && artisans.length > 0 && (
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={handlePageChange} />
         )}
       </div>
     </main>
