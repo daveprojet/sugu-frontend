@@ -76,14 +76,14 @@ export default function AboutPage() {
             className="max-w-3xl"
           >
             <p className="text-sm font-semibold text-purple-200 mb-3 uppercase tracking-wider">
-              À propos de Sugu.sn
+              À propos de Bricolibe
             </p>
             <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight drop-shadow-lg mb-6">
               Rapprocher les clients des bons artisans,<br />
               <span className="text-purple-200">sans complication.</span>
             </h1>
             <p className="text-indigo-100 text-lg leading-relaxed max-w-2xl mb-8">
-              Sugu.sn aide les particuliers a trouver rapidement un artisan disponible et proche de chez eux.
+              Bricolibe aide les particuliers a trouver rapidement un artisan disponible et proche de chez eux.
               La plateforme facilite la demande, le suivi, les avis et la visibilite des prestataires locaux.
             </p>
             <div className="flex flex-wrap gap-4">

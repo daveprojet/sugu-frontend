@@ -62,7 +62,7 @@ export default function ArtisanDetailPage() {
       </div>
     );
 
-  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour%20${artisan.prenom}%2C%20j'ai%20trouvé%20votre%20profil%20sur%20Sugu.sn%20!`;
+  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour%20${artisan.prenom}%2C%20j'ai%20trouvé%20votre%20profil%20sur%20Bricolibe%20!`;
 
   const handleDemande = async (e) => {
     e.preventDefault();

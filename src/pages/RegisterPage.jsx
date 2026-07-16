@@ -106,7 +106,7 @@ export default function RegisterPage() {
             Créer un compte
           </h1>
           <p className="text-indigo-200 text-sm mt-2 font-medium drop-shadow-sm">
-            Rejoignez <span className="text-purple-300 font-semibold">Sugu.sn</span> en quelques secondes
+            Rejoignez <span className="text-purple-300 font-semibold">Bricolibe</span> en quelques secondes
           </p>
         </div>
 

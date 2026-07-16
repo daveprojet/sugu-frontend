@@ -2,7 +2,7 @@ export default function TermsPage() {
   const sections = [
     {
       title: 'Objet',
-      text: 'Sugu.sn met en relation des clients avec des artisans. La plateforme facilite la recherche, les demandes, le suivi des statuts, les avis et les reponses publiques des artisans.',
+      text: 'Bricolibe met en relation des clients avec des artisans. La plateforme facilite la recherche, les demandes, le suivi des statuts, les avis et les reponses publiques des artisans.',
     },
     {
       title: 'Compte utilisateur',
@@ -10,7 +10,7 @@ export default function TermsPage() {
     },
     {
       title: 'Demandes et prestations',
-      text: 'Les demandes envoyees via Sugu.sn servent a initier une relation entre client et artisan. Les conditions pratiques de la prestation, notamment prix, delais et modalites d intervention, sont convenues directement entre les parties.',
+      text: 'Les demandes envoyees via Bricolibe servent a initier une relation entre client et artisan. Les conditions pratiques de la prestation, notamment prix, delais et modalites d intervention, sont convenues directement entre les parties.',
     },
     {
       title: 'Avis et commentaires',
@@ -18,7 +18,7 @@ export default function TermsPage() {
     },
     {
       title: 'Responsabilité',
-      text: "Sugu.sn fournit un service de mise en relation. La plateforme ne se substitue pas aux artisans dans l'exécution des prestations et ne garantit pas le resultat des travaux effectues.",
+      text: "Bricolibe fournit un service de mise en relation. La plateforme ne se substitue pas aux artisans dans l'exécution des prestations et ne garantit pas le resultat des travaux effectues.",
     },
   ]
 

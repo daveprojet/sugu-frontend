@@ -17,7 +17,10 @@ import {
   MessageSquare, 
   Send, 
   X, 
-  ChevronRight 
+  ChevronRight,
+  Phone,
+  MessageCircle,
+  Filter,
 } from 'lucide-react'
 
 const defaultAvis = { note: 5, commentaire: '' }
@@ -28,6 +31,16 @@ export default function DashboardClientPage() {
   const createAvis = useCreateAvis()
   const [avisOpen, setAvisOpen] = useState(null)
   const [avisForm, setAvisForm] = useState(defaultAvis)
+  const [statutFilter, setStatutFilter] = useState('all')
+
+  const demandesFiltrees = statutFilter === 'all'
+    ? demandes
+    : demandes.filter(d => d.statut === statutFilter)
+
+  const statutCounts = demandes.reduce((acc, d) => {
+    acc[d.statut] = (acc[d.statut] || 0) + 1
+    return acc
+  }, {})
 
   if (loading || isLoading) {
     return <div className="flex justify-center py-24"><Spinner size="lg" /></div>
@@ -136,6 +149,45 @@ export default function DashboardClientPage() {
             </Link>
           </div>
 
+          {demandes.length > 0 && (
+            <div className="px-6 py-3 border-b border-gray-100/80 flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setStatutFilter('all')}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                  statutFilter === 'all'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                    : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                }`}
+              >
+                <Filter className="w-3 h-3" />
+                Toutes
+                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === 'all' ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                  {demandes.length}
+                </span>
+              </button>
+              {Object.entries(STATUTS_DEMANDE).map(([key, { label }]) => {
+                const count = statutCounts[key] || 0
+                if (count === 0) return null
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setStatutFilter(key)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                      statutFilter === key
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                        : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                    }`}
+                  >
+                    {label}
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === key ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           {demandes.length === 0 ? (
             <div className="p-16 text-center">
               <div className="w-16 h-16 rounded-3xl bg-indigo-50 flex items-center justify-center mx-auto mb-4">
@@ -156,6 +208,7 @@ export default function DashboardClientPage() {
                 <thead className="bg-gray-50/80 text-xs uppercase tracking-wider text-gray-500">
                   <tr>
                     <th className="px-6 py-3.5 font-semibold">Artisan</th>
+                    <th className="px-6 py-3.5 font-semibold">Contact</th>
                     <th className="px-6 py-3.5 font-semibold">Demande</th>
                     <th className="px-6 py-3.5 font-semibold">Statut</th>
                     <th className="px-6 py-3.5 font-semibold">Date</th>
@@ -163,7 +216,13 @@ export default function DashboardClientPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100/80">
-                  {demandes.map((demande) => {
+                  {demandesFiltrees.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center">
+                        <p className="font-medium text-gray-500">Aucune demande avec ce statut</p>
+                      </td>
+                    </tr>
+                  ) : demandesFiltrees.map((demande) => {
                     // Récupérer la couleur du badge depuis la constante
                     const statusConfig = STATUTS_DEMANDE[demande.statut] || { color: 'bg-gray-100 text-gray-600', label: demande.statut };
                     return (
@@ -175,6 +234,30 @@ export default function DashboardClientPage() {
                             </span>
                             <p className="text-xs text-gray-400 mt-0.5">{demande.artisan_metier}</p>
                           </Link>
+                        </td>
+                        <td className="px-6 py-4 align-middle">
+                          <div className="flex flex-col gap-1">
+                            {demande.artisan_telephone && (
+                              <a
+                                href={`tel:${demande.artisan_telephone}`}
+                                className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-indigo-600 transition-colors"
+                              >
+                                <Phone className="w-3.5 h-3.5" />
+                                {demande.artisan_telephone}
+                              </a>
+                            )}
+                            {demande.artisan_whatsapp && (
+                              <a
+                                href={`https://wa.me/${demande.artisan_whatsapp}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 transition-colors"
+                              >
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                {demande.artisan_whatsapp}
+                              </a>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 text-gray-600 max-w-xs align-middle">
                           <p className="line-clamp-2 leading-relaxed">{demande.description}</p>
