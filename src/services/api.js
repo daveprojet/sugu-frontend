@@ -57,7 +57,7 @@ export const artisanService = {
     fd.append('photo', f)
     return api.patch(`/artisans/${id}/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
-  avis:        (id)     => api.get(`/artisans/${id}/avis/`),
+  avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
 }
 
 // ── Demandes ──────────────────────────────────────

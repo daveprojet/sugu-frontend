@@ -1,6 +1,6 @@
 {
-  "name": "sugu-app",
-  "version": "1.2.0",
+  "name": "bricolibe-app",
+  "version": "1.2.1",
   "engines": {
     "node": ">=20.19.0"
   },

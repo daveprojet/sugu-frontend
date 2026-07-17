@@ -12,6 +12,7 @@ import AboutPage          from '@/pages/AboutPage'
 import ContactPage        from '@/pages/ContactPage'
 import ArtisansPage       from '@/pages/ArtisansPage'
 import ArtisanDetailPage  from '@/pages/ArtisanDetailPage'
+import AvisArtisanPage    from '@/pages/AvisArtisanPage'
 import MonProfil from '@/pages/MonProfil'
 import IdentitePiecePage from '@/pages/IdentitePiecePage'
 import LoginPage          from '@/pages/LoginPage'
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="/contact"           element={<ContactPage />} />
           <Route path="/artisans"          element={<ArtisansPage />} />
           <Route path="/artisans/:uid"      element={<ArtisanDetailPage />} />
+          <Route path="/artisans/:uid/avis"  element={<AvisArtisanPage />} />
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />

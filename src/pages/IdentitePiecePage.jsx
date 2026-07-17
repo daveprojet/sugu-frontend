@@ -21,6 +21,7 @@ import {
   validateIdentityFile,
 } from '@/utils/helpers'
 import Spinner from '@/components/common/Spinner'
+import CameraCapture from '@/components/common/CameraCapture'
 
 export default function IdentitePiecePage() {
   const { user } = useAuth()
@@ -35,6 +36,7 @@ export default function IdentitePiecePage() {
   const [versoPreview, setVersoPreview] = useState(null)
   const [selfieFile, setSelfieFile] = useState(null)
   const [selfiePreview, setSelfiePreview] = useState(null)
+  const [showCamera, setShowCamera] = useState(false)
 
   useEffect(() => {
     if (identite) {
@@ -337,20 +339,16 @@ export default function IdentitePiecePage() {
                     Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage
                   </p>
                   <div className="flex items-start gap-4">
-                    <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group">
+                    <div
+                      onClick={() => setShowCamera(true)}
+                      className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group"
+                    >
                       <Camera className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 transition-colors mb-2" />
                       <span className="text-sm font-medium text-gray-500 group-hover:text-indigo-600">
-                        {selfieFile ? selfieFile.name : 'Prendre une photo ou sélectionner'}
+                        {selfieFile ? selfieFile.name : 'Prendre une photo avec la caméra'}
                       </span>
                       <span className="text-xs text-gray-400 mt-1">JPG, PNG — max 5 Mo</span>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png"
-                        capture="user"
-                        onChange={handleSelfieChange}
-                        className="hidden"
-                      />
-                    </label>
+                    </div>
                     {selfiePreview && (
                       <div className="relative flex-shrink-0">
                         <img
@@ -431,6 +429,19 @@ export default function IdentitePiecePage() {
           )}
         </motion.div>
       </div>
+
+      {showCamera && (
+        <CameraCapture
+          onCapture={(file) => {
+            const err = validateIdentityFile(file)
+            if (err) { toast.error(err); return }
+            setSelfieFile(file)
+            setSelfiePreview(URL.createObjectURL(file))
+            setShowCamera(false)
+          }}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
     </main>
   )
 }
