@@ -228,7 +228,7 @@ export default function DashboardClientPage() {
                     return (
                       <tr key={demande.id} className="group hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4 align-middle">
-                          <Link to={`/artisans/${demande.artisan}`} className="block group/link">
+                          <Link to={`/artisans/${demande.artisan_uid}`} className="block group/link">
                             <span className="font-medium text-gray-900 group-hover/link:text-indigo-600 transition-colors">
                               {demande.artisan_nom}
                             </span>

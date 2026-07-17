@@ -18,10 +18,10 @@ export function useArtisan(uid) {
   )
 }
 
-export function useArtisanAvis(uid) {
+export function useArtisanAvis(uid, params = {}) {
   return useQuery(
-    ['artisan-avis', uid],
-    () => artisanService.avis(uid).then(r => r.data),
+    ['artisan-avis', uid, params],
+    () => artisanService.avis(uid, params).then(r => r.data),
     { enabled: !!uid }
   )
 }

@@ -26,7 +26,8 @@ export default function DashboardArtisanPage() {
   const { user } = useAuth()
   const { data: identite } = useIdentite(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
-  const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
+  const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
+  const avis = avisPage?.results || []
   const updateDemande = useUpdateDemande()
   const updateArtisan = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
