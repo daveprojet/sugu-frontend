@@ -29,7 +29,7 @@ const StarRating = ({ note }) => {
 };
 
 export default function ArtisanCard({ artisan }) {
-  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour, j'ai trouvé votre profil sur Sugu.sn et j'aimerais faire appel à vos services.`;
+  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour, j'ai trouvé votre profil sur Bricolibe et j'aimerais faire appel à vos services.`;
 
   return (
     <motion.div

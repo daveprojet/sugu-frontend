@@ -2,7 +2,7 @@ export default function ConfidentialitePage() {
   const sections = [
     {
       title: 'Collecte des informations',
-      text: "Nous collectons les informations necessaires pour creer et gerer votre compte, traiter vos demandes et ameliorer l experience sur Sugu.sn. Cela peut inclure votre nom, adresse e-mail, numero de telephone, localisation et les details de vos demandes de service.",
+      text: "Nous collectons les informations necessaires pour creer et gerer votre compte, traiter vos demandes et ameliorer l experience sur Bricolibe. Cela peut inclure votre nom, adresse e-mail, numero de telephone, localisation et les details de vos demandes de service.",
     },
     {
       title: 'Utilisation des donnees',

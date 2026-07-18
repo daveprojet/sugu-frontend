@@ -80,7 +80,7 @@ export default function LoginPage() {
           </h1>
           <p className="text-indigo-200 text-sm mt-2 font-medium drop-shadow-sm">
             Bon retour sur{" "}
-            <span className="text-purple-300 font-semibold">Sugu.sn</span> !
+            <span className="text-purple-300 font-semibold">Bricolibe</span> !
           </p>
         </motion.div>
 

@@ -23,7 +23,9 @@ export default function ArtisanDetailPage() {
   const { uid } = useParams();
   const { user } = useAuth();
   const { data: artisan, isLoading } = useArtisan(uid);
-  const { data: avis = [] } = useArtisanAvis(uid);
+  const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 })
+  const avis = avisPage?.results || []
+  const totalAvis = avisPage?.count || 0
   const createDemande = useCreateDemande();
   const [showDemandeForm, setShowDemandeForm] = useState(false);
   const [description, setDescription] = useState("");
@@ -62,7 +64,7 @@ export default function ArtisanDetailPage() {
       </div>
     );
 
-  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour%20${artisan.prenom}%2C%20j'ai%20trouvé%20votre%20profil%20sur%20Sugu.sn%20!`;
+  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour%20${artisan.prenom}%2C%20j'ai%20trouvé%20votre%20profil%20sur%20Bricolibe%20!`;
 
   const handleDemande = async (e) => {
     e.preventDefault();
@@ -140,7 +142,7 @@ export default function ArtisanDetailPage() {
               <div className="flex flex-col items-center mt-3">
                 <div className="flex items-center gap-2">
                   <StarRating note={artisan.note_moyenne || 0} size="md" />
-                  <span className="text-sm font-semibold text-gray-700">({avis.length})</span>
+                  <span className="text-sm font-semibold text-gray-700">({totalAvis})</span>
                 </div>
               </div>
 
@@ -296,16 +298,17 @@ export default function ArtisanDetailPage() {
             {/* Avis - Premium */}
             <motion.div variants={itemVariants} className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-6">
               <h2 className="font-display font-semibold text-gray-900 mb-4 text-lg flex items-center gap-2">
-                Avis clients <span className="text-sm font-normal text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">({avis.length})</span>
+                Avis clients <span className="text-sm font-normal text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">({totalAvis})</span>
               </h2>
               
-              {avis.length === 0 ? (
+              {totalAvis === 0 ? (
                 <p className="text-gray-400 text-sm italic">
                   Aucun avis pour le moment.
                 </p>
               ) : (
+                <>
                 <div className="flex flex-col gap-5">
-                  {avis.map((a) => (
+                  {avis.slice(0, 5).map((a) => (
                     <div
                       key={a.id}
                       className="border-b border-gray-100 pb-5 last:border-0 last:pb-0"
@@ -346,6 +349,15 @@ export default function ArtisanDetailPage() {
                     </div>
                   ))}
                 </div>
+                {totalAvis > 5 && (
+                  <Link
+                    to={`/artisans/${uid}/avis`}
+                    className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:gap-3 transition-all duration-200"
+                  >
+                    Voir les {totalAvis} avis →
+                  </Link>
+                )}
+                </>
               )}
             </motion.div>
           </div>

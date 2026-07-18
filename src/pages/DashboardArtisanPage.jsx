@@ -18,19 +18,32 @@ import {
   Calendar,
   User,
   IdCard,
+  Phone,
+  Filter,
 } from 'lucide-react'
 
 export default function DashboardArtisanPage() {
   const { user } = useAuth()
   const { data: identite } = useIdentite(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
-  const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
+  const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
+  const avis = avisPage?.results || []
   const updateDemande = useUpdateDemande()
   const updateArtisan = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
   const [disponible, setDisponible] = useState(user?.disponible ?? true)
   const [replyOpen, setReplyOpen] = useState(null)
   const [replyText, setReplyText] = useState('')
+  const [statutFilter, setStatutFilter] = useState('all')
+
+  const demandesFiltrees = statutFilter === 'all'
+    ? demandes
+    : demandes.filter((d) => d.statut === statutFilter)
+
+  const statutCounts = demandes.reduce((acc, d) => {
+    acc[d.statut] = (acc[d.statut] || 0) + 1
+    return acc
+  }, {})
 
   const toggleDispo = async () => {
     const next = !disponible
@@ -199,7 +212,7 @@ export default function DashboardArtisanPage() {
 
         {/* Demandes */}
         <section>
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4">
             <h2 className="font-display text-xl font-bold text-gray-900">Demandes reçues</h2>
             {!isLoading && demandes.length > 0 && (
               <span className="inline-flex items-center justify-center bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
@@ -207,6 +220,45 @@ export default function DashboardArtisanPage() {
               </span>
             )}
           </div>
+
+          {!isLoading && demandes.length > 0 && (
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              <button
+                onClick={() => setStatutFilter('all')}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                  statutFilter === 'all'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                    : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                }`}
+              >
+                <Filter className="w-3 h-3" />
+                Toutes
+                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === 'all' ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                  {demandes.length}
+                </span>
+              </button>
+              {Object.entries(STATUTS_DEMANDE).map(([key, { label }]) => {
+                const count = statutCounts[key] || 0
+                if (count === 0) return null
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setStatutFilter(key)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                      statutFilter === key
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                        : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                    }`}
+                  >
+                    {label}
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === key ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
 
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -218,6 +270,11 @@ export default function DashboardArtisanPage() {
               <p className="font-medium text-gray-500">Aucune demande pour le moment</p>
               <p className="text-sm text-gray-400 mt-1">Complétez votre profil pour être mieux visible</p>
             </div>
+          ) : demandesFiltrees.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+              <Inbox className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="font-medium text-gray-500">Aucune demande avec ce statut</p>
+            </div>
           ) : (
             <motion.div
               variants={containerVariants}
@@ -225,7 +282,7 @@ export default function DashboardArtisanPage() {
               animate="visible"
               className="flex flex-col gap-4"
             >
-              {demandes.map((d) => {
+              {demandesFiltrees.map((d) => {
                 // Couleur du statut basée sur la constante
                 const statusColor = STATUTS_DEMANDE[d.statut]?.color || 'bg-gray-100 text-gray-600';
                 return (
@@ -245,6 +302,15 @@ export default function DashboardArtisanPage() {
                             {STATUTS_DEMANDE[d.statut]?.label || d.statut}
                           </span>
                         </div>
+                        {d.client_telephone && (
+                          <a
+                            href={`tel:${d.client_telephone}`}
+                            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors mb-2"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            {d.client_telephone}
+                          </a>
+                        )}
                         <p className="text-sm text-gray-600 leading-relaxed">{d.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 font-medium">
                           <span className="flex items-center gap-1.5">
