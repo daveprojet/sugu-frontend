@@ -16,7 +16,7 @@ import {
 import heroBg from "/images/metiers/register-bg.jpg";
 
 const contactEmail = "contact@bricolibe.com";
-const contactPhone = "+221770000000";
+const contactPhone = "+221777234086";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
