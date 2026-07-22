@@ -21,6 +21,7 @@ import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
 import DashboardClientPage from '@/pages/DashboardClientPage'
 import TermsPage from '@/pages/TermsPage'
 import ConfidentialitePage from '@/pages/ConfidentialitePage'
+import CommissionDashboardPage from '@/pages/CommissionDashboardPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +61,9 @@ function AppRoutes() {
           } />
           <Route path="/dashboard-artisan" element={
             <PrivateRoute role="artisan"><DashboardArtisanPage /></PrivateRoute>
+          } />
+          <Route path="/dashboard-artisan/commissions" element={
+            <PrivateRoute role="artisan"><CommissionDashboardPage /></PrivateRoute>
           } />
           <Route path="/dashboard-client" element={
             <PrivateRoute role="client"><DashboardClientPage /></PrivateRoute>

@@ -1,26 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { METIERS, QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
+import { QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
+import { useCategories } from "@/hooks/useCategories";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Wrench, Phone, Lock, Check, Eye, EyeOff } from "lucide-react";
+import { User, Wrench, Phone, Lock, Check, Eye, EyeOff, Tag } from "lucide-react";
 
-// 1. IMPORT DE L'IMAGE DE FOND
 import bgImage from '/images/metiers/register-bg.jpg';
-
-// Mapping des icônes métier
-const metierIconMap = {
-  plombier: Wrench,
-  electricien: Wrench, 
-  macon: Wrench,
-  peintre: Wrench,
-  menuisier: Wrench,
-  couvreur: Wrench,
-  climaticien: Wrench,
-  vitrier: Wrench,
-};
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -28,6 +16,7 @@ export default function RegisterPage() {
   const [params] = useSearchParams();
   const { pathname } = useLocation();
   const isArtisanFlow = params.get("role") === "artisan" || pathname === "/inscription-artisan";
+  const { data: categories = [] } = useCategories();
 
   const [form, setForm] = useState({
     prenom: "",
@@ -35,7 +24,7 @@ export default function RegisterPage() {
     telephone: "",
     password: "",
     role: isArtisanFlow ? "artisan" : "client",
-    metier: [],
+    categories: [],
     quartier: "",
     ville: "Dakar",
     bio: "",
@@ -46,12 +35,12 @@ export default function RegisterPage() {
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
-  const handleMetierChange = (metierId) => {
-    const currentMetiers = form.metier || [];
-    if (currentMetiers.includes(metierId)) {
-      set("metier", currentMetiers.filter((id) => id !== metierId));
+  const handleCategoryChange = (catUid) => {
+    const current = form.categories || [];
+    if (current.includes(catUid)) {
+      set("categories", current.filter((uid) => uid !== catUid));
     } else {
-      set("metier", [...currentMetiers, metierId]);
+      set("categories", [...current, catUid]);
     }
   };
 
@@ -213,15 +202,14 @@ export default function RegisterPage() {
                 >
                   <div>
                     <label className="block text-sm font-medium text-indigo-200 mb-2">
-                      Métiers (choix multiples)
+                      Catégories (choix multiples)
                     </label>
                     <div className="grid grid-cols-2 gap-3 p-4 border border-white/30 rounded-2xl max-h-48 overflow-y-auto bg-white/10 backdrop-blur-sm">
-                      {METIERS.map((m) => {
-                        const Icon = metierIconMap[m.id] || Wrench;
-                        const isChecked = form.metier?.includes(m.id);
+                      {categories.map((cat) => {
+                        const isChecked = form.categories?.includes(cat.uid);
                         return (
                           <label
-                            key={m.id}
+                            key={cat.uid}
                             className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
                               isChecked
                                 ? "bg-white/40 border-white/50 shadow-sm text-indigo-900"
@@ -231,11 +219,11 @@ export default function RegisterPage() {
                             <input
                               type="checkbox"
                               checked={isChecked}
-                              onChange={() => handleMetierChange(m.id)}
+                              onChange={() => handleCategoryChange(cat.uid)}
                               className="w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
                             />
-                            <Icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm font-medium">{m.label}</span>
+                            <Tag className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium">{cat.nom}</span>
                           </label>
                         );
                       })}

@@ -58,6 +58,7 @@ export const artisanService = {
     return api.patch(`/artisans/${id}/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
+  estimerPrix: (id, data)   => api.post(`/artisans/${id}/estimer-prix/`, data),
 }
 
 // ── Demandes ──────────────────────────────────────
@@ -85,6 +86,23 @@ export const identiteService = {
 // ── Contacts ──────────────────────────────────────────
 export const contactService = {
   create: (data) => api.post('/contacts/', data),
+}
+
+// ── Catégories / Prestations ──────────────────────────
+export const categorieService = {
+  list:          ()      => api.get('/categories/'),
+  detail:        (uid)   => api.get(`/categories/${uid}/`),
+}
+
+// ── Commissions / Paiements ──────────────────────────
+export const commissionService = {
+  list:          ()      => api.get('/commissions/'),
+  detail:        (uid)   => api.get(`/commissions/${uid}/`),
+}
+
+export const paiementService = {
+  list:          ()      => api.get('/commissions/paiements/'),
+  create:        (data)  => api.post('/commissions/paiements/creer/', data),
 }
 
 export default api

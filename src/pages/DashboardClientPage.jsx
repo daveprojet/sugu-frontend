@@ -4,23 +4,25 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes } from '@/hooks/useDemandes'
 import { useCreateAvis } from '@/hooks/useAvis'
-import Badge from '@/components/common/Badge'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import { STATUTS_DEMANDE } from '@/utils/constants'
-import { 
-  Inbox, 
-  Clock, 
-  CheckCircle, 
-  User, 
-  Search, 
-  MessageSquare, 
-  Send, 
-  X, 
+import {
+  Inbox,
+  Clock,
+  CheckCircle,
+  User,
+  Search,
+  MessageSquare,
+  Send,
+  X,
   ChevronRight,
   Phone,
   MessageCircle,
   Filter,
+  Tag,
+  BadgeDollarSign,
+  Lock,
 } from 'lucide-react'
 
 const defaultAvis = { note: 5, commentaire: '' }
@@ -69,7 +71,6 @@ export default function DashboardClientPage() {
     setAvisForm(defaultAvis)
   }
 
-  // Animations Framer Motion
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -82,23 +83,23 @@ export default function DashboardClientPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* Header */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
           <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
-            Bonjour, {user?.prenom} 👋
+            Bonjour, {user?.prenom}
           </h1>
           <p className="text-gray-500 text-sm mt-1 font-medium">
             Suivez vos demandes et laissez un avis après une prestation terminée.
           </p>
         </motion.div>
 
-        {/* Stats Grid Premium */}
-        <motion.div 
+        {/* Stats Grid */}
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -124,8 +125,8 @@ export default function DashboardClientPage() {
           ))}
         </motion.div>
 
-        {/* Mes demandes - Premium Section */}
-        <motion.div 
+        {/* Mes demandes */}
+        <motion.div
           variants={itemVariants}
           initial="hidden"
           animate="visible"
@@ -140,8 +141,8 @@ export default function DashboardClientPage() {
                 </span>
               )}
             </h2>
-            <Link 
-              to="/artisans" 
+            <Link
+              to="/artisans"
               className="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium px-4 py-2 rounded-full shadow-md shadow-indigo-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
             >
               <Search className="w-4 h-4" />
@@ -195,8 +196,8 @@ export default function DashboardClientPage() {
               </div>
               <p className="font-medium text-gray-500">Aucune demande envoyée</p>
               <p className="text-sm text-gray-400 mt-1">Choisissez un artisan et envoyez votre première demande.</p>
-              <Link 
-                to="/artisans" 
+              <Link
+                to="/artisans"
                 className="inline-flex items-center gap-1 mt-4 text-indigo-600 hover:text-indigo-700 font-medium text-sm"
               >
                 Parcourir les artisans <ChevronRight className="w-4 h-4" />
@@ -204,12 +205,13 @@ export default function DashboardClientPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px] text-sm text-left">
+              <table className="w-full min-w-[750px] text-sm text-left">
                 <thead className="bg-gray-50/80 text-xs uppercase tracking-wider text-gray-500">
                   <tr>
                     <th className="px-6 py-3.5 font-semibold">Artisan</th>
                     <th className="px-6 py-3.5 font-semibold">Contact</th>
                     <th className="px-6 py-3.5 font-semibold">Demande</th>
+                    <th className="px-6 py-3.5 font-semibold">Prix</th>
                     <th className="px-6 py-3.5 font-semibold">Statut</th>
                     <th className="px-6 py-3.5 font-semibold">Date</th>
                     <th className="px-6 py-3.5 font-semibold text-right">Avis</th>
@@ -218,13 +220,13 @@ export default function DashboardClientPage() {
                 <tbody className="divide-y divide-gray-100/80">
                   {demandesFiltrees.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center">
+                      <td colSpan={7} className="px-6 py-12 text-center">
                         <p className="font-medium text-gray-500">Aucune demande avec ce statut</p>
                       </td>
                     </tr>
                   ) : demandesFiltrees.map((demande) => {
-                    // Récupérer la couleur du badge depuis la constante
                     const statusConfig = STATUTS_DEMANDE[demande.statut] || { color: 'bg-gray-100 text-gray-600', label: demande.statut };
+                    const isContactRevealed = ['ACCEPTEE', 'EN_COURS', 'TERMINEE'].includes(demande.statut);
                     return (
                       <tr key={demande.id} className="group hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4 align-middle">
@@ -232,35 +234,57 @@ export default function DashboardClientPage() {
                             <span className="font-medium text-gray-900 group-hover/link:text-indigo-600 transition-colors">
                               {demande.artisan_nom}
                             </span>
-                            <p className="text-xs text-gray-400 mt-0.5">{demande.artisan_metier}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{Array.isArray(demande.artisan_categories) ? demande.artisan_categories.join(', ') : demande.artisan_categories}</p>
                           </Link>
                         </td>
                         <td className="px-6 py-4 align-middle">
-                          <div className="flex flex-col gap-1">
-                            {demande.artisan_telephone && (
-                              <a
-                                href={`tel:${demande.artisan_telephone}`}
-                                className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-indigo-600 transition-colors"
-                              >
-                                <Phone className="w-3.5 h-3.5" />
-                                {demande.artisan_telephone}
-                              </a>
-                            )}
-                            {demande.artisan_whatsapp && (
-                              <a
-                                href={`https://wa.me/${demande.artisan_whatsapp}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 transition-colors"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                {demande.artisan_whatsapp}
-                              </a>
-                            )}
-                          </div>
+                          {isContactRevealed ? (
+                            <div className="flex flex-col gap-1">
+                              {demande.artisan_telephone && (
+                                <a
+                                  href={`tel:${demande.artisan_telephone}`}
+                                  className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-indigo-600 transition-colors"
+                                >
+                                  <Phone className="w-3.5 h-3.5" />
+                                  {demande.artisan_telephone}
+                                </a>
+                              )}
+                              {demande.artisan_whatsapp && (
+                                <a
+                                  href={`https://wa.me/${demande.artisan_whatsapp}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 transition-colors"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                  {demande.artisan_whatsapp}
+                                </a>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 text-xs text-gray-400 italic">
+                              <Lock className="w-3.5 h-3.5" />
+                              Après acceptation
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-gray-600 max-w-xs align-middle">
                           <p className="line-clamp-2 leading-relaxed">{demande.description}</p>
+                          {demande.service_element_nom && (
+                            <p className="text-xs text-indigo-500 font-medium mt-1">
+                              {demande.service_element_nom}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 align-middle">
+                          {demande.prix_affiche != null ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                              <BadgeDollarSign className="w-4 h-4" />
+                              {demande.prix_affiche.toLocaleString("fr-FR")} FCFA
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">—</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 align-middle">
                           <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${statusConfig.color}`}>
@@ -273,7 +297,7 @@ export default function DashboardClientPage() {
                         <td className="px-6 py-4 text-right align-middle">
                           {demande.statut !== 'TERMINEE' ? (
                             <span className="text-xs text-gray-400 font-medium italic">
-                              Disponible après fin
+                              Après fin de prestation
                             </span>
                           ) : demande.avis_id ? (
                             <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
@@ -298,7 +322,7 @@ export default function DashboardClientPage() {
           )}
         </motion.div>
 
-        {/* Formulaire Avis - Premium Expandable Card */}
+        {/* Formulaire Avis */}
         <AnimatePresence>
           {avisOpen && (
             <motion.section
@@ -356,8 +380,8 @@ export default function DashboardClientPage() {
                     </div>
 
                     <div className="flex md:flex-col gap-2 pt-6 md:pt-0">
-                      <button 
-                        type="submit" 
+                      <button
+                        type="submit"
                         className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70"
                         disabled={createAvis.isLoading}
                       >
@@ -367,9 +391,9 @@ export default function DashboardClientPage() {
                           </>
                         )}
                       </button>
-                      <button 
-                        type="button" 
-                        onClick={() => setAvisOpen(null)} 
+                      <button
+                        type="button"
+                        onClick={() => setAvisOpen(null)}
                         className="inline-flex items-center justify-center border border-gray-200 bg-white/80 text-gray-700 font-medium px-6 py-3 rounded-full hover:bg-gray-50 transition-colors shadow-sm"
                       >
                         Annuler

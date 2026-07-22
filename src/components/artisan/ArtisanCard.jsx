@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { MapPin, MessageCircle, Star, ChevronRight, BadgeCheck } from "lucide-react";
+import { MapPin, Star, ChevronRight, BadgeCheck, Navigation } from "lucide-react";
 
 const StarRating = ({ note }) => {
   const fullStars = Math.floor(note);
@@ -29,8 +29,6 @@ const StarRating = ({ note }) => {
 };
 
 export default function ArtisanCard({ artisan }) {
-  const whatsappUrl = `https://wa.me/${artisan.whatsapp?.replace(/\D/g, "")}?text=Bonjour, j'ai trouvé votre profil sur Bricolibe et j'aimerais faire appel à vos services.`;
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -40,7 +38,6 @@ export default function ArtisanCard({ artisan }) {
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       className="group bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl hover:shadow-indigo-100/60 border border-gray-100 hover:border-indigo-200 transition-all duration-300 flex flex-col gap-5 relative overflow-hidden"
     >
-      {/* Subtle background gradient on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/0 via-white/0 to-purple-50/0 group-hover:to-indigo-50/20 transition-all duration-500 pointer-events-none" />
 
       {/* Header */}
@@ -71,20 +68,14 @@ export default function ArtisanCard({ artisan }) {
             {artisan.prenom} {artisan.nom}
           </h3>
           <div className="flex flex-wrap gap-1.5 mt-2">
-            {Array.isArray(artisan.metier_label) ? (
-              artisan.metier_label.map((label, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200/60"
-                >
-                  {label}
-                </span>
-              ))
-            ) : (
-              <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200/60">
-                {artisan.metier_label}
+            {artisan.categories?.map((cat) => (
+              <span
+                key={cat.uid}
+                className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200/60"
+              >
+                {cat.nom}
               </span>
-            )}
+            ))}
           </div>
           <div className="flex items-center gap-1.5 mt-2">
             <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
@@ -106,6 +97,12 @@ export default function ArtisanCard({ artisan }) {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {artisan.distance_km != null && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full ring-1 ring-inset ring-indigo-200/60">
+              <Navigation className="w-3 h-3" />
+              {artisan.distance_km} km
+            </span>
+          )}
           {artisan.est_verifie && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full ring-1 ring-inset ring-emerald-200/60">
               <BadgeCheck className="w-3 h-3" /> Vérifié
@@ -139,17 +136,6 @@ export default function ArtisanCard({ artisan }) {
           Voir le profil
           <ChevronRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
         </Link>
-        {artisan.whatsapp && (
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 shadow-md hover:shadow-lg transition-all duration-200 px-5 py-2.5 text-sm font-medium"
-          >
-            <MessageCircle className="w-4 h-4" />
-            WhatsApp
-          </a>
-        )}
       </div>
     </motion.div>
   );
