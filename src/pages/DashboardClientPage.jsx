@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
-import { useDemandes } from '@/hooks/useDemandes'
+import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
 import { useCreateAvis } from '@/hooks/useAvis'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
@@ -23,6 +23,8 @@ import {
   Tag,
   BadgeDollarSign,
   Lock,
+  Check,
+  Ban,
 } from 'lucide-react'
 
 const defaultAvis = { note: 5, commentaire: '' }
@@ -30,6 +32,7 @@ const defaultAvis = { note: 5, commentaire: '' }
 export default function DashboardClientPage() {
   const { user, loading } = useAuth()
   const { data: demandes = [], isLoading } = useDemandes()
+  const updateDemande = useUpdateDemande()
   const createAvis = useCreateAvis()
   const [avisOpen, setAvisOpen] = useState(null)
   const [avisForm, setAvisForm] = useState(defaultAvis)
@@ -69,6 +72,20 @@ export default function DashboardClientPage() {
     })
     setAvisOpen(null)
     setAvisForm(defaultAvis)
+  }
+
+  const confirmerPrix = async (demande) => {
+    await updateDemande.mutateAsync({
+      id: demande.id,
+      data: { prix_confirme: true },
+    })
+  }
+
+  const refuserPrix = async (demande) => {
+    await updateDemande.mutateAsync({
+      id: demande.id,
+      data: { statut: 'ANNULEE' },
+    })
   }
 
   const containerVariants = {
@@ -282,6 +299,31 @@ export default function DashboardClientPage() {
                               <BadgeDollarSign className="w-4 h-4" />
                               {demande.prix_affiche.toLocaleString("fr-FR")} FCFA
                             </span>
+                          ) : demande.prix_propose != null && demande.prix_total == null && demande.statut === 'EN_ATTENTE' ? (
+                            <div className="flex flex-col gap-2">
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                                <BadgeDollarSign className="w-3 h-3" />
+                                {demande.prix_propose.toLocaleString("fr-FR")} FCFA proposé
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => confirmerPrix(demande)}
+                                  disabled={updateDemande.isLoading}
+                                  className="inline-flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-emerald-600 transition-colors"
+                                >
+                                  <Check className="w-3 h-3" />
+                                  Confirmer
+                                </button>
+                                <button
+                                  onClick={() => refuserPrix(demande)}
+                                  disabled={updateDemande.isLoading}
+                                  className="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                  <Ban className="w-3 h-3" />
+                                  Refuser
+                                </button>
+                              </div>
+                            </div>
                           ) : (
                             <span className="text-xs text-gray-400 italic">—</span>
                           )}

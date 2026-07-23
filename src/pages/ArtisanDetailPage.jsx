@@ -87,14 +87,12 @@ export default function ArtisanDetailPage() {
   const servicesList = categorieDetail?.services || [];
   const selectedServiceData = servicesList.find((s) => s.uid === selectedServiceUid);
 
-  const round6 = (n) => Number(Number(n).toFixed(6));
-
   useEffect(() => {
     if (artisan?.latitude && artisan?.longitude && !clientCoords && navigator.geolocation) {
       setGeoLoading(true);
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setClientCoords({ latitude: round6(pos.coords.latitude), longitude: round6(pos.coords.longitude) });
+          setClientCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
           setGeoLoading(false);
         },
         () => setGeoLoading(false),
@@ -108,7 +106,7 @@ export default function ArtisanDetailPage() {
     setGeoLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setClientCoords({ latitude: round6(pos.coords.latitude), longitude: round6(pos.coords.longitude) });
+        setClientCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
         setGeoLoading(false);
       },
       () => setGeoLoading(false),

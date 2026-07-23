@@ -6,7 +6,8 @@ import { useCategories } from "@/hooks/useCategories";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Wrench, Phone, Lock, Check, Eye, EyeOff, Tag } from "lucide-react";
+import { User, Wrench, Phone, Lock, Check, Eye, EyeOff, Tag, MapPin, Info } from "lucide-react";
+import MapPicker from "@/components/common/MapPicker";
 
 import bgImage from '/images/metiers/register-bg.jpg';
 
@@ -28,6 +29,8 @@ export default function RegisterPage() {
     quartier: "",
     ville: "Dakar",
     bio: "",
+    latitude: null,
+    longitude: null,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,6 +45,16 @@ export default function RegisterPage() {
     } else {
       set("categories", [...current, catUid]);
     }
+  };
+
+  const handlePositionChange = ({ latitude, longitude, quartier, commune }) => {
+    setForm((f) => ({
+      ...f,
+      latitude,
+      longitude,
+      quartier: quartier || f.quartier,
+      ville: commune || f.ville,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -230,23 +243,41 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200 mb-2 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Votre position géographique
+                    </label>
+                    <div className="bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl p-3 mb-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="w-4 h-4 text-indigo-300 mt-0.5 shrink-0" />
+                        <p className="text-xs text-indigo-200 leading-relaxed">
+                          Indiquez votre position pour que les clients proches vous trouvent.
+                          Elle correspond à l&apos;endroit où vous travaillez ou habitez habituellement.
+                        </p>
+                      </div>
+                    </div>
+                    <MapPicker
+                      value={
+                        form.latitude && form.longitude
+                          ? { latitude: form.latitude, longitude: form.longitude }
+                          : null
+                      }
+                      onChange={handlePositionChange}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
                         Quartier
                       </label>
-                      <select
+                      <input
                         value={form.quartier}
                         onChange={(e) => set("quartier", e.target.value)}
-                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm appearance-none"
-                      >
-                        <option value="">Sélectionnez un quartier</option>
-                        {QUARTIERS_DAKAR.map((q) => (
-                          <option key={q} value={q}>
-                            {q}
-                          </option>
-                        ))}
-                      </select>
+                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                        placeholder="Rempli automatiquement ou saisissez"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">

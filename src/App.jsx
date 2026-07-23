@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { useGeoLocation } from '@/hooks/useGeoLocation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 
@@ -39,6 +40,7 @@ function PrivateRoute({ children, role }) {
 }
 
 function AppRoutes() {
+  useGeoLocation()
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />

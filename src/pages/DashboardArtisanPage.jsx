@@ -42,6 +42,7 @@ export default function DashboardArtisanPage() {
   const [replyOpen, setReplyOpen] = useState(null)
   const [replyText, setReplyText] = useState('')
   const [statutFilter, setStatutFilter] = useState('all')
+  const [prixInputs, setPrixInputs] = useState({})
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -346,6 +347,12 @@ export default function DashboardArtisanPage() {
                               {d.prix_affiche.toLocaleString("fr-FR")} FCFA
                             </span>
                           )}
+                          {d.prix_propose != null && d.prix_total == null && (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                              <BadgeDollarSign className="w-3 h-3" />
+                              {d.prix_propose.toLocaleString("fr-FR")} FCFA (propose)
+                            </span>
+                          )}
                         </div>
                         {d.client_telephone && d.statut !== 'EN_ATTENTE' && (
                           <a
@@ -378,7 +385,48 @@ export default function DashboardArtisanPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-2 flex-shrink-0 mt-2 md:mt-0">
-                        {d.statut === 'EN_ATTENTE' && (
+                        {d.statut === 'EN_ATTENTE' && !d.service_element && (
+                          <div className="flex flex-col gap-2">
+                            {!d.prix_propose ? (
+                              <div className="flex items-center gap-2">
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="100"
+                                    value={prixInputs[d.id] || ''}
+                                    onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
+                                    placeholder="Prix FCFA"
+                                    className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                  />
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    const prix = parseInt(prixInputs[d.id], 10)
+                                    if (prix > 0) {
+                                      updateDemande.mutate({ id: d.id, data: { prix_propose: prix } })
+                                    }
+                                  }}
+                                  disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0}
+                                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                  <BadgeDollarSign className="w-3.5 h-3.5" /> Proposer
+                                </button>
+                                <button
+                                  onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                                  className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                                >
+                                  <XCircle className="w-3.5 h-3.5" /> Refuser
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-amber-600 font-medium italic">
+                                Prix propose : {d.prix_propose.toLocaleString("fr-FR")} FCFA — en attente du client
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {d.statut === 'EN_ATTENTE' && d.service_element && (
                           <>
                             <button
                               onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ACCEPTEE' } })}

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useArtisans } from '@/hooks/useArtisans'
 import { useCategories } from '@/hooks/useCategories'
+import { useAuth } from '@/context/AuthContext'
 import ArtisanCard from '@/components/artisan/ArtisanCard'
 import Spinner from '@/components/common/Spinner'
 import EmptyState from '@/components/common/EmptyState'
@@ -21,10 +22,14 @@ export default function ArtisansPage() {
     disponible:  '',
   })
 
+  const { user } = useAuth()
   const { data: categories = [] } = useCategories()
 
+  const hasPosition = user?.latitude && user?.longitude
+  const isCategoryActive = !!filters.categorie
+
   const { data, isLoading, isError } = useArtisans(
-    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), page }
+    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
   )
 
   const artisans = data?.results || data || []
@@ -80,6 +85,11 @@ export default function ArtisansPage() {
             }
           </h1>
           <p className="text-gray-500 text-sm font-medium">Trouvez l'artisan qualifié près de chez vous.</p>
+          {isCategoryActive && !hasPosition && (
+            <p className="text-gray-400 text-xs italic mt-1">
+              Activez la géolocalisation pour voir les artisans les plus proches
+            </p>
+          )}
         </motion.div>
 
         {/* Filtres - Design Premium Glassmorphism */}

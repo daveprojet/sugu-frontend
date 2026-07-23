@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Camera, Check, Pencil, User, IdCard, Tag } from "lucide-react";
+import { Camera, Check, Pencil, User, IdCard, Tag, MapPin, Info } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
   useArtisan,
@@ -12,6 +12,7 @@ import {
 import { useCategories } from "@/hooks/useCategories";
 import Spinner from "@/components/common/Spinner";
 import StarRating from "@/components/common/StarRating";
+import MapPicker from "@/components/common/MapPicker";
 import { QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
 
 export default function MonProfil() {
@@ -37,6 +38,8 @@ export default function MonProfil() {
     telephone: "",
     whatsapp: "",
     disponible: true,
+    latitude: null,
+    longitude: null,
   });
   const [savingAccount, setSavingAccount] = useState(false);
 
@@ -59,6 +62,8 @@ export default function MonProfil() {
       telephone: artisan.telephone || "",
       whatsapp: artisan.whatsapp || "",
       disponible: artisan.disponible ?? true,
+      latitude: artisan.latitude ? Number(artisan.latitude) : null,
+      longitude: artisan.longitude ? Number(artisan.longitude) : null,
     });
   }, [artisan]);
 
@@ -85,6 +90,16 @@ export default function MonProfil() {
     } else {
       setArtisan("categories", [...current, catUid]);
     }
+  };
+
+  const handlePositionChange = ({ latitude, longitude, quartier, commune }) => {
+    setArtisanForm((f) => ({
+      ...f,
+      latitude,
+      longitude,
+      quartier: quartier || f.quartier,
+      ville: commune || f.ville,
+    }));
   };
 
   const saveAccount = async (e) => {
@@ -390,23 +405,39 @@ export default function MonProfil() {
                       })}
                     </div>
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Votre position géographique
+                    </label>
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3 mb-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                        <p className="text-xs text-gray-500 leading-relaxed">
+                          Indiquez votre position pour que les clients proches vous trouvent.
+                          Elle correspond à l&apos;endroit où vous travaillez ou habitez habituellement.
+                        </p>
+                      </div>
+                    </div>
+                    <MapPicker
+                      value={
+                        artisanForm.latitude && artisanForm.longitude
+                          ? { latitude: artisanForm.latitude, longitude: artisanForm.longitude }
+                          : null
+                      }
+                      onChange={handlePositionChange}
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Quartier
                     </label>
-                    <select
+                    <input
                       value={artisanForm.quartier}
                       onChange={(e) => setArtisan("quartier", e.target.value)}
-                      required
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
-                    >
-                      <option value="">Sélectionnez un quartier</option>
-                      {QUARTIERS_DAKAR.map((q) => (
-                        <option key={q} value={q}>
-                          {q}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Rempli automatiquement ou saisissez"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

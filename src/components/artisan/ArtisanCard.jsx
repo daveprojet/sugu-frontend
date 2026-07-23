@@ -83,6 +83,14 @@ export default function ArtisanCard({ artisan }) {
               {artisan.quartier}, {artisan.ville}
             </span>
           </div>
+          {artisan.distance_km != null && (
+            <div className="flex items-center gap-1.5 mt-1">
+              <Navigation className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+              <span className="text-xs text-indigo-600 font-medium">
+                {artisan.distance_km} km de vous
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -97,12 +105,6 @@ export default function ArtisanCard({ artisan }) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          {artisan.distance_km != null && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full ring-1 ring-inset ring-indigo-200/60">
-              <Navigation className="w-3 h-3" />
-              {artisan.distance_km} km
-            </span>
-          )}
           {artisan.est_verifie && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full ring-1 ring-inset ring-emerald-200/60">
               <BadgeCheck className="w-3 h-3" /> Vérifié
