@@ -2,16 +2,18 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Camera, Check, Pencil, User, IdCard } from "lucide-react";
+import { Camera, Check, Pencil, User, IdCard, Tag, MapPin, Info } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
   useArtisan,
   useUpdateArtisan,
   useUploadArtisanPhoto,
 } from "@/hooks/useArtisans";
+import { useCategories } from "@/hooks/useCategories";
 import Spinner from "@/components/common/Spinner";
 import StarRating from "@/components/common/StarRating";
-import { METIERS, QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
+import MapPicker from "@/components/common/MapPicker";
+import { QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
 
 export default function MonProfil() {
   const { user, loading, updateMe, fetchMe } = useAuth();
@@ -21,6 +23,7 @@ export default function MonProfil() {
   );
   const updateArtisan = useUpdateArtisan();
   const updateArtisanPhoto = useUploadArtisanPhoto();
+  const { data: allCategories = [] } = useCategories();
 
   const [accountForm, setAccountForm] = useState({
     prenom: "",
@@ -28,13 +31,15 @@ export default function MonProfil() {
     telephone: "",
   });
   const [artisanForm, setArtisanForm] = useState({
-    metier: [],
+    categories: [],
     ville: "Dakar",
     quartier: "",
     bio: "",
     telephone: "",
     whatsapp: "",
     disponible: true,
+    latitude: null,
+    longitude: null,
   });
   const [savingAccount, setSavingAccount] = useState(false);
 
@@ -50,13 +55,15 @@ export default function MonProfil() {
   useEffect(() => {
     if (!artisan) return;
     setArtisanForm({
-      metier: artisan.metier || [],
+      categories: artisan.categories?.map(c => c.uid) || [],
       ville: artisan.ville || "Dakar",
       quartier: artisan.quartier || "",
       bio: artisan.bio || "",
       telephone: artisan.telephone || "",
       whatsapp: artisan.whatsapp || "",
       disponible: artisan.disponible ?? true,
+      latitude: artisan.latitude ? Number(artisan.latitude) : null,
+      longitude: artisan.longitude ? Number(artisan.longitude) : null,
     });
   }, [artisan]);
 
@@ -76,16 +83,23 @@ export default function MonProfil() {
     setArtisanForm((form) => ({ ...form, [key]: value }));
   };
 
-  const handleMetierChange = (metierId) => {
-    const currentMetiers = artisanForm.metier || [];
-    if (currentMetiers.includes(metierId)) {
-      setArtisan(
-        "metier",
-        currentMetiers.filter((id) => id !== metierId),
-      );
+  const handleCategoryChange = (catUid) => {
+    const current = artisanForm.categories || [];
+    if (current.includes(catUid)) {
+      setArtisan("categories", current.filter((uid) => uid !== catUid));
     } else {
-      setArtisan("metier", [...currentMetiers, metierId]);
+      setArtisan("categories", [...current, catUid]);
     }
+  };
+
+  const handlePositionChange = ({ latitude, longitude, quartier, commune }) => {
+    setArtisanForm((f) => ({
+      ...f,
+      latitude,
+      longitude,
+      quartier: quartier || f.quartier,
+      ville: commune || f.ville,
+    }));
   };
 
   const saveAccount = async (e) => {
@@ -244,20 +258,14 @@ export default function MonProfil() {
             {isArtisan && artisan && (
               <div className="mt-4 pt-4 border-t border-gray-100 text-left">
                 <div className="flex flex-wrap gap-1.5 mb-3">
-                  {Array.isArray(artisan.metier_label) ? (
-                    artisan.metier_label.map((label, idx) => (
-                      <span
-                        key={idx}
-                        className="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full"
-                      >
-                        {label}
-                      </span>
-                    ))
-                  ) : (
-                    <p className="text-sm font-medium text-gray-900">
-                      {artisan.metier_label}
-                    </p>
-                  )}
+                  {artisan.categories?.map((cat) => (
+                    <span
+                      key={cat.uid}
+                      className="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full"
+                    >
+                      {cat.nom}
+                    </span>
+                  ))}
                 </div>
                 <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-gray-300" />
@@ -371,14 +379,14 @@ export default function MonProfil() {
                 >
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Métiers (choix multiples)
+                      Catégories (choix multiples)
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border border-gray-200 rounded-2xl max-h-48 overflow-y-auto bg-gray-50/30">
-                      {METIERS.map((m) => {
-                        const isChecked = artisanForm.metier?.includes(m.id);
+                      {allCategories.map((cat) => {
+                        const isChecked = artisanForm.categories?.includes(cat.uid);
                         return (
                           <label
-                            key={m.id}
+                            key={cat.uid}
                             className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
                               isChecked
                                 ? "bg-indigo-50 border-indigo-300 shadow-sm text-indigo-700"
@@ -388,32 +396,48 @@ export default function MonProfil() {
                             <input
                               type="checkbox"
                               checked={isChecked}
-                              onChange={() => handleMetierChange(m.id)}
+                              onChange={() => handleCategoryChange(cat.uid)}
                               className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 accent-indigo-600"
                             />
-                            <span className="text-sm font-medium">{m.label}</span>
+                            <span className="text-sm font-medium">{cat.nom}</span>
                           </label>
                         );
                       })}
                     </div>
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Votre position géographique
+                    </label>
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3 mb-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
+                        <p className="text-xs text-gray-500 leading-relaxed">
+                          Indiquez votre position pour que les clients proches vous trouvent.
+                          Elle correspond à l&apos;endroit où vous travaillez ou habitez habituellement.
+                        </p>
+                      </div>
+                    </div>
+                    <MapPicker
+                      value={
+                        artisanForm.latitude && artisanForm.longitude
+                          ? { latitude: artisanForm.latitude, longitude: artisanForm.longitude }
+                          : null
+                      }
+                      onChange={handlePositionChange}
+                    />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Quartier
                     </label>
-                    <select
+                    <input
                       value={artisanForm.quartier}
                       onChange={(e) => setArtisan("quartier", e.target.value)}
-                      required
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
-                    >
-                      <option value="">Sélectionnez un quartier</option>
-                      {QUARTIERS_DAKAR.map((q) => (
-                        <option key={q} value={q}>
-                          {q}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Rempli automatiquement ou saisissez"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

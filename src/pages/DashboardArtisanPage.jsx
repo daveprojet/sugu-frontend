@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
 import { useArtisanAvis, useUpdateArtisan, useIdentite } from '@/hooks/useArtisans'
+import { useCommissions } from '@/hooks/usePaiements'
 import { useRepondreAvis } from '@/hooks/useAvis'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
@@ -20,6 +21,10 @@ import {
   IdCard,
   Phone,
   Filter,
+  Tag,
+  AlertTriangle,
+  Wallet,
+  BadgeDollarSign
 } from 'lucide-react'
 
 export default function DashboardArtisanPage() {
@@ -31,10 +36,13 @@ export default function DashboardArtisanPage() {
   const updateDemande = useUpdateDemande()
   const updateArtisan = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
+  const { data: commissionsPage } = useCommissions()
+  const commissions = commissionsPage?.results || []
   const [disponible, setDisponible] = useState(user?.disponible ?? true)
   const [replyOpen, setReplyOpen] = useState(null)
   const [replyText, setReplyText] = useState('')
   const [statutFilter, setStatutFilter] = useState('all')
+  const [prixInputs, setPrixInputs] = useState({})
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -57,6 +65,9 @@ export default function DashboardArtisanPage() {
     terminees: demandes.filter((d) => d.statut === 'TERMINEE').length,
   }
 
+  const commissionsEnAttente = commissions.filter(c => c.statut === 'EN_ATTENTE' || c.statut === 'EN_RETARD')
+  const totalCommissionsDue = commissionsEnAttente.reduce((sum, c) => sum + c.montant_commission, 0)
+
   const openReply = (item) => {
     setReplyOpen(item.id)
     setReplyText(item.reponse_artisan || '')
@@ -73,14 +84,12 @@ export default function DashboardArtisanPage() {
     setReplyText('')
   }
 
-  // Mapping des couleurs pour les cartes de statistiques
   const statCards = [
     { label: 'Total demandes', value: stats.total, icon: Inbox, color: 'text-indigo-600', bg: 'bg-indigo-50' },
     { label: 'En attente', value: stats.enAttente, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
     { label: 'Terminées', value: stats.terminees, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
   ]
 
-  // Animations Framer Motion
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
@@ -93,7 +102,7 @@ export default function DashboardArtisanPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
       <div className="max-w-6xl mx-auto space-y-10">
-        
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -106,21 +115,27 @@ export default function DashboardArtisanPage() {
             </div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
-                Bonjour, {user?.prenom} 👋
+                Bonjour, {user?.prenom}
               </h1>
               <p className="text-gray-500 text-sm font-medium mt-0.5">Voici un aperçu de votre activité</p>
             </div>
           </div>
 
-          {/* Toggle Dispo Premium */}
-          <button
-            onClick={toggleDispo}
-            className={`group relative flex items-center gap-3 px-6 py-2.5 rounded-full border-2 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md
-              ${disponible 
-                ? 'border-emerald-500 text-emerald-700 bg-white hover:bg-emerald-50' 
-                : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'
-              }`}
-          >
+          <div className="flex items-center gap-3">
+            <Link
+              to="/dashboard-artisan/commissions"
+              className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 px-4 py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm"
+            >
+              <Wallet className="w-4 h-4" /> Commissions
+            </Link>
+            <button
+              onClick={toggleDispo}
+              className={`group relative flex items-center gap-3 px-6 py-2.5 rounded-full border-2 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md
+                ${disponible
+                  ? 'border-emerald-500 text-emerald-700 bg-white hover:bg-emerald-50'
+                  : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'
+                }`}
+            >
             <span className="relative flex h-3 w-3">
               <span
                 className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
@@ -135,7 +150,33 @@ export default function DashboardArtisanPage() {
             </span>
             {disponible ? 'Disponible' : 'Indisponible'}
           </button>
+          </div>
         </motion.div>
+
+        {/* Commission Alert */}
+        {user?.bloque && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-900">Votre profil est temporairement bloqué</p>
+              <p className="text-xs text-red-700 mt-0.5">
+                Une commission de {totalCommissionsDue.toLocaleString("fr-FR")} FCFA est due. Veuillez régulariser votre situation pour recevoir de nouvelles demandes.
+              </p>
+            </div>
+            <Link
+              to="/dashboard-artisan/commissions"
+              className="inline-flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-full text-xs font-medium hover:bg-red-700 transition-colors flex-shrink-0"
+            >
+              <Wallet className="w-3.5 h-3.5" /> Payer
+            </Link>
+          </motion.div>
+        )}
 
         {/* Identity Status */}
         {user?.artisan_uid && (
@@ -181,7 +222,7 @@ export default function DashboardArtisanPage() {
           </motion.div>
         )}
 
-        {/* Stats Cards avec animations */}
+        {/* Stats Cards */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -283,7 +324,6 @@ export default function DashboardArtisanPage() {
               className="flex flex-col gap-4"
             >
               {demandesFiltrees.map((d) => {
-                // Couleur du statut basée sur la constante
                 const statusColor = STATUTS_DEMANDE[d.statut]?.color || 'bg-gray-100 text-gray-600';
                 return (
                   <motion.div
@@ -301,8 +341,20 @@ export default function DashboardArtisanPage() {
                           >
                             {STATUTS_DEMANDE[d.statut]?.label || d.statut}
                           </span>
+                          {d.prix_affiche != null && (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                              <BadgeDollarSign className="w-3 h-3" />
+                              {d.prix_affiche.toLocaleString("fr-FR")} FCFA
+                            </span>
+                          )}
+                          {d.prix_propose != null && d.prix_total == null && (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                              <BadgeDollarSign className="w-3 h-3" />
+                              {d.prix_propose.toLocaleString("fr-FR")} FCFA (propose)
+                            </span>
+                          )}
                         </div>
-                        {d.client_telephone && (
+                        {d.client_telephone && d.statut !== 'EN_ATTENTE' && (
                           <a
                             href={`tel:${d.client_telephone}`}
                             className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors mb-2"
@@ -310,6 +362,11 @@ export default function DashboardArtisanPage() {
                             <Phone className="w-3.5 h-3.5" />
                             {d.client_telephone}
                           </a>
+                        )}
+                        {d.service_element_nom && (
+                          <p className="text-xs text-indigo-500 font-medium mt-1">
+                            {d.categorie_nom} — {d.service_element_nom}
+                          </p>
                         )}
                         <p className="text-sm text-gray-600 leading-relaxed">{d.description}</p>
                         <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 font-medium">
@@ -321,16 +378,55 @@ export default function DashboardArtisanPage() {
                               year: 'numeric',
                             })}
                           </span>
-                          {d.statut === 'TERMINEE' && (
-                            <span className="flex items-center gap-1.5 text-emerald-600">
-                              <CheckCircle className="w-3.5 h-3.5" /> Terminée
-                            </span>
+                          {d.distance_km != null && d.statut !== 'EN_ATTENTE' && (
+                            <span>{d.distance_km} km</span>
                           )}
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 flex-shrink-0 mt-2 md:mt-0">
-                        {d.statut === 'EN_ATTENTE' && (
+                        {d.statut === 'EN_ATTENTE' && !d.service_element && (
+                          <div className="flex flex-col gap-2">
+                            {!d.prix_propose ? (
+                              <div className="flex items-center gap-2">
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="100"
+                                    value={prixInputs[d.id] || ''}
+                                    onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
+                                    placeholder="Prix FCFA"
+                                    className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                  />
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    const prix = parseInt(prixInputs[d.id], 10)
+                                    if (prix > 0) {
+                                      updateDemande.mutate({ id: d.id, data: { prix_propose: prix } })
+                                    }
+                                  }}
+                                  disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0}
+                                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                  <BadgeDollarSign className="w-3.5 h-3.5" /> Proposer
+                                </button>
+                                <button
+                                  onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                                  className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                                >
+                                  <XCircle className="w-3.5 h-3.5" /> Refuser
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-amber-600 font-medium italic">
+                                Prix propose : {d.prix_propose.toLocaleString("fr-FR")} FCFA — en attente du client
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {d.statut === 'EN_ATTENTE' && d.service_element && (
                           <>
                             <button
                               onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ACCEPTEE' } })}
@@ -347,6 +443,14 @@ export default function DashboardArtisanPage() {
                           </>
                         )}
                         {d.statut === 'ACCEPTEE' && (
+                          <button
+                            onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'EN_COURS' } })}
+                            className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                          >
+                            <Clock className="w-3.5 h-3.5" /> En cours
+                          </button>
+                        )}
+                        {(d.statut === 'ACCEPTEE' || d.statut === 'EN_COURS') && (
                           <button
                             onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'TERMINEE' } })}
                             className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
@@ -422,7 +526,6 @@ export default function DashboardArtisanPage() {
                         <p className="text-sm text-gray-400 italic">Aucun commentaire ajouté.</p>
                       )}
 
-                      {/* Réponse existante */}
                       {item.reponse_artisan && replyOpen !== item.id && (
                         <div className="mt-4 bg-indigo-50 border border-indigo-200/60 rounded-xl p-4">
                           <div className="flex items-center gap-2 mb-1">
@@ -442,7 +545,6 @@ export default function DashboardArtisanPage() {
                         </div>
                       )}
 
-                      {/* Formulaire de réponse */}
                       {replyOpen === item.id && (
                         <form onSubmit={(e) => submitReply(e, item)} className="mt-4 flex flex-col gap-3">
                           <textarea

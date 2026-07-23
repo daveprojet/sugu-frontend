@@ -2,26 +2,34 @@ import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useArtisans } from '@/hooks/useArtisans'
+import { useCategories } from '@/hooks/useCategories'
+import { useAuth } from '@/context/AuthContext'
 import ArtisanCard from '@/components/artisan/ArtisanCard'
 import Spinner from '@/components/common/Spinner'
 import EmptyState from '@/components/common/EmptyState'
 import Pagination from '@/components/common/Pagination'
-import { METIERS, QUARTIERS_DAKAR } from '@/utils/constants'
-import { Filter, X, MapPin, Briefcase, CheckCircle, Star } from 'lucide-react'
+import { QUARTIERS_DAKAR } from '@/utils/constants'
+import { Filter, X, MapPin, CheckCircle, Star, Briefcase } from 'lucide-react'
 
 export default function ArtisansPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const topRef = useRef(null)
   const [page, setPage] = useState(1)
   const [filters, setFilters] = useState({
-    metier:      searchParams.get('metier') || '',
     quartier:    searchParams.get('quartier') || '',
+    categorie:   searchParams.get('categorie') || '',
     note_moyenne: '',
     disponible:  '',
   })
 
+  const { user } = useAuth()
+  const { data: categories = [] } = useCategories()
+
+  const hasPosition = user?.latitude && user?.longitude
+  const isCategoryActive = !!filters.categorie
+
   const { data, isLoading, isError } = useArtisans(
-    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), page }
+    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
   )
 
   const artisans = data?.results || data || []
@@ -29,8 +37,8 @@ export default function ArtisansPage() {
 
   useEffect(() => {
     const params = {}
-    if (filters.metier)      params.metier = filters.metier
     if (filters.quartier)    params.quartier = filters.quartier
+    if (filters.categorie)   params.categorie = filters.categorie
     if (filters.note_moyenne) params.note_moyenne = filters.note_moyenne
     setSearchParams(params, { replace: true })
   }, [filters, setSearchParams])
@@ -71,12 +79,17 @@ export default function ArtisansPage() {
           className="mb-6"
         >
           <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900 mb-1">
-            {filters.metier
-              ? `Artisans — ${METIERS.find(m => m.id === filters.metier)?.label}`
+            {filters.categorie
+              ? `Artisans — ${categories.find(c => c.uid === filters.categorie)?.nom || 'Categorie'}`
               : 'Tous les artisans'
             }
           </h1>
           <p className="text-gray-500 text-sm font-medium">Trouvez l'artisan qualifié près de chez vous.</p>
+          {isCategoryActive && !hasPosition && (
+            <p className="text-gray-400 text-xs italic mt-1">
+              Activez la géolocalisation pour voir les artisans les plus proches
+            </p>
+          )}
         </motion.div>
 
         {/* Filtres - Design Premium Glassmorphism */}
@@ -90,19 +103,19 @@ export default function ArtisansPage() {
           </div>
 
           <div className="flex-1 min-w-[140px]">
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Métier</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Catégorie</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
                 <Briefcase className="w-4 h-4" />
               </div>
               <select
-                value={filters.metier}
-                onChange={e => handleFilter('metier', e.target.value)}
+                value={filters.categorie}
+                onChange={e => handleFilter('categorie', e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
               >
-                <option value="">Tous les métiers</option>
-                {METIERS.map(m => (
-                  <option key={m.id} value={m.id}>{m.label}</option>
+                <option value="">Toutes les catégories</option>
+                {categories.map(c => (
+                  <option key={c.uid} value={c.uid}>{c.nom}</option>
                 ))}
               </select>
             </div>
@@ -164,9 +177,9 @@ export default function ArtisansPage() {
             </div>
           </div>
 
-          {(filters.metier || filters.quartier || filters.note_moyenne || filters.disponible) && (
+          {(filters.quartier || filters.categorie || filters.note_moyenne || filters.disponible) && (
             <button
-              onClick={() => setFilters({ metier: '', quartier: '', note_moyenne: '', disponible: '' })}
+              onClick={() => setFilters({ quartier: '', categorie: '', note_moyenne: '', disponible: '' })}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white/50 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all duration-200 shadow-sm ml-auto md:ml-0"
             >
               Effacer <X className="w-3.5 h-3.5" />

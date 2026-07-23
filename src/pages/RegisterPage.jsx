@@ -1,26 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { METIERS, QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
+import { QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
+import { useCategories } from "@/hooks/useCategories";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Wrench, Phone, Lock, Check, Eye, EyeOff } from "lucide-react";
+import { User, Wrench, Phone, Lock, Check, Eye, EyeOff, Tag, MapPin, Info } from "lucide-react";
+import MapPicker from "@/components/common/MapPicker";
 
-// 1. IMPORT DE L'IMAGE DE FOND
 import bgImage from '/images/metiers/register-bg.jpg';
-
-// Mapping des icônes métier
-const metierIconMap = {
-  plombier: Wrench,
-  electricien: Wrench, 
-  macon: Wrench,
-  peintre: Wrench,
-  menuisier: Wrench,
-  couvreur: Wrench,
-  climaticien: Wrench,
-  vitrier: Wrench,
-};
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -28,6 +17,7 @@ export default function RegisterPage() {
   const [params] = useSearchParams();
   const { pathname } = useLocation();
   const isArtisanFlow = params.get("role") === "artisan" || pathname === "/inscription-artisan";
+  const { data: categories = [] } = useCategories();
 
   const [form, setForm] = useState({
     prenom: "",
@@ -35,10 +25,12 @@ export default function RegisterPage() {
     telephone: "",
     password: "",
     role: isArtisanFlow ? "artisan" : "client",
-    metier: [],
+    categories: [],
     quartier: "",
     ville: "Dakar",
     bio: "",
+    latitude: null,
+    longitude: null,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,13 +38,23 @@ export default function RegisterPage() {
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
-  const handleMetierChange = (metierId) => {
-    const currentMetiers = form.metier || [];
-    if (currentMetiers.includes(metierId)) {
-      set("metier", currentMetiers.filter((id) => id !== metierId));
+  const handleCategoryChange = (catUid) => {
+    const current = form.categories || [];
+    if (current.includes(catUid)) {
+      set("categories", current.filter((uid) => uid !== catUid));
     } else {
-      set("metier", [...currentMetiers, metierId]);
+      set("categories", [...current, catUid]);
     }
+  };
+
+  const handlePositionChange = ({ latitude, longitude, quartier, commune }) => {
+    setForm((f) => ({
+      ...f,
+      latitude,
+      longitude,
+      quartier: quartier || f.quartier,
+      ville: commune || f.ville,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -213,15 +215,14 @@ export default function RegisterPage() {
                 >
                   <div>
                     <label className="block text-sm font-medium text-indigo-200 mb-2">
-                      Métiers (choix multiples)
+                      Catégories (choix multiples)
                     </label>
                     <div className="grid grid-cols-2 gap-3 p-4 border border-white/30 rounded-2xl max-h-48 overflow-y-auto bg-white/10 backdrop-blur-sm">
-                      {METIERS.map((m) => {
-                        const Icon = metierIconMap[m.id] || Wrench;
-                        const isChecked = form.metier?.includes(m.id);
+                      {categories.map((cat) => {
+                        const isChecked = form.categories?.includes(cat.uid);
                         return (
                           <label
-                            key={m.id}
+                            key={cat.uid}
                             className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
                               isChecked
                                 ? "bg-white/40 border-white/50 shadow-sm text-indigo-900"
@@ -231,15 +232,39 @@ export default function RegisterPage() {
                             <input
                               type="checkbox"
                               checked={isChecked}
-                              onChange={() => handleMetierChange(m.id)}
+                              onChange={() => handleCategoryChange(cat.uid)}
                               className="w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
                             />
-                            <Icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-sm font-medium">{m.label}</span>
+                            <Tag className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium">{cat.nom}</span>
                           </label>
                         );
                       })}
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200 mb-2 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      Votre position géographique
+                    </label>
+                    <div className="bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl p-3 mb-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="w-4 h-4 text-indigo-300 mt-0.5 shrink-0" />
+                        <p className="text-xs text-indigo-200 leading-relaxed">
+                          Indiquez votre position pour que les clients proches vous trouvent.
+                          Elle correspond à l&apos;endroit où vous travaillez ou habitez habituellement.
+                        </p>
+                      </div>
+                    </div>
+                    <MapPicker
+                      value={
+                        form.latitude && form.longitude
+                          ? { latitude: form.latitude, longitude: form.longitude }
+                          : null
+                      }
+                      onChange={handlePositionChange}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -247,18 +272,12 @@ export default function RegisterPage() {
                       <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
                         Quartier
                       </label>
-                      <select
+                      <input
                         value={form.quartier}
                         onChange={(e) => set("quartier", e.target.value)}
-                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm appearance-none"
-                      >
-                        <option value="">Sélectionnez un quartier</option>
-                        {QUARTIERS_DAKAR.map((q) => (
-                          <option key={q} value={q}>
-                            {q}
-                          </option>
-                        ))}
-                      </select>
+                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                        placeholder="Rempli automatiquement ou saisissez"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
