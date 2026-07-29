@@ -45,6 +45,9 @@ export const authService = {
   logout:   ()     => api.post('/auth/logout/'),
   me:       ()     => api.get('/auth/me/'),
   updateMe: (data) => api.patch('/auth/me/', data),
+  passwordResetRequest: (data) => api.post('/auth/password-reset/request/', data),
+  passwordResetVerify:  (data) => api.post('/auth/password-reset/verify/', data),
+  passwordResetConfirm: (data) => api.post('/auth/password-reset/confirm/', data),
 }
 
 // ── Artisans ──────────────────────────────────────

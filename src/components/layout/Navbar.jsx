@@ -8,6 +8,8 @@ import {
   LogOut,
   ChevronDown,
   Wrench,
+  Menu,
+  X,
 } from "lucide-react";
 
 import logo from "/images/logo.png";
@@ -15,6 +17,7 @@ import logo from "/images/logo.png";
 export default function Navbar() {
   const { user, logout, isArtisan } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -83,7 +86,7 @@ export default function Navbar() {
                   {user.prenom}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`}
+                  className={`hidden md:block w-4 h-4 text-gray-400 transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
@@ -143,8 +146,77 @@ export default function Navbar() {
               </Link>
             </>
           )}
+
+          {/* Burger button — mobile only */}
+          <button
+            onClick={() => setBurgerOpen(!burgerOpen)}
+            className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
+            aria-label="Menu de navigation"
+          >
+            {burgerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu panel */}
+      <AnimatePresence>
+        {burgerOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden overflow-hidden bg-white/95 backdrop-blur-md border-b border-gray-200/60 shadow-sm"
+          >
+            <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1.5">
+              <Link
+                to="/a-propos"
+                onClick={() => setBurgerOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
+              >
+                À propos
+              </Link>
+              <Link
+                to="/artisans"
+                onClick={() => setBurgerOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
+              >
+                <Wrench className="w-4 h-4 text-gray-400" />
+                Trouver un artisan
+              </Link>
+              {!isArtisan && (
+                <Link
+                  to="/inscription-artisan"
+                  onClick={() => setBurgerOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
+                >
+                  Devenir prestataire
+                </Link>
+              )}
+              <Link
+                to="/contact"
+                onClick={() => setBurgerOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
+              >
+                Contact
+              </Link>
+
+              {!user && (
+                <>
+                  <hr className="my-2 mx-3 border-gray-100" />
+                  <Link
+                    to="/inscription"
+                    onClick={() => setBurgerOpen(false)}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md shadow-indigo-500/30 transition-all duration-200"
+                  >
+                    S'inscrire
+                  </Link>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

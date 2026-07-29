@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { METIERS } from "@/utils/constants";
+import { METIERS, METIER_TO_CATEGORIE_NOM } from "@/utils/constants";
+import { useCategories } from "@/hooks/useCategories";
 import {
   Wrench,
   Zap,
@@ -118,6 +120,26 @@ const metierAssets = {
 
 export default function MetierGrid() {
   const navigate = useNavigate();
+  const { data: categories = [] } = useCategories();
+  const slugToUid = useMemo(() => {
+    const map = {};
+    categories.forEach((c) => {
+      const slug = Object.keys(METIER_TO_CATEGORIE_NOM).find(
+        (k) => METIER_TO_CATEGORIE_NOM[k] === c.nom
+      );
+      if (slug) map[slug] = c.uid;
+    });
+    return map;
+  }, [categories]);
+
+  const handleMetierClick = (metierId) => {
+    const uid = slugToUid[metierId];
+    if (uid) {
+      navigate(`/artisans?categorie=${uid}`);
+    } else {
+      navigate("/artisans");
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -133,7 +155,7 @@ export default function MetierGrid() {
         return (
           <motion.button
             key={m.id}
-            onClick={() => navigate(`/artisans?metier=${m.id}`)}
+            onClick={() => handleMetierClick(m.id)}
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}

@@ -143,6 +143,15 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <div className="flex justify-end -mt-2">
+              <Link
+                to="/mot-de-passe-oublie"
+                className="text-sm text-indigo-200 hover:text-white transition-colors"
+              >
+                Mot de passe oublié ?
+              </Link>
+            </div>
+
             {/* Bouton CTA avec dégradé adapté au fond sombre */}
             <motion.button
               type="submit"

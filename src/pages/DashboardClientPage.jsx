@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
@@ -37,6 +37,13 @@ export default function DashboardClientPage() {
   const [avisOpen, setAvisOpen] = useState(null)
   const [avisForm, setAvisForm] = useState(defaultAvis)
   const [statutFilter, setStatutFilter] = useState('all')
+  const avisRef = useRef(null)
+
+  useEffect(() => {
+    if (avisOpen) {
+      avisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [avisOpen])
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -360,6 +367,7 @@ export default function DashboardClientPage() {
         <AnimatePresence>
           {avisOpen && (
             <motion.section
+              ref={avisRef}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}

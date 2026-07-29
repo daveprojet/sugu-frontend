@@ -41,4 +41,19 @@ export const STATUTS_IDENTITE = {
   REJETEE:    { label: 'Rejetée',                     color: 'bg-red-100 text-red-800' },
 }
 
+export const METIER_TO_CATEGORIE_NOM = {
+  plombier: 'Plomberie',
+  electricien: 'Électricité',
+  menuisier: 'Menuiserie',
+  macon: 'Maçonnerie',
+  peintre: 'Peinture',
+  carreleur: 'Carrelage',
+  climatisation: 'Climatisation',
+  soudeur: 'Soudure',
+  jardinier: 'Jardinage',
+  menage: 'Ménage',
+  chauffeur: null,
+  informatique: 'Informatique',
+}
+
 export const API_BASE_URL = import.meta.env.VITE_API_URL

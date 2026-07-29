@@ -15,12 +15,13 @@ export default function ArtisansPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const topRef = useRef(null)
   const [page, setPage] = useState(1)
-  const [filters, setFilters] = useState({
+
+  const filters = {
     quartier:    searchParams.get('quartier') || '',
     categorie:   searchParams.get('categorie') || '',
-    note_moyenne: '',
-    disponible:  '',
-  })
+    note_moyenne: searchParams.get('note_moyenne') || '',
+    disponible:  searchParams.get('disponible') || '',
+  }
 
   const { user } = useAuth()
   const { data: categories = [] } = useCategories()
@@ -36,18 +37,18 @@ export default function ArtisansPage() {
   const totalPages = Math.ceil((data?.count || 0) / 12)
 
   useEffect(() => {
-    const params = {}
-    if (filters.quartier)    params.quartier = filters.quartier
-    if (filters.categorie)   params.categorie = filters.categorie
-    if (filters.note_moyenne) params.note_moyenne = filters.note_moyenne
-    setSearchParams(params, { replace: true })
-  }, [filters, setSearchParams])
-
-  useEffect(() => {
     setPage(1)
-  }, [filters])
+  }, [searchParams])
 
-  const handleFilter = (key, value) => setFilters(f => ({ ...f, [key]: value }))
+  const handleFilter = (key, value) => {
+    const next = new URLSearchParams(searchParams)
+    if (value) {
+      next.set(key, value)
+    } else {
+      next.delete(key)
+    }
+    setSearchParams(next, { replace: true })
+  }
 
   const handlePageChange = (newPage) => {
     setPage(newPage)
@@ -178,7 +179,7 @@ export default function ArtisansPage() {
 
           {(filters.quartier || filters.categorie || filters.note_moyenne || filters.disponible) && (
             <button
-              onClick={() => setFilters({ quartier: '', categorie: '', note_moyenne: '', disponible: '' })}
+              onClick={() => setSearchParams({}, { replace: true })}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white/50 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all duration-200 shadow-sm ml-auto md:ml-0"
             >
               Effacer <X className="w-3.5 h-3.5" />
