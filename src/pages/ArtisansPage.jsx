@@ -170,9 +170,8 @@ export default function ArtisansPage() {
                 onChange={e => handleFilter('disponible', e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
               >
-                <option value="">Disponibilité</option>
-                <option value="true">Disponible maintenant</option>
-                <option value="false">Tous</option>
+                <option value="true">Disponible</option>
+                <option value="false">Non disponible</option>
               </select>
             </div>
           </div>

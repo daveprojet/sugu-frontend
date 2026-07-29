@@ -43,6 +43,7 @@ export default function DashboardArtisanPage() {
   const [replyText, setReplyText] = useState('')
   const [statutFilter, setStatutFilter] = useState('all')
   const [prixInputs, setPrixInputs] = useState({})
+  const [editingPrixId, setEditingPrixId] = useState(null)
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -222,6 +223,87 @@ export default function DashboardArtisanPage() {
           </motion.div>
         )}
 
+        {/* Refus Alert — Blocage permanent */}
+        {user?.bloque_refus && !user?.date_deblocage_refus && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-900">Profil définitivement bloqué</p>
+              <p className="text-xs text-red-700 mt-0.5">
+                Votre profil a été bloqué en raison de refus répétés de demandes catalogue.
+                Veuillez contacter le service client pour toute demande de réactivation.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Refus Alert — Blocage temporaire */}
+        {user?.bloque_refus && user?.date_deblocage_refus && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-orange-900">Profil temporairement bloqué</p>
+              <p className="text-xs text-orange-700 mt-0.5">
+                Votre profil est masqué des résultats de recherche jusqu'au{' '}
+                {new Date(user.date_deblocage_refus).toLocaleDateString('fr-FR', {
+                  day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                })}
+                {' '}suite à des refus de demandes catalogue.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Refus Alert — Avertissement */}
+        {!user?.bloque_refus && user?.nb_refus_catalogue > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-2xl p-4 flex items-center gap-4 border ${
+              user.nb_refus_catalogue >= 3
+                ? 'bg-red-50 border-red-200'
+                : 'bg-amber-50 border-amber-200'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+              user.nb_refus_catalogue >= 3
+                ? 'bg-red-100 text-red-600'
+                : 'bg-amber-100 text-amber-600'
+            }`}>
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className={`text-sm font-semibold ${
+                user.nb_refus_catalogue >= 3 ? 'text-red-900' : 'text-amber-900'
+              }`}>
+                {user.nb_refus_catalogue >= 3
+                  ? 'Attention, vous approchez du blocage !'
+                  : 'Rappel sur les refus de demande'}
+              </p>
+              <p className={`text-xs mt-0.5 ${
+                user.nb_refus_catalogue >= 3 ? 'text-red-700' : 'text-amber-700'
+              }`}>
+                Vous avez refusé <strong>{user.nb_refus_catalogue} demande{user.nb_refus_catalogue > 1 ? 's' : ''} catalogue</strong>
+                {user.nb_refus_catalogue >= 5
+                  ? '. Votre profil est actuellement masqué.'
+                  : ` sur 5 avant le blocage temporaire du profil.`}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Stats Cards */}
         <motion.div
           variants={containerVariants}
@@ -387,7 +469,43 @@ export default function DashboardArtisanPage() {
                       <div className="flex flex-wrap gap-2 flex-shrink-0 mt-2 md:mt-0">
                         {d.statut === 'EN_ATTENTE' && !d.service_element && (
                           <div className="flex flex-col gap-2">
-                            {!d.prix_propose ? (
+                            {editingPrixId === d.id ? (
+                              <div className="flex items-center gap-2">
+                                <div className="relative">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="100"
+                                    value={prixInputs[d.id] ?? d.prix_propose ?? ''}
+                                    onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
+                                    placeholder="Prix FCFA"
+                                    className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                                  />
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    const prix = parseInt(prixInputs[d.id] ?? d.prix_propose, 10)
+                                    if (prix > 0) {
+                                      updateDemande.mutate({ id: d.id, data: { prix_propose: prix } })
+                                      setEditingPrixId(null)
+                                    }
+                                  }}
+                                  disabled={!prixInputs[d.id] && !d.prix_propose}
+                                  className="inline-flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                                >
+                                  <BadgeDollarSign className="w-3.5 h-3.5" /> Enregistrer
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingPrixId(null)
+                                    setPrixInputs(prev => ({ ...prev, [d.id]: '' }))
+                                  }}
+                                  className="inline-flex items-center gap-1.5 border border-gray-200 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                                >
+                                  Annuler
+                                </button>
+                              </div>
+                            ) : !d.prix_propose ? (
                               <div className="flex items-center gap-2">
                                 <div className="relative">
                                   <input
@@ -420,9 +538,27 @@ export default function DashboardArtisanPage() {
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-xs text-amber-600 font-medium italic">
-                                Prix propose : {d.prix_propose.toLocaleString("fr-FR")} FCFA — en attente du client
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                                  <BadgeDollarSign className="w-3 h-3" />
+                                  {d.prix_propose.toLocaleString("fr-FR")} FCFA proposé
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    setEditingPrixId(d.id)
+                                    setPrixInputs(prev => ({ ...prev, [d.id]: d.prix_propose }))
+                                  }}
+                                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                                >
+                                  Modifier
+                                </button>
+                                <button
+                                  onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                                  className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                                >
+                                  <XCircle className="w-3.5 h-3.5" /> Refuser
+                                </button>
+                              </div>
                             )}
                           </div>
                         )}

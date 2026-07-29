@@ -11,16 +11,21 @@ export default function SearchBar() {
   const navigate = useNavigate();
   const { data: categories = [] } = useCategories();
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (categorie) {
-      navigate(`/artisans?categorie=${categorie}`);
-      return;
-    }
-    const params = new URLSearchParams();
-    if (quartier) params.set("quartier", quartier);
-    navigate(`/artisans?${params.toString()}`);
-  };
+const handleSearch = (e) => {
+  e.preventDefault();
+  const params = new URLSearchParams();
+  
+  if (categorie) {
+    params.set("categorie", categorie);
+  }
+  
+  if (quartier) {
+    params.set("quartier", quartier);
+  }
+  
+  navigate(`/artisans?${params.toString()}`);
+};
+
 
   return (
     <form

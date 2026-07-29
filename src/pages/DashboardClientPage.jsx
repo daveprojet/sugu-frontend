@@ -243,7 +243,6 @@ export default function DashboardClientPage() {
                     </tr>
                   ) : demandesFiltrees.map((demande) => {
                     const statusConfig = STATUTS_DEMANDE[demande.statut] || { color: 'bg-gray-100 text-gray-600', label: demande.statut };
-                    const isContactRevealed = ['ACCEPTEE', 'EN_COURS', 'TERMINEE'].includes(demande.statut);
                     return (
                       <tr key={demande.id} className="group hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4 align-middle">
@@ -255,7 +254,6 @@ export default function DashboardClientPage() {
                           </Link>
                         </td>
                         <td className="px-6 py-4 align-middle">
-                          {isContactRevealed ? (
                             <div className="flex flex-col gap-1">
                               {demande.artisan_telephone && (
                                 <a
@@ -278,12 +276,6 @@ export default function DashboardClientPage() {
                                 </a>
                               )}
                             </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5 text-xs text-gray-400 italic">
-                              <Lock className="w-3.5 h-3.5" />
-                              Après acceptation
-                            </div>
-                          )}
                         </td>
                         <td className="px-6 py-4 text-gray-600 max-w-xs align-middle">
                           <p className="line-clamp-2 leading-relaxed">{demande.description}</p>

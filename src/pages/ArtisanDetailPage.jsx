@@ -303,7 +303,7 @@ export default function ArtisanDetailPage() {
               )}
 
               <div className="mt-4">
-                {artisan.bloque ? (
+                {artisan.bloque || artisan.bloque_refus ? (
                   <Badge variant="default">
                     <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Temporairement indisponible
                   </Badge>
@@ -315,7 +315,7 @@ export default function ArtisanDetailPage() {
               </div>
 
               {/* Contact buttons */}
-              {isContactVisible && !artisan.bloque && (
+              {isContactVisible && !artisan.bloque && !artisan.bloque_refus && (
                 <div className="mt-6 flex flex-col gap-3">
                   {user && user.role !== "artisan" && (
                     <button
@@ -421,7 +421,7 @@ export default function ArtisanDetailPage() {
                             <span>Calcul du prix...</span>
                           ) : estimation ? (
                             <span>
-                              Prix estimé : <strong>{estimation.prix_total?.toLocaleString("fr-FR")} FCFA</strong>
+                              Prix de la prestation : <strong>{estimation.prix_total?.toLocaleString("fr-FR")} FCFA</strong>
                               {estimation.distance_km != null && (
                                 <span className="text-indigo-500 ml-1">({estimation.distance_km} km)</span>
                               )}
