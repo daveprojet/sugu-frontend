@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
-import { useCommissions, usePaiements, useCreatePaiement } from '@/hooks/usePaiements'
+import { useCommissions, usePaiements, usePaytechInit } from '@/hooks/usePaiements'
 import Spinner from '@/components/common/Spinner'
 import {
   Wallet,
@@ -13,13 +13,28 @@ import {
   ArrowUpRight,
   CreditCard,
   Filter,
-  Phone,
+  ShieldCheck,
 } from 'lucide-react'
+
+const METHODES_PAYTECH = [
+  { value: '', label: 'Toutes les méthodes' },
+  { value: 'Orange Money', label: 'Orange Money' },
+  { value: 'Wave', label: 'Wave' },
+  { value: 'Free Money', label: 'Free Money' },
+  { value: 'Carte Bancaire', label: 'Carte Bancaire' },
+]
 
 const MOYENS_PAIEMENT = [
   { value: 'wave', label: 'Wave', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   { value: 'orange_money', label: 'Orange Money', color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  { value: 'paytech', label: 'PayTech', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
 ]
+
+const STATUTS_PAIEMENT = {
+  EN_COURS: { label: 'En cours', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  VALIDE:   { label: 'Validé',   color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  ECHEC:    { label: 'Échec',    color: 'bg-red-50 text-red-700 border-red-200' },
+}
 
 export default function CommissionDashboardPage() {
   const { user } = useAuth()
@@ -27,11 +42,11 @@ export default function CommissionDashboardPage() {
   const commissions = commissionsPage?.results || []
   const { data: paiementsPage, isLoading: paiementsLoading } = usePaiements()
   const paiements = paiementsPage?.results || []
-  const createPaiement = useCreatePaiement()
+  const paytechInit = usePaytechInit()
 
   const [filter, setFilter] = useState('all')
   const [payModal, setPayModal] = useState(null)
-  const [form, setForm] = useState({ telephone: '', montant: 0, moyen_paiement: 'wave', reference: '' })
+  const [methode, setMethode] = useState('Orange Money')
 
   const filtered = filter === 'all'
     ? commissions
@@ -48,22 +63,14 @@ export default function CommissionDashboardPage() {
 
   const openPay = (commission) => {
     setPayModal(commission)
-    setForm({
-      telephone: user?.telephone || '',
-      montant: commission.montant_commission,
-      moyen_paiement: 'wave',
-      reference: '',
-    })
+    setMethode('Orange Money')
   }
 
   const submitPay = async (e) => {
     e.preventDefault()
-    await createPaiement.mutateAsync({
+    await paytechInit.mutateAsync({
       commission: payModal.uid,
-      montant: form.montant,
-      methode: form.moyen_paiement,
-      reference_transaction: form.reference,
-      telephone: form.telephone,
+      target_payment: methode,
     })
     setPayModal(null)
   }
@@ -278,43 +285,45 @@ export default function CommissionDashboardPage() {
                       <th className="px-6 py-3.5 font-semibold">Date</th>
                       <th className="px-6 py-3.5 font-semibold">Montant</th>
                       <th className="px-6 py-3.5 font-semibold">Moyen</th>
-                      <th className="px-6 py-3.5 font-semibold">Téléphone</th>
+                      <th className="px-6 py-3.5 font-semibold">Statut</th>
                       <th className="px-6 py-3.5 font-semibold">Référence</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100/80">
-                    {paiements.map((p) => (
-                      <tr key={p.uid} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4 text-gray-600">
-                          {new Date(p.date_paiement).toLocaleString('fr-FR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-gray-900">
-                          {p.montant.toLocaleString("fr-FR")} FCFA
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                            MOYENS_PAIEMENT.find(m => m.value === p.methode)?.color || 'bg-gray-50 text-gray-600 border-gray-200'
-                          }`}>
-                            {MOYENS_PAIEMENT.find(m => m.value === p.methode)?.label || p.methode}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-gray-600">
-                          <span className="inline-flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-gray-400" />
-                            {p.telephone}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-gray-500 text-xs font-mono">
-                          {p.reference || '—'}
-                        </td>
-                      </tr>
-                    ))}
+                    {paiements.map((p) => {
+                      const statut = STATUTS_PAIEMENT[p.statut] || STATUTS_PAIEMENT.EN_COURS
+                      return (
+                        <tr key={p.uid} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-4 text-gray-600">
+                            {new Date(p.date_paiement).toLocaleString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                          <td className="px-6 py-4 font-semibold text-gray-900">
+                            {p.montant.toLocaleString("fr-FR")} FCFA
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                              MOYENS_PAIEMENT.find(m => m.value === p.methode)?.color || 'bg-gray-50 text-gray-600 border-gray-200'
+                            }`}>
+                              {MOYENS_PAIEMENT.find(m => m.value === p.methode)?.label || p.methode}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${statut.color}`}>
+                              {statut.label}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-gray-500 text-xs font-mono">
+                            {p.reference_transaction || '—'}
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -322,7 +331,7 @@ export default function CommissionDashboardPage() {
           </section>
         )}
 
-        {/* Pay Modal */}
+        {/* Pay Modal — PayTech */}
         {payModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <motion.div
@@ -340,31 +349,17 @@ export default function CommissionDashboardPage() {
               <form onSubmit={submitPay} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Numéro de téléphone
-                  </label>
-                  <input
-                    type="tel"
-                    value={form.telephone}
-                    onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))}
-                    required
-                    placeholder="77 123 45 67"
-                    className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                     Moyen de paiement
                   </label>
                   <div className="grid grid-cols-2 gap-3">
-                    {MOYENS_PAIEMENT.map(({ value, label, color }) => (
+                    {METHODES_PAYTECH.map(({ value, label }) => (
                       <button
-                        key={value}
+                        key={value || 'all'}
                         type="button"
-                        onClick={() => setForm(f => ({ ...f, moyen_paiement: value }))}
+                        onClick={() => setMethode(value)}
                         className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${
-                          form.moyen_paiement === value
-                            ? `${color} border-current shadow-sm`
+                          methode === value
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
                             : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                       >
@@ -374,28 +369,23 @@ export default function CommissionDashboardPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                    Référence du paiement
-                  </label>
-                  <input
-                    type="text"
-                    value={form.reference}
-                    onChange={e => setForm(f => ({ ...f, reference: e.target.value }))}
-                    placeholder="Numéro de transaction"
-                    className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm"
-                  />
+                <div className="flex items-start gap-2.5 bg-indigo-50/60 border border-indigo-100 rounded-xl p-3.5">
+                  <ShieldCheck className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-indigo-800 leading-relaxed">
+                    Vous serez redirigé vers la page sécurisée <strong>PayTech</strong> pour finaliser votre paiement
+                    (Wave, Orange Money, Free Money, Carte bancaire…). Votre commission sera validée automatiquement.
+                  </p>
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <button
                     type="submit"
                     className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70"
-                    disabled={createPaiement.isLoading}
+                    disabled={paytechInit.isLoading}
                   >
-                    {createPaiement.isLoading ? 'Envoi...' : (
+                    {paytechInit.isLoading ? 'Redirection...' : (
                       <>
-                        Confirmer le paiement <ArrowUpRight className="w-4 h-4" />
+                        Payer avec PayTech <ArrowUpRight className="w-4 h-4" />
                       </>
                     )}
                   </button>
