@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
 import { useCreateAvis } from '@/hooks/useAvis'
+import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import { STATUTS_DEMANDE } from '@/utils/constants'
@@ -37,6 +39,7 @@ export default function DashboardClientPage() {
   const [avisOpen, setAvisOpen] = useState(null)
   const [avisForm, setAvisForm] = useState(defaultAvis)
   const [statutFilter, setStatutFilter] = useState('all')
+  const [cancelDemande, setCancelDemande] = useState(null)
   const avisRef = useRef(null)
 
   useEffect(() => {
@@ -88,11 +91,23 @@ export default function DashboardClientPage() {
     })
   }
 
-  const refuserPrix = async (demande) => {
-    await updateDemande.mutateAsync({
-      id: demande.id,
-      data: { statut: 'ANNULEE' },
-    })
+  const openCancel = (demande) => {
+    setCancelDemande(demande)
+  }
+
+  const submitCancel = async () => {
+    if (!cancelDemande) return
+    try {
+      await updateDemande.mutateAsync({
+        id: cancelDemande.id,
+        data: { statut: 'ANNULEE' },
+      })
+      toast.success('Demande annulée')
+    } catch (err) {
+      toast.error(extractApiError(err, "Impossible d'annuler la demande"))
+    } finally {
+      setCancelDemande(null)
+    }
   }
 
   const containerVariants = {
@@ -314,7 +329,7 @@ export default function DashboardClientPage() {
                                   Confirmer
                                 </button>
                                 <button
-                                  onClick={() => refuserPrix(demande)}
+                                  onClick={() => openCancel(demande)}
                                   disabled={updateDemande.isLoading}
                                   className="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-red-600 transition-colors"
                                 >
@@ -331,6 +346,18 @@ export default function DashboardClientPage() {
                           <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${statusConfig.color}`}>
                             {statusConfig.label}
                           </span>
+                          {demande.statut === 'EN_ATTENTE' && !(demande.prix_propose != null && demande.prix_total == null) && (
+                            <div className="mt-1.5">
+                              <button
+                                onClick={() => openCancel(demande)}
+                                disabled={updateDemande.isLoading}
+                                className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-800 hover:underline transition-colors"
+                              >
+                                <Ban className="w-3 h-3" />
+                                Annuler la demande
+                              </button>
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-gray-500 text-xs align-middle">
                           {new Date(demande.created_at).toLocaleDateString('fr-FR')}
@@ -445,6 +472,62 @@ export default function DashboardClientPage() {
                 </form>
               ))}
             </motion.section>
+          )}
+        </AnimatePresence>
+
+        {/* Confirmation d'annulation */}
+        <AnimatePresence>
+          {cancelDemande && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.25 }}
+                className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+                    <Ban className="w-6 h-6 text-red-500" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCancelDemande(null)}
+                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                  {cancelDemande.prix_propose != null && cancelDemande.prix_total == null
+                    ? 'Refuser le prix et annuler la demande ?'
+                    : 'Annuler cette demande ?'}
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Votre demande à <strong>{cancelDemande.artisan_nom}</strong> sera annulée et
+                  l'artisan en sera prévenu. Cette action est irréversible.
+                </p>
+
+                <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCancelDemande(null)}
+                    className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    Garder ma demande
+                  </button>
+                  <button
+                    type="button"
+                    onClick={submitCancel}
+                    disabled={updateDemande.isLoading}
+                    className="inline-flex items-center justify-center flex-1 gap-2 bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-3 rounded-xl shadow-lg shadow-red-500/30 transition-all duration-200 disabled:opacity-70"
+                  >
+                    {updateDemande.isLoading ? 'Annulation...' : 'Confirmer l\'annulation'}
+                  </button>
+                </div>
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>

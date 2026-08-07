@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { toast } from 'react-toastify'
 import { authService } from '@/services/api'
 import { extractApiError } from '@/utils/errors'
-import { KeyRound, Lock, ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react'
+import { KeyRound, Lock, ArrowLeft, CheckCircle, Eye, EyeOff, RefreshCw } from 'lucide-react'
+
+const RESEND_COOLDOWN = 60
 
 export default function ResetMotDePassePage() {
   const navigate = useNavigate()
@@ -19,11 +21,34 @@ export default function ResetMotDePassePage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [resetToken, setResetToken] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [resending, setResending] = useState(false)
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return undefined
+    const timer = setInterval(() => {
+      setResendCooldown((c) => Math.max(0, c - 1))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
 
   // Rediriger si pas de téléphone
   if (!telephone) {
     navigate('/mot-de-passe-oublie', { replace: true })
     return null
+  }
+
+  const handleResend = async () => {
+    setResending(true)
+    try {
+      await authService.passwordResetRequest({ telephone })
+      toast.success('Code renvoyé par SMS !')
+      setResendCooldown(RESEND_COOLDOWN)
+    } catch (err) {
+      toast.error(extractApiError(err, 'Erreur lors de l\'envoi du code.'))
+    } finally {
+      setResending(false)
+    }
   }
 
   const handleVerifyCode = async (e) => {
@@ -150,10 +175,16 @@ export default function ResetMotDePassePage() {
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => navigate('/mot-de-passe-oublie')}
-                  className="text-sm text-indigo-200 hover:text-white transition-colors"
+                  onClick={handleResend}
+                  disabled={resending || resendCooldown > 0}
+                  className="inline-flex items-center gap-1.5 text-sm text-indigo-200 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Renvoyer un code
+                  <RefreshCw className={`w-3.5 h-3.5 ${resending ? 'animate-spin' : ''}`} />
+                  {resending
+                    ? 'Envoi...'
+                    : resendCooldown > 0
+                      ? `Renvoyer le code (${resendCooldown}s)`
+                      : 'Renvoyer un code'}
                 </button>
               </div>
             </form>

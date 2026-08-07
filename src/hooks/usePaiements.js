@@ -83,3 +83,16 @@ export function usePaytechVerify() {
     }
   )
 }
+
+export function usePaytechCancel() {
+  const qc = useQueryClient()
+  return useMutation(
+    (token) => paytechService.cancel(token),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries('commissions')
+        qc.invalidateQueries('paiements')
+      },
+    }
+  )
+}

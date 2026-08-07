@@ -113,6 +113,7 @@ export const paiementService = {
 export const paytechService = {
   init:   (data) => api.post('/commissions/paiements/paytech/init/', data),
   verify: (token) => api.post('/commissions/paiements/paytech/verify/', { token }),
+  cancel: (token) => api.post('/commissions/paiements/paytech/cancel/', { token }),
 }
 
 export default api

@@ -9,6 +9,7 @@ import Spinner from '@/components/common/Spinner'
 import EmptyState from '@/components/common/EmptyState'
 import Pagination from '@/components/common/Pagination'
 import { QUARTIERS_DAKAR } from '@/utils/constants'
+import { normalizeCoord } from '@/utils/geo'
 import { Filter, X, MapPin, CheckCircle, Star, Briefcase } from 'lucide-react'
 
 export default function ArtisansPage() {
@@ -26,11 +27,31 @@ export default function ArtisansPage() {
   const { user } = useAuth()
   const { data: categories = [] } = useCategories()
 
-  const hasPosition = user?.latitude && user?.longitude
+  const [anonPos, setAnonPos] = useState(null)
+  const anonRequested = useRef(false)
+
+  useEffect(() => {
+    if (user || anonPos || anonRequested.current) return
+    if (!navigator.geolocation) return
+    anonRequested.current = true
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setAnonPos({
+        latitude: normalizeCoord(pos.coords.latitude),
+        longitude: normalizeCoord(pos.coords.longitude),
+      }),
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }, [user, anonPos])
+
+  const position = user?.latitude && user?.longitude
+    ? { latitude: user.latitude, longitude: user.longitude }
+    : anonPos
+  const hasPosition = !!position
   const isCategoryActive = !!filters.categorie
 
   const { data, isLoading, isError } = useArtisans(
-    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
+    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), ...(position ? { lat: position.latitude, lng: position.longitude } : {}), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
   )
 
   const artisans = data?.results || data || []

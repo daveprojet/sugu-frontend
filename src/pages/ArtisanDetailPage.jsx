@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -9,6 +9,7 @@ import { useCreateDemande } from "@/hooks/useDemandes";
 import { artisanService } from "@/services/api";
 import { useCategorie } from "@/hooks/useCategories";
 import { useAuth } from "@/context/AuthContext";
+import { normalizeCoord } from "@/utils/geo";
 import StarRating from "@/components/common/StarRating";
 import Badge from "@/components/common/Badge";
 import Spinner from "@/components/common/Spinner";
@@ -29,6 +30,8 @@ import {
   List,
   HelpCircle,
   Maximize2,
+  LogIn,
+  Briefcase,
 } from "lucide-react";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -65,6 +68,7 @@ function FitBounds({ artisanPos, clientPos }) {
 
 export default function ArtisanDetailPage() {
   const { uid } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: artisan, isLoading } = useArtisan(uid);
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 });
@@ -72,6 +76,7 @@ export default function ArtisanDetailPage() {
   const totalAvis = avisPage?.count || 0;
   const createDemande = useCreateDemande();
   const [showDemandeForm, setShowDemandeForm] = useState(false);
+  const [authModal, setAuthModal] = useState(null);
   const [selectedCategorie, setSelectedCategorie] = useState(null);
   const [selectedServiceUid, setSelectedServiceUid] = useState(null);
   const [description, setDescription] = useState("");
@@ -92,7 +97,7 @@ export default function ArtisanDetailPage() {
       setGeoLoading(true);
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setClientCoords({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+          setClientCoords({ latitude: normalizeCoord(pos.coords.latitude), longitude: normalizeCoord(pos.coords.longitude) });
           setGeoLoading(false);
         },
         () => setGeoLoading(false),
@@ -194,7 +199,21 @@ export default function ArtisanDetailPage() {
     setDescription("");
   };
 
-  const isContactVisible = user && user.role !== "artisan";
+  const openDemandeOrAuth = () => {
+    if (!user) {
+      setAuthModal("login");
+    } else if (user.role === "artisan") {
+      setAuthModal("artisan");
+    } else {
+      setShowDemandeForm(true);
+    }
+  };
+
+  const goToLogin = () => {
+    const redirect = encodeURIComponent(`/artisans/${uid}`);
+    setAuthModal(null);
+    navigate(`/connexion?redirect=${redirect}`);
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
@@ -315,16 +334,14 @@ export default function ArtisanDetailPage() {
               </div>
 
               {/* Contact buttons */}
-              {isContactVisible && !artisan.bloque && !artisan.bloque_refus && (
+              {!artisan.bloque && !artisan.bloque_refus && (
                 <div className="mt-6 flex flex-col gap-3">
-                  {user && user.role !== "artisan" && (
-                    <button
-                      onClick={() => setShowDemandeForm(true)}
-                      className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-4 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
-                    >
-                      Demander un rendez-vous
-                    </button>
-                  )}
+                  <button
+                    onClick={openDemandeOrAuth}
+                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-4 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+                  >
+                    Demander un rendez-vous
+                  </button>
                 </div>
               )}
             </div>
@@ -619,6 +636,67 @@ export default function ArtisanDetailPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+      {/* Auth modal (visitor / artisan) */}
+      {authModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          onClick={() => setAuthModal(null)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                {authModal === "artisan" ? (
+                  <Briefcase className="w-6 h-6 text-white" />
+                ) : (
+                  <LogIn className="w-6 h-6 text-white" />
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setAuthModal(null)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+              {authModal === "artisan"
+                ? "Connexion client requise"
+                : "Connectez-vous pour envoyer votre demande"}
+            </h3>
+
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {authModal === "artisan"
+                ? "Les demandes de rendez-vous sont réservées aux comptes clients. Connectez-vous avec un compte client pour envoyer une demande à cet artisan."
+                : "Pour envoyer une demande à cet artisan, vous devez être connecté : cela lui permet de vous recontacter, de suivre le statut de votre demande et de confirmer le prix depuis votre tableau de bord."}
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={goToLogin}
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-4 py-3 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+              >
+                <LogIn className="w-4 h-4" /> Se connecter
+              </button>
+              {authModal === "login" && (
+                <Link
+                  to="/inscription"
+                  className="inline-flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  Créer un compte
+                </Link>
+              )}
+            </div>
+          </motion.div>
         </div>
       )}
     </main>

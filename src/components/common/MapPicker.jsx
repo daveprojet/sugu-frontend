@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-lea
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
+import { normalizeCoord } from "@/utils/geo";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -81,6 +82,8 @@ export default function MapPicker({ value, onChange }) {
   }, []);
 
   const handlePositionSelect = useCallback(async (lat, lng) => {
+    lat = normalizeCoord(lat);
+    lng = normalizeCoord(lng);
     const newPos = { latitude: lat, longitude: lng };
     setPosition(newPos);
     setAddress(null);

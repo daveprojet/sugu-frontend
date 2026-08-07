@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { normalizeCoord } from "@/utils/geo";
 
 export function useGeoLocation() {
   const { user, updateMe } = useAuth();
@@ -13,8 +14,8 @@ export function useGeoLocation() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         updateMe({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
+          latitude: normalizeCoord(pos.coords.latitude),
+          longitude: normalizeCoord(pos.coords.longitude),
         });
       },
       () => {},

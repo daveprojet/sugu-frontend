@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-toastify";
@@ -11,9 +11,18 @@ import loginBg from "/images/metiers/register-bg.jpg";
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ telephone: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const redirectTo = () => {
+    const redirect = searchParams.get("redirect");
+    if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
+      return redirect;
+    }
+    return "/";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +30,7 @@ export default function LoginPage() {
     try {
       await login(form);
       toast.success("Bienvenue !");
-      navigate("/");
+      navigate(redirectTo(), { replace: true });
     } catch (err) {
       toast.error(extractApiError(err, "Téléphone ou mot de passe incorrect"));
     } finally {

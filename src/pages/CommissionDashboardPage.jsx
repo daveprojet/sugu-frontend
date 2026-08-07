@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 
 const METHODES_PAYTECH = [
-  { value: '', label: 'Toutes les méthodes' },
   { value: 'Orange Money', label: 'Orange Money' },
   { value: 'Wave', label: 'Wave' },
   { value: 'Free Money', label: 'Free Money' },
@@ -33,6 +32,7 @@ const MOYENS_PAIEMENT = [
 const STATUTS_PAIEMENT = {
   EN_COURS: { label: 'En cours', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   VALIDE:   { label: 'Validé',   color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  ANNULE:   { label: 'Annulé',   color: 'bg-gray-50 text-gray-700 border-gray-200' },
   ECHEC:    { label: 'Échec',    color: 'bg-red-50 text-red-700 border-red-200' },
 }
 
@@ -287,6 +287,7 @@ export default function CommissionDashboardPage() {
                       <th className="px-6 py-3.5 font-semibold">Moyen</th>
                       <th className="px-6 py-3.5 font-semibold">Statut</th>
                       <th className="px-6 py-3.5 font-semibold">Référence</th>
+                      <th className="px-6 py-3.5 font-semibold">Numéro</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100/80">
@@ -320,6 +321,9 @@ export default function CommissionDashboardPage() {
                           </td>
                           <td className="px-6 py-4 text-gray-500 text-xs font-mono">
                             {p.reference_transaction || '—'}
+                          </td>
+                          <td className="px-6 py-4 text-gray-600 font-mono text-xs">
+                            {p.telephone || '—'}
                           </td>
                         </tr>
                       )
