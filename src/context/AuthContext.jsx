@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { authService } from '@/services/api'
+import { authService, setAuthToken, clearAuthToken } from '@/services/api'
 
 const AuthContext = createContext(null)
 
@@ -18,30 +18,35 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
+  // Au chargement : le refresh token est dans un cookie httpOnly (invisible JS),
+  // donc on tente toujours /me/ — un 401 déclenche un refresh silencieux dans
+  // l'intercepteur ; s'il échoue, user reste null.
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (token) fetchMe()
-    else setLoading(false)
+    fetchMe()
   }, [fetchMe])
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials)
-    localStorage.setItem('access_token', data.access)
-    localStorage.setItem('refresh_token', data.refresh)
+    setAuthToken(data.access)
     await fetchMe()
     return data
   }
 
-  const logout = () => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    setUser(null)
+  const logout = async () => {
+    try {
+      // Blacklist du refresh token côté serveur (cookie httpOnly) — best effort.
+      await authService.logout()
+    } catch {
+      // On nettoie le client quoi qu'il arrive.
+    } finally {
+      clearAuthToken()
+      setUser(null)
+    }
   }
 
   const register = async (formData) => {
     const { data } = await authService.register(formData)
-    localStorage.setItem('access_token', data.access)
-    localStorage.setItem('refresh_token', data.refresh)
+    setAuthToken(data.access)
     await fetchMe()
     return data
   }

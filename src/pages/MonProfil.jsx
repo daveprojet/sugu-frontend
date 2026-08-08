@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Camera, Check, Pencil, User, IdCard, Tag, MapPin, Info } from "lucide-react";
+import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
   useArtisan,
@@ -42,6 +42,11 @@ export default function MonProfil() {
     longitude: null,
   });
   const [savingAccount, setSavingAccount] = useState(false);
+  const [phoneModal, setPhoneModal] = useState(false);
+  const [newPhone, setNewPhone] = useState("");
+  const [phonePassword, setPhonePassword] = useState("");
+  const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -116,6 +121,34 @@ export default function MonProfil() {
       toast.error(detail);
     } finally {
       setSavingAccount(false);
+    }
+  };
+
+  const openPhoneModal = () => {
+    setNewPhone(accountForm.telephone || "");
+    setPhonePassword("");
+    setPhoneError("");
+    setPhoneModal(true);
+  };
+
+  const savePhone = async (e) => {
+    e.preventDefault();
+    setSavingPhone(true);
+    setPhoneError("");
+    try {
+      await updateMe({ telephone: newPhone, current_password: phonePassword });
+      setPhoneModal(false);
+      setPhonePassword("");
+      toast.success("Numero mis a jour.");
+    } catch (error) {
+      const detail =
+        error.response?.data?.current_password?.[0] ||
+        error.response?.data?.telephone?.[0] ||
+        error.response?.data?.detail ||
+        "Impossible de modifier le numéro.";
+      setPhoneError(detail);
+    } finally {
+      setSavingPhone(false);
     }
   };
 
@@ -322,15 +355,22 @@ export default function MonProfil() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Téléphone
+                  Téléphone (identifiant de connexion)
                 </label>
-                <input
-                  type="tel"
-                  value={accountForm.telephone}
-                  onChange={(e) => setAccount("telephone", e.target.value)}
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
-                />
+                <button
+                  type="button"
+                  onClick={openPhoneModal}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-sm text-gray-500 cursor-pointer hover:border-indigo-300 hover:bg-gray-50 transition-all outline-none"
+                >
+                  <span>{accountForm.telephone}</span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 shrink-0">
+                    <Pencil className="w-3.5 h-3.5" /> Modifier
+                  </span>
+                </button>
+                <p className="text-xs text-gray-400 mt-1.5">
+                  Votre numéro est votre identifiant de connexion : sa modification
+                  nécessite votre mot de passe.
+                </p>
               </div>
               <div className="md:col-span-2 flex justify-end mt-2">
                 <button
@@ -527,6 +567,79 @@ export default function MonProfil() {
           )}
         </motion.div>
       </div>
+
+      {phoneModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 md:p-8"
+          >
+            <h3 className="font-display text-lg font-semibold text-gray-900 mb-1">
+              Modifier mon numéro
+            </h3>
+            <p className="text-sm text-gray-500 mb-5">
+              Votre numéro de téléphone est votre identifiant de connexion. Saisissez
+              votre mot de passe actuel pour confirmer le changement.
+            </p>
+            <form onSubmit={savePhone} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nouveau numéro
+                </label>
+                <input
+                  type="tel"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mot de passe actuel
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    value={phonePassword}
+                    onChange={(e) => setPhonePassword(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                  />
+                </div>
+              </div>
+              {phoneError && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                  {phoneError}
+                </p>
+              )}
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPhoneModal(false)}
+                  className="px-5 py-2.5 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingPhone}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-2.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {savingPhone ? (
+                    <Spinner size="sm" color="white" />
+                  ) : (
+                    <Check className="w-4 h-4" />
+                  )}{" "}
+                  Enregistrer
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </main>
   );
 }

@@ -1,20 +1,30 @@
 import axios from 'axios'
 import { API_BASE_URL } from '@/utils/constants'
 
+// Access token gardé en mémoire uniquement (jamais persisté) : un XSS ne peut
+// ni le lire durablement, ni obtenir un nouveau refresh (cookie httpOnly).
+let accessToken = null
+
+export const setAuthToken = (token) => { accessToken = token }
+export const clearAuthToken = () => { accessToken = null }
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
+  // Le refresh token voyage dans un cookie httpOnly envoyé automatiquement.
+  withCredentials: true,
 })
 
-// Injecter le token JWT automatiquement
+// Injecter le token JWT (mémoire) automatiquement
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`
   return config
 })
 
 
-// Refresh token automatique si 401
+// Refresh silencieux si 401 (cookie httpOnly), avec garde anti-réentrance :
+// un seul refresh en vol, les autres requêtes 401 attendent le même.
+let refreshPromise = null
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -22,16 +32,20 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        const refresh = localStorage.getItem('refresh_token')
-        const { data } = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, { refresh })
-        localStorage.setItem('access_token', data.access)
-        localStorage.setItem('refresh_token', data.refresh)
-        original.headers.Authorization = `Bearer ${data.access}`
+        refreshPromise = refreshPromise || api.post('/auth/token/refresh/', null, { _retry: true })
+        const { data } = await refreshPromise
+        refreshPromise = null
+        accessToken = data.access
+        original.headers.Authorization = `Bearer ${accessToken}`
         return api(original)
-      } catch {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        window.location.href = '/connexion'
+      } catch (refreshError) {
+        refreshPromise = null
+        // On ne redirige que si une session était active (évite de bouncer
+        // les visiteurs de pages publiques au premier chargement).
+        const hadSession = !!accessToken
+        accessToken = null
+        if (hadSession) window.location.href = '/connexion'
+        return Promise.reject(refreshError)
       }
     }
     return Promise.reject(error)

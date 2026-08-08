@@ -20,9 +20,9 @@ export default function Navbar() {
   const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setMenuOpen(false);
-    logout();
+    await logout();
     navigate("/");
   };
 
