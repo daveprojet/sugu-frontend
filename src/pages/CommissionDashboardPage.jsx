@@ -239,7 +239,7 @@ export default function CommissionDashboardPage() {
                           {c.montant_commission.toLocaleString("fr-FR")} FCFA
                         </span>
                         <span className="text-xs text-gray-400 font-medium">
-                          (5% de {c.montant_commande?.toLocaleString("fr-FR")} FCFA)
+                          (10% de {c.montant_commande?.toLocaleString("fr-FR")} FCFA)
                         </span>
                       </div>
 

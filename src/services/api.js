@@ -4,9 +4,31 @@ import { API_BASE_URL } from '@/utils/constants'
 // Access token gardé en mémoire uniquement (jamais persisté) : un XSS ne peut
 // ni le lire durablement, ni obtenir un nouveau refresh (cookie httpOnly).
 let accessToken = null
+let refreshTimer = null
+let onSessionExpired = null
 
-export const setAuthToken = (token) => { accessToken = token }
-export const clearAuthToken = () => { accessToken = null }
+// L'access est renouvelé 60 s avant son expiration : il n'expire donc jamais
+// en pleine navigation (la déconnexion « à 15 min » disparaît).
+const ACCESS_REFRESH_LEAD_MS = 60 * 1000
+// Délai avant une nouvelle tentative après une erreur transitoire (réseau).
+const ACCESS_RETRY_DELAY_MS = 15 * 1000
+
+// Handler appelé quand la session est réellement morte (refresh refusé).
+export const setSessionExpiredHandler = (fn) => { onSessionExpired = fn }
+
+export const clearAuthToken = () => {
+  accessToken = null
+  clearTimeout(refreshTimer)
+}
+
+const getTokenExpiry = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp ? payload.exp * 1000 : null
+  } catch {
+    return null
+  }
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -15,16 +37,75 @@ const api = axios.create({
   withCredentials: true,
 })
 
+// Refresh silencieux partagé (garde anti-réentrance) : en cas de 401 ou juste
+// avant l'expiration, une seule requête de refresh est en vol à la fois, les
+// autres appels attendent le même résultat.
+let refreshPromise = null
+const silentRefresh = () => {
+  if (!refreshPromise) {
+    refreshPromise = api
+      .post('/auth/token/refresh/', null, { _retry: true })
+      .then(({ data }) => {
+        accessToken = data.access
+        scheduleRefresh()
+        return data.access
+      })
+      .finally(() => { refreshPromise = null })
+  }
+  return refreshPromise
+}
+
+// Planifie le prochain renouvellement juste avant l'expiration de l'access.
+const scheduleRefresh = () => {
+  clearTimeout(refreshTimer)
+  const exp = getTokenExpiry(accessToken)
+  if (!exp) return
+  let delay = exp - Date.now() - ACCESS_REFRESH_LEAD_MS
+  if (delay < 0) delay = ACCESS_RETRY_DELAY_MS // déjà dans la fenêtre : réessaie
+  refreshTimer = setTimeout(() => {
+    silentRefresh().catch(handleRefreshFailure)
+  }, delay)
+}
+
+// Onglet de retour au premier plan : on renouvelle si l'access est sur le point
+// d'expirer (les setTimeout sont throttlés dans les onglets en arrière-plan).
+const onWindowVisible = () => {
+  const exp = getTokenExpiry(accessToken)
+  if (exp && exp - Date.now() < ACCESS_REFRESH_LEAD_MS * 2) {
+    silentRefresh().catch(handleRefreshFailure)
+  }
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('focus', onWindowVisible)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) onWindowVisible()
+  })
+}
+
+// Échec du refresh : une vraie session morte (401) est nettoyée sans hard
+// reload (PrivateRoute redirige) ; une erreur réseau transitoire ne détruit
+// pas la session et relance le refresh un peu plus tard.
+const handleRefreshFailure = (err) => {
+  if (err?.response?.status === 401) {
+    clearAuthToken()
+    if (onSessionExpired) onSessionExpired()
+  } else {
+    scheduleRefresh()
+  }
+}
+
+export const setAuthToken = (token) => {
+  accessToken = token
+  scheduleRefresh()
+}
+
 // Injecter le token JWT (mémoire) automatiquement
 api.interceptors.request.use((config) => {
   if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`
   return config
 })
 
-
-// Refresh silencieux si 401 (cookie httpOnly), avec garde anti-réentrance :
-// un seul refresh en vol, les autres requêtes 401 attendent le même.
-let refreshPromise = null
+// Refresh silencieux si 401 (cookie httpOnly), avec garde anti-réentrance.
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -32,19 +113,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        refreshPromise = refreshPromise || api.post('/auth/token/refresh/', null, { _retry: true })
-        const { data } = await refreshPromise
-        refreshPromise = null
-        accessToken = data.access
-        original.headers.Authorization = `Bearer ${accessToken}`
+        await silentRefresh()
         return api(original)
       } catch (refreshError) {
-        refreshPromise = null
-        // On ne redirige que si une session était active (évite de bouncer
-        // les visiteurs de pages publiques au premier chargement).
-        const hadSession = !!accessToken
-        accessToken = null
-        if (hadSession) window.location.href = '/connexion'
+        handleRefreshFailure(refreshError)
         return Promise.reject(refreshError)
       }
     }

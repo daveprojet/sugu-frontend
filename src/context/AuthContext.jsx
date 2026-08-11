@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { authService, setAuthToken, clearAuthToken } from '@/services/api'
+import { authService, setAuthToken, clearAuthToken, setSessionExpiredHandler } from '@/services/api'
 
 const AuthContext = createContext(null)
 
@@ -24,6 +24,13 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     fetchMe()
   }, [fetchMe])
+
+  // Session réellement expirée (refresh refusé par le serveur) : l'intercepteur
+  // vide l'access token et prévient ici → user passe à null et PrivateRoute
+  // redirige vers /connexion (plus de hard reload brutal).
+  useEffect(() => {
+    setSessionExpiredHandler(() => setUser(null))
+  }, [])
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials)
