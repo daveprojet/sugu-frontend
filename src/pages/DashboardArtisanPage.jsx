@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
 import { useArtisanAvis, useUpdateArtisan, useIdentite } from '@/hooks/useArtisans'
 import { useCommissions } from '@/hooks/usePaiements'
 import { useRepondreAvis } from '@/hooks/useAvis'
+import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
@@ -24,10 +26,12 @@ import {
   Tag,
   AlertTriangle,
   Wallet,
-  BadgeDollarSign
+  BadgeDollarSign,
+  X
 } from 'lucide-react'
 
 export default function DashboardArtisanPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { data: identite } = useIdentite(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
@@ -44,6 +48,8 @@ export default function DashboardArtisanPage() {
   const [statutFilter, setStatutFilter] = useState('all')
   const [prixInputs, setPrixInputs] = useState({})
   const [editingPrixId, setEditingPrixId] = useState(null)
+  const [blockedModal, setBlockedModal] = useState(null)
+  const [refusDemande, setRefusDemande] = useState(null)
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -68,6 +74,32 @@ export default function DashboardArtisanPage() {
 
   const commissionsEnAttente = commissions.filter(c => c.statut === 'EN_ATTENTE' || c.statut === 'EN_RETARD')
   const totalCommissionsDue = commissionsEnAttente.reduce((sum, c) => sum + c.montant_commission, 0)
+
+  const hasActiveMission = demandes.some((d) => d.statut === 'ACCEPTEE' || d.statut === 'EN_COURS')
+
+  const majDemande = (payload) =>
+    updateDemande.mutate(payload, {
+      onError: (e) => toast.error(extractApiError(e, 'Action impossible.')),
+    })
+
+  const verifierEngagement = (action) => {
+    if (commissionsEnAttente.length > 0) {
+      setBlockedModal('commission')
+      return
+    }
+    if (hasActiveMission) {
+      setBlockedModal('mission')
+      return
+    }
+    action()
+  }
+
+  const submitRefus = () => {
+    if (!refusDemande) return
+    const id = refusDemande.id
+    setRefusDemande(null)
+    majDemande({ id, data: { statut: 'ANNULEE' } })
+  }
 
   const openReply = (item) => {
     setReplyOpen(item.id)
@@ -492,8 +524,10 @@ export default function DashboardArtisanPage() {
                                   onClick={() => {
                                     const prix = parseInt(prixInputs[d.id] ?? d.prix_propose, 10)
                                     if (prix > 0) {
-                                      updateDemande.mutate({ id: d.id, data: { prix_propose: prix } })
-                                      setEditingPrixId(null)
+                                      verifierEngagement(() => {
+                                        majDemande({ id: d.id, data: { prix_propose: prix } })
+                                        setEditingPrixId(null)
+                                      })
                                     }
                                   }}
                                   disabled={!prixInputs[d.id] && !d.prix_propose}
@@ -528,7 +562,7 @@ export default function DashboardArtisanPage() {
                                   onClick={() => {
                                     const prix = parseInt(prixInputs[d.id], 10)
                                     if (prix > 0) {
-                                      updateDemande.mutate({ id: d.id, data: { prix_propose: prix } })
+                                      verifierEngagement(() => majDemande({ id: d.id, data: { prix_propose: prix } }))
                                     }
                                   }}
                                   disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0}
@@ -537,7 +571,7 @@ export default function DashboardArtisanPage() {
                                   <BadgeDollarSign className="w-3.5 h-3.5" /> Proposer
                                 </button>
                                 <button
-                                  onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                                  onClick={() => setRefusDemande(d)}
                                   className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                                 >
                                   <XCircle className="w-3.5 h-3.5" /> Refuser
@@ -559,7 +593,7 @@ export default function DashboardArtisanPage() {
                                   Modifier
                                 </button>
                                 <button
-                                  onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                                  onClick={() => setRefusDemande(d)}
                                   className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                                 >
                                   <XCircle className="w-3.5 h-3.5" /> Refuser
@@ -571,13 +605,13 @@ export default function DashboardArtisanPage() {
                         {d.statut === 'EN_ATTENTE' && d.service_element && (
                           <>
                             <button
-                              onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ACCEPTEE' } })}
+                              onClick={() => verifierEngagement(() => majDemande({ id: d.id, data: { statut: 'ACCEPTEE' } }))}
                               className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                             >
                               <ThumbsUp className="w-3.5 h-3.5" /> Accepter
                             </button>
                             <button
-                              onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
+                              onClick={() => setRefusDemande(d)}
                               className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                             >
                               <XCircle className="w-3.5 h-3.5" /> Refuser
@@ -586,7 +620,7 @@ export default function DashboardArtisanPage() {
                         )}
                         {d.statut === 'ACCEPTEE' && (
                           <button
-                            onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'EN_COURS' } })}
+                            onClick={() => majDemande({ id: d.id, data: { statut: 'EN_COURS' } })}
                             className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                           >
                             <Clock className="w-3.5 h-3.5" /> En cours
@@ -594,7 +628,7 @@ export default function DashboardArtisanPage() {
                         )}
                         {(d.statut === 'ACCEPTEE' || d.statut === 'EN_COURS') && (
                           <button
-                            onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'TERMINEE' } })}
+                            onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
                             className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                           >
                             <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
@@ -734,6 +768,139 @@ export default function DashboardArtisanPage() {
           )}
         </section>
       </div>
+
+      <AnimatePresence>
+        {blockedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.25 }}
+              className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-amber-500" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBlockedModal(null)}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                {blockedModal === 'commission' ? 'Commission impayée' : 'Mission en cours'}
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {blockedModal === 'commission' ? (
+                  <>
+                    Vous avez <strong>{totalCommissionsDue.toLocaleString('fr-FR')} FCFA</strong> de commission en
+                    attente. Réglez-la avant d'accepter de nouvelles demandes.
+                  </>
+                ) : (
+                  <>
+                    Vous avez déjà une mission en cours. Terminez-la avant d'accepter de nouvelles demandes.
+                  </>
+                )}
+              </p>
+
+              <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setBlockedModal(null)}
+                  className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  Plus tard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBlockedModal(null)
+                    if (blockedModal === 'commission') navigate('/dashboard-artisan/commissions')
+                  }}
+                  className={
+                    blockedModal === 'commission'
+                      ? 'inline-flex items-center justify-center flex-1 gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium px-4 py-2 rounded-xl shadow-lg shadow-orange-500/30 transition-all duration-200'
+                      : 'inline-flex items-center justify-center flex-1 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-200'
+                  }
+                >
+                  {blockedModal === 'commission' ? (
+                    <>
+                      <Wallet className="w-4 h-4" /> Régler ma commission
+                    </>
+                  ) : (
+                    'Compris'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {refusDemande && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.25 }}
+              className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+                  <XCircle className="w-6 h-6 text-red-500" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRefusDemande(null)}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                Refuser cette demande ?
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {refusDemande.service_element_nom ? (
+                  <>
+                    La demande de <strong>{refusDemande.client_nom}</strong> pour{' '}
+                    <strong>{refusDemande.service_element_nom}</strong> sera refusée. Le client en
+                    sera prévenu par SMS. Cette action est irréversible.
+                  </>
+                ) : (
+                  <>
+                    La demande de <strong>{refusDemande.client_nom}</strong> sera refusée. Le client en
+                    sera prévenu par SMS. Cette action est irréversible.
+                  </>
+                )}
+              </p>
+
+              <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRefusDemande(null)}
+                  className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  Garder la demande
+                </button>
+                <button
+                  type="button"
+                  onClick={submitRefus}
+                  className="inline-flex items-center justify-center flex-1 gap-2 bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-xl shadow-lg shadow-red-500/30 transition-all duration-200"
+                >
+                  <XCircle className="w-4 h-4" /> Confirmer le refus
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   )
 }
