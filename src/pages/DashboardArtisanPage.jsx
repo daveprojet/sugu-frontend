@@ -75,19 +75,26 @@ export default function DashboardArtisanPage() {
   const commissionsEnAttente = commissions.filter(c => c.statut === 'EN_ATTENTE' || c.statut === 'EN_RETARD')
   const totalCommissionsDue = commissionsEnAttente.reduce((sum, c) => sum + c.montant_commission, 0)
 
-  const hasActiveMission = demandes.some((d) => d.statut === 'ACCEPTEE' || d.statut === 'EN_COURS')
+  const aEngagement = (d) =>
+    demandes.some(
+      (x) =>
+        x.id !== d.id &&
+        (x.statut === 'ACCEPTEE' ||
+          x.statut === 'EN_COURS' ||
+          (x.statut === 'EN_ATTENTE' && x.prix_propose != null))
+    )
 
   const majDemande = (payload) =>
     updateDemande.mutate(payload, {
       onError: (e) => toast.error(extractApiError(e, 'Action impossible.')),
     })
 
-  const verifierEngagement = (action) => {
+  const verifierEngagement = (action, d) => {
     if (commissionsEnAttente.length > 0) {
       setBlockedModal('commission')
       return
     }
-    if (hasActiveMission) {
+    if (aEngagement(d)) {
       setBlockedModal('mission')
       return
     }
@@ -527,7 +534,7 @@ export default function DashboardArtisanPage() {
                                       verifierEngagement(() => {
                                         majDemande({ id: d.id, data: { prix_propose: prix } })
                                         setEditingPrixId(null)
-                                      })
+                                      }, d)
                                     }
                                   }}
                                   disabled={!prixInputs[d.id] && !d.prix_propose}
@@ -562,7 +569,7 @@ export default function DashboardArtisanPage() {
                                   onClick={() => {
                                     const prix = parseInt(prixInputs[d.id], 10)
                                     if (prix > 0) {
-                                      verifierEngagement(() => majDemande({ id: d.id, data: { prix_propose: prix } }))
+                                      verifierEngagement(() => majDemande({ id: d.id, data: { prix_propose: prix } }), d)
                                     }
                                   }}
                                   disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0}
@@ -605,7 +612,7 @@ export default function DashboardArtisanPage() {
                         {d.statut === 'EN_ATTENTE' && d.service_element && (
                           <>
                             <button
-                              onClick={() => verifierEngagement(() => majDemande({ id: d.id, data: { statut: 'ACCEPTEE' } }))}
+                              onClick={() => verifierEngagement(() => majDemande({ id: d.id, data: { statut: 'ACCEPTEE' } }), d)}
                               className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
                             >
                               <ThumbsUp className="w-3.5 h-3.5" /> Accepter
@@ -803,7 +810,7 @@ export default function DashboardArtisanPage() {
                   </>
                 ) : (
                   <>
-                    Vous avez déjà une mission en cours. Terminez-la avant d'accepter de nouvelles demandes.
+                    Vous avez déjà une mission en cours ou une demande en attente de prix. Terminez-la avant d'accepter de nouvelles demandes.
                   </>
                 )}
               </p>
