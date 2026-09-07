@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
-import { useCommissions, usePaiements, usePaytechInit } from '@/hooks/usePaiements'
+import { useCommissions, usePaiements, usePaytechInit, useReversements } from '@/hooks/usePaiements'
 import Spinner from '@/components/common/Spinner'
 import {
   Wallet,
@@ -14,6 +14,8 @@ import {
   CreditCard,
   Filter,
   ShieldCheck,
+  Banknote,
+  TrendingUp,
 } from 'lucide-react'
 
 const METHODES_PAYTECH = [
@@ -36,6 +38,12 @@ const STATUTS_PAIEMENT = {
   ECHEC:    { label: 'Échec',    color: 'bg-red-50 text-red-700 border-red-200' },
 }
 
+const STATUTS_REVERSEMENT = {
+  EN_ATTENTE: { label: 'En attente',   color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  REVERSE:    { label: 'Reversé',      color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  ECHEC:      { label: 'Échec',        color: 'bg-red-50 text-red-700 border-red-200' },
+}
+
 export default function CommissionDashboardPage() {
   const { user } = useAuth()
   const { data: commissionsPage, isLoading } = useCommissions()
@@ -43,6 +51,12 @@ export default function CommissionDashboardPage() {
   const { data: paiementsPage, isLoading: paiementsLoading } = usePaiements()
   const paiements = paiementsPage?.results || []
   const paytechInit = usePaytechInit()
+  const { data: reversementsPage, isLoading: reversementsLoading } = useReversements()
+  const reversements = reversementsPage?.results || []
+
+  const totalReverses = reversements
+    .filter(r => r.statut === 'REVERSE')
+    .reduce((sum, r) => sum + (r.montant_gain || 0), 0)
 
   const [filter, setFilter] = useState('all')
   const [payModal, setPayModal] = useState(null)
@@ -111,6 +125,77 @@ export default function CommissionDashboardPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Reversements (gains artisan) */}
+        <motion.section
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <h2 className="font-display text-lg font-bold text-gray-900">Mes gains</h2>
+                <p className="text-xs text-gray-500">Reversements de vos dépannages payés en ligne</p>
+              </div>
+            </div>
+            {totalReverses > 0 && (
+              <div className="text-right">
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Total reversé</p>
+                <p className="font-display text-lg font-bold text-emerald-600">
+                  {totalReverses.toLocaleString("fr-FR")} FCFA
+                </p>
+              </div>
+            )}
+          </div>
+
+          {reversementsLoading ? (
+            <div className="flex justify-center py-6"><Spinner size="sm" /></div>
+          ) : reversements.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-4">
+              Aucun gain pour le moment. Vos reversements apparaîtront après le paiement en ligne de vos dépannages.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {reversements.map((r) => {
+                const st = STATUTS_REVERSEMENT[r.statut] || STATUTS_REVERSEMENT.EN_ATTENTE
+                return (
+                  <div
+                    key={r.uid}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center">
+                        <Banknote className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {r.montant_gain.toLocaleString("fr-FR")} FCFA
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Demande #{r.demande_id || '—'} · Commandé {r.montant_commande.toLocaleString("fr-FR")} FCFA
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {r.statut === 'REVERSE' && r.reference_wave && (
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          Wave : {r.reference_wave}
+                        </span>
+                      )}
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${st.color}`}>
+                        {st.label}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </motion.section>
 
         {/* Total Due Banner */}
         {totalDue > 0 && (

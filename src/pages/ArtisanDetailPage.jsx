@@ -6,10 +6,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import { useCreateDemande } from "@/hooks/useDemandes";
-import { artisanService } from "@/services/api";
 import { useCategorie } from "@/hooks/useCategories";
 import { useAuth } from "@/context/AuthContext";
 import { normalizeCoord } from "@/utils/geo";
+import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
 import Badge from "@/components/common/Badge";
 import Spinner from "@/components/common/Spinner";
@@ -28,7 +28,6 @@ import {
   AlertTriangle,
   LocateFixed,
   List,
-  HelpCircle,
   Maximize2,
   LogIn,
   Briefcase,
@@ -84,13 +83,10 @@ export default function ArtisanDetailPage() {
   const [clientCoords, setClientCoords] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
-  const [estimation, setEstimation] = useState(null);
-  const [estimationLoading, setEstimationLoading] = useState(false);
+  const [modePaiement, setModePaiement] = useState("en_ligne");
 
-  const isAutre = selectedServiceUid === "autre";
   const { data: categorieDetail } = useCategorie(selectedCategorie);
   const servicesList = categorieDetail?.services || [];
-  const selectedServiceData = servicesList.find((s) => s.uid === selectedServiceUid);
 
   useEffect(() => {
     if (artisan?.latitude && artisan?.longitude && !clientCoords && navigator.geolocation) {
@@ -118,27 +114,6 @@ export default function ArtisanDetailPage() {
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
-
-  useEffect(() => {
-    if (!selectedServiceData || !clientCoords || !uid) {
-      setEstimation(null);
-      return;
-    }
-    let cancelled = false;
-    setEstimationLoading(true);
-    artisanService.estimerPrix(uid, {
-      service_uid: selectedServiceData.uid,
-      latitude: clientCoords.latitude,
-      longitude: clientCoords.longitude,
-    }).then(({ data }) => {
-      if (!cancelled) setEstimation(data);
-    }).catch(() => {
-      if (!cancelled) setEstimation(null);
-    }).finally(() => {
-      if (!cancelled) setEstimationLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, [selectedServiceData?.uid, clientCoords?.latitude, clientCoords?.longitude, uid]);
 
   const handleCopy = async (text, type) => {
     await navigator.clipboard.writeText(text);
@@ -174,11 +149,20 @@ export default function ArtisanDetailPage() {
 
   const handleDemande = async (e) => {
     e.preventDefault();
+    if (!selectedCategorie) {
+      toast.error("Veuillez choisir une catégorie.", { position: "top-right" });
+      return;
+    }
+    if (!selectedServiceUid) {
+      toast.error("Veuillez choisir une prestation ou \"Autre\".", { position: "top-right" });
+      return;
+    }
     const payload = {
       artisan: artisan.id,
       description,
+      mode_paiement: modePaiement,
     };
-    if (!isAutre && selectedServiceUid) {
+    if (selectedServiceUid !== "autre") {
       payload.service_element = selectedServiceUid;
     }
     if (clientCoords) {
@@ -395,7 +379,6 @@ export default function ArtisanDetailPage() {
                           setSelectedCategorie(val);
                           setSelectedServiceUid(null);
                         }}
-                        required
                         className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
                       >
                         <option value="">-- Choisir une catégorie --</option>
@@ -406,7 +389,7 @@ export default function ArtisanDetailPage() {
                     </div>
                   </div>
 
-                  {/* 2. Select service (affiché si catégorie choisie) */}
+                  {/* 2. Select service (affiché si catégorie réelle choisie) */}
                   {selectedCategorie && (
                     <div>
                       <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
@@ -419,63 +402,36 @@ export default function ArtisanDetailPage() {
                         <select
                           value={selectedServiceUid || ""}
                           onChange={(e) => setSelectedServiceUid(e.target.value || null)}
-                          required
                           className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
                         >
                           <option value="">-- Choisir une prestation --</option>
                           {servicesList.map((svc) => (
                             <option key={svc.uid} value={svc.uid}>
-                              {svc.nom} — {svc.prix_base?.toLocaleString("fr-FR")} FCFA
+                              {svc.nom}
                             </option>
                           ))}
-                          <option value="autre">Autre (prix à définir par l'artisan)</option>
+                          <option value="autre">Autre</option>
                         </select>
                       </div>
-                      {selectedServiceData && (
-                        <div className="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50 border border-indigo-200/60 text-xs text-indigo-700">
-                          <Tag className="w-3.5 h-3.5 flex-shrink-0" />
-                          {estimationLoading ? (
-                            <span>Calcul du prix...</span>
-                          ) : estimation ? (
-                            <span>
-                              Prix de la prestation : <strong>{estimation.prix_total?.toLocaleString("fr-FR")} FCFA</strong>
-                              {estimation.distance_km != null && (
-                                <span className="text-indigo-500 ml-1">({estimation.distance_km} km)</span>
-                              )}
-                            </span>
-                          ) : (
-                            <span>
-                              Prix de base : <strong>{selectedServiceData.prix_base?.toLocaleString("fr-FR")} FCFA</strong>
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </div>
                   )}
 
-                  {/* Message "autre" */}
-                  {isAutre && (
-                    <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
-                      <HelpCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-amber-800">
-                        Votre problème n'est pas dans la liste ? Décrivez-le en détail ci-dessous.
-                        <strong> L'artisan définira le prix</strong> après avoir pris connaissance de votre demande.
-                      </p>
-                    </div>
+                  {/* Note pour la prestation "Autre" */}
+                  {selectedServiceUid === "autre" && (
+                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                      Vous pouvez décrire votre besoin dans la section ci-dessous. L'artisan fixera le prix après discussion avec vous.
+                    </p>
                   )}
 
                   {/* 3. Textarea description */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-                      {isAutre ? "Description de votre problème" : "Description complémentaire"}
+                      Description de votre besoin
                     </label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder={isAutre
-                        ? "Décrivez votre problème en détail (ex: Ma porte d'entrée ne ferme plus correctement, la serrure est bloquée...)"
-                        : "Ajoutez des détails (ex: Fuite sous l'évier, besoin d'intervention rapide...)"
-                      }
+                      placeholder="Décrivez votre problème en détail (ex: Fuite sous l'évier, besoin d'intervention rapide...). L'artisan fixera le prix après discussion."
                       rows={4}
                       required
                       className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm resize-none"
@@ -488,7 +444,7 @@ export default function ArtisanDetailPage() {
                       <LocateFixed className={`w-4 h-4 ${clientCoords ? 'text-emerald-600' : 'text-gray-400'}`} />
                       {clientCoords ? (
                         <span className="text-emerald-700 font-medium">
-                          {isAutre ? "Position captée" : "Position captée — Calcul du prix automatique"}
+                          Position captée
                         </span>
                       ) : geoLoading ? (
                         <span className="text-gray-500">Détection de votre position...</span>
@@ -501,6 +457,43 @@ export default function ArtisanDetailPage() {
                         Activer
                       </button>
                     )}
+                  </div>
+
+                  {/* Mode de paiement */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                      Moyen de paiement
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className={`flex items-start gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${modePaiement === "en_ligne" ? "border-indigo-500 bg-indigo-50" : "border-gray-200 bg-gray-50/80"}`}>
+                        <input
+                          type="radio"
+                          name="mode_paiement"
+                          value="en_ligne"
+                          checked={modePaiement === "en_ligne"}
+                          onChange={() => setModePaiement("en_ligne")}
+                          className="mt-1"
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold text-gray-900">En ligne</span>
+                          <span className="block text-xs text-gray-500">Wave, Orange Money, Free Money ou carte — paiement recommandé, sécurisé.</span>
+                        </span>
+                      </label>
+                      <label className={`flex items-start gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${modePaiement === "especes" ? "border-indigo-500 bg-indigo-50" : "border-gray-200 bg-gray-50/80"}`}>
+                        <input
+                          type="radio"
+                          name="mode_paiement"
+                          value="especes"
+                          checked={modePaiement === "especes"}
+                          onChange={() => setModePaiement("especes")}
+                          className="mt-1"
+                        />
+                        <span>
+                          <span className="block text-sm font-semibold text-gray-900">En espèces</span>
+                          <span className="block text-xs text-gray-500">Paiement comptant à l'artisan, à confirmer sur la plateforme.</span>
+                        </span>
+                      </label>
+                    </div>
                   </div>
 
                   <div className="flex gap-3">

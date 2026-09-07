@@ -3,11 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { XCircle, RotateCcw, ChevronLeft, Loader2 } from 'lucide-react'
 import { usePaytechCancel } from '@/hooks/usePaiements'
+import { useAuth } from '@/context/AuthContext'
 
 export default function PaymentCancelPage() {
   const [searchParams] = useSearchParams()
   const cancel = usePaytechCancel()
+  const { user } = useAuth()
 
+  const isArtisan = user?.role === 'artisan'
   const token = useMemo(() => {
     return searchParams.get('token') || sessionStorage.getItem('paytech_token') || ''
   }, [searchParams])
@@ -40,19 +43,21 @@ export default function PaymentCancelPage() {
           <p className="text-sm text-gray-500 mt-2">
             {cancelling
               ? 'Nous enregistrons l\'annulation de votre paiement.'
-              : 'Vous avez annulé le paiement de votre commission. Aucun montant n\'a été débité.'}
+              : isArtisan
+                ? 'Vous avez annulé le paiement de votre commission. Aucun montant n\'a été débité.'
+                : 'Vous avez annulé le paiement de votre dépannage. Aucun montant n\'a été débité.'}
           </p>
         </div>
 
         <div className="flex flex-col gap-3 pt-2">
           <Link
-            to="/dashboard-artisan/commissions"
+            to={isArtisan ? '/dashboard-artisan/commissions' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4" /> Réessayer le paiement
           </Link>
           <Link
-            to="/dashboard-artisan"
+            to={isArtisan ? '/dashboard-artisan' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" /> Retour au tableau de bord

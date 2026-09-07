@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
-import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
+import { useDemandes, useUpdateDemande, useFixerPrix } from '@/hooks/useDemandes'
 import { useArtisanAvis, useUpdateArtisan, useIdentite } from '@/hooks/useArtisans'
 import { useCommissions } from '@/hooks/usePaiements'
 import { useRepondreAvis } from '@/hooks/useAvis'
@@ -38,6 +38,7 @@ export default function DashboardArtisanPage() {
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
   const avis = avisPage?.results || []
   const updateDemande = useUpdateDemande()
+  const fixerPrix = useFixerPrix()
   const updateArtisan = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
   const { data: commissionsPage } = useCommissions()
@@ -47,7 +48,6 @@ export default function DashboardArtisanPage() {
   const [replyText, setReplyText] = useState('')
   const [statutFilter, setStatutFilter] = useState('all')
   const [prixInputs, setPrixInputs] = useState({})
-  const [editingPrixId, setEditingPrixId] = useState(null)
   const [blockedModal, setBlockedModal] = useState(null)
   const [refusDemande, setRefusDemande] = useState(null)
 
@@ -80,14 +80,25 @@ export default function DashboardArtisanPage() {
       (x) =>
         x.id !== d.id &&
         (x.statut === 'ACCEPTEE' ||
-          x.statut === 'EN_COURS' ||
-          (x.statut === 'EN_ATTENTE' && x.prix_propose != null))
+          x.statut === 'PRIX_FIXE' ||
+          x.statut === 'EN_COURS')
     )
 
   const majDemande = (payload) =>
     updateDemande.mutate(payload, {
       onError: (e) => toast.error(extractApiError(e, 'Action impossible.')),
     })
+
+  const soumettrePrix = (d) => {
+    const prix = parseInt(prixInputs[d.id], 10)
+    if (!prix || prix <= 0) {
+      toast.error('Veuillez saisir un montant valide')
+      return
+    }
+    fixerPrix.mutate({ id: d.id, prix }, {
+      onSuccess: () => setPrixInputs((prev) => ({ ...prev, [d.id]: '' })),
+    })
+  }
 
   const verifierEngagement = (action, d) => {
     if (commissionsEnAttente.length > 0) {
@@ -474,10 +485,10 @@ export default function DashboardArtisanPage() {
                               {d.prix_affiche.toLocaleString("fr-FR")} FCFA
                             </span>
                           )}
-                          {d.prix_propose != null && d.prix_total == null && (
+                          {d.statut === 'ACCEPTEE' && d.prix_total == null && (
                             <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
                               <BadgeDollarSign className="w-3 h-3" />
-                              {d.prix_propose.toLocaleString("fr-FR")} FCFA (propose)
+                              Prix à fixer
                             </span>
                           )}
                         </div>
@@ -505,111 +516,11 @@ export default function DashboardArtisanPage() {
                               year: 'numeric',
                             })}
                           </span>
-                          {d.distance_km != null && d.statut !== 'EN_ATTENTE' && (
-                            <span>{d.distance_km} km</span>
-                          )}
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-2 flex-shrink-0 mt-2 md:mt-0">
-                        {d.statut === 'EN_ATTENTE' && !d.service_element && (
-                          <div className="flex flex-col gap-2">
-                            {editingPrixId === d.id ? (
-                              <div className="flex items-center gap-2">
-                                <div className="relative">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="100"
-                                    value={prixInputs[d.id] ?? d.prix_propose ?? ''}
-                                    onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
-                                    placeholder="Prix FCFA"
-                                    className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                  />
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    const prix = parseInt(prixInputs[d.id] ?? d.prix_propose, 10)
-                                    if (prix > 0) {
-                                      verifierEngagement(() => {
-                                        majDemande({ id: d.id, data: { prix_propose: prix } })
-                                        setEditingPrixId(null)
-                                      }, d)
-                                    }
-                                  }}
-                                  disabled={!prixInputs[d.id] && !d.prix_propose}
-                                  className="inline-flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
-                                >
-                                  <BadgeDollarSign className="w-3.5 h-3.5" /> Enregistrer
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setEditingPrixId(null)
-                                    setPrixInputs(prev => ({ ...prev, [d.id]: '' }))
-                                  }}
-                                  className="inline-flex items-center gap-1.5 border border-gray-200 text-gray-600 hover:bg-gray-50 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
-                                >
-                                  Annuler
-                                </button>
-                              </div>
-                            ) : !d.prix_propose ? (
-                              <div className="flex items-center gap-2">
-                                <div className="relative">
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="100"
-                                    value={prixInputs[d.id] || ''}
-                                    onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
-                                    placeholder="Prix FCFA"
-                                    className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                                  />
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    const prix = parseInt(prixInputs[d.id], 10)
-                                    if (prix > 0) {
-                                      verifierEngagement(() => majDemande({ id: d.id, data: { prix_propose: prix } }), d)
-                                    }
-                                  }}
-                                  disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0}
-                                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
-                                >
-                                  <BadgeDollarSign className="w-3.5 h-3.5" /> Proposer
-                                </button>
-                                <button
-                                  onClick={() => setRefusDemande(d)}
-                                  className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
-                                >
-                                  <XCircle className="w-3.5 h-3.5" /> Refuser
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-                                  <BadgeDollarSign className="w-3 h-3" />
-                                  {d.prix_propose.toLocaleString("fr-FR")} FCFA proposé
-                                </span>
-                                <button
-                                  onClick={() => {
-                                    setEditingPrixId(d.id)
-                                    setPrixInputs(prev => ({ ...prev, [d.id]: d.prix_propose }))
-                                  }}
-                                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
-                                >
-                                  Modifier
-                                </button>
-                                <button
-                                  onClick={() => setRefusDemande(d)}
-                                  className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
-                                >
-                                  <XCircle className="w-3.5 h-3.5" /> Refuser
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {d.statut === 'EN_ATTENTE' && d.service_element && (
+                        {d.statut === 'EN_ATTENTE' && (
                           <>
                             <button
                               onClick={() => verifierEngagement(() => majDemande({ id: d.id, data: { statut: 'ACCEPTEE' } }), d)}
@@ -625,15 +536,54 @@ export default function DashboardArtisanPage() {
                             </button>
                           </>
                         )}
-                        {d.statut === 'ACCEPTEE' && (
-                          <button
-                            onClick={() => majDemande({ id: d.id, data: { statut: 'EN_COURS' } })}
-                            className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
-                          >
-                            <Clock className="w-3.5 h-3.5" /> En cours
-                          </button>
+                        {d.statut === 'ACCEPTEE' && d.prix_total == null && (
+                          <div className="flex flex-col gap-1.5 w-full md:w-auto">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                step="100"
+                                value={prixInputs[d.id] || ''}
+                                onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
+                                placeholder="Prix FCFA"
+                                className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                              />
+                              <button
+                                onClick={() => soumettrePrix(d)}
+                                disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0 || fixerPrix.isLoading}
+                                className="inline-flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                              >
+                                <BadgeDollarSign className="w-3.5 h-3.5" /> Fixer le prix
+                              </button>
+                              <button
+                                onClick={() => setRefusDemande(d)}
+                                className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                              >
+                                <XCircle className="w-3.5 h-3.5" /> Refuser
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-gray-400 italic">
+                              Après avoir convenu du prix avec le client par téléphone.
+                            </p>
+                          </div>
                         )}
-                        {(d.statut === 'ACCEPTEE' || d.statut === 'EN_COURS') && (
+                        {d.statut === 'PRIX_FIXE' && (
+                          <>
+                            <button
+                              onClick={() => majDemande({ id: d.id, data: { statut: 'EN_COURS' } })}
+                              className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <Clock className="w-3.5 h-3.5" /> En cours
+                            </button>
+                            <button
+                              onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
+                              className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
+                            </button>
+                          </>
+                        )}
+                        {d.statut === 'EN_COURS' && (
                           <button
                             onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
                             className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"

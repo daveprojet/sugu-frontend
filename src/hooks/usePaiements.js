@@ -1,6 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import { commissionService, paiementService, paytechService } from '@/services/api'
+import { commissionService, paiementService, paytechService, reversementService } from '@/services/api'
 import { toast } from 'react-toastify'
+
+export function useReversements() {
+  return useQuery(
+    'reversements',
+    () => reversementService.list().then(r => r.data),
+    { staleTime: 1000 * 60 * 2 }
+  )
+}
+
+export function useReversement(uid) {
+  return useQuery(
+    ['reversement', uid],
+    () => reversementService.detail(uid).then(r => r.data),
+    { enabled: !!uid }
+  )
+}
 
 export function useCommissions() {
   return useQuery(
@@ -78,6 +94,7 @@ export function usePaytechVerify() {
       onSuccess: (res) => {
         qc.invalidateQueries('commissions')
         qc.invalidateQueries('paiements')
+        qc.invalidateQueries('demandes')
         return res
       },
     }
@@ -92,6 +109,7 @@ export function usePaytechCancel() {
       onSuccess: () => {
         qc.invalidateQueries('commissions')
         qc.invalidateQueries('paiements')
+        qc.invalidateQueries('demandes')
       },
     }
   )

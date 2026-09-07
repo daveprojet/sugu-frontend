@@ -148,7 +148,6 @@ export const artisanService = {
     return api.patch(`/artisans/${id}/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
-  estimerPrix: (id, data)   => api.post(`/artisans/${id}/estimer-prix/`, data),
 }
 
 // ── Demandes ──────────────────────────────────────
@@ -157,6 +156,8 @@ export const demandeService = {
   detail: (id)     => api.get(`/demandes/${id}/`),
   create: (data)   => api.post('/demandes/', data),
   update: (id, d)  => api.patch(`/demandes/${id}/`, d),
+  fixerPrix: (id, prix) => api.patch(`/demandes/${id}/fixer-prix/`, { prix_total: prix }),
+  confirmerPaiement: (id, montant) => api.post(`/demandes/${id}/confirmer-paiement/`, { montant_confirme: montant }),
 }
 
 // ── Avis ──────────────────────────────────────────
@@ -200,6 +201,12 @@ export const paytechService = {
   init:   (data) => api.post('/commissions/paiements/paytech/init/', data),
   verify: (token) => api.post('/commissions/paiements/paytech/verify/', { token }),
   cancel: (token) => api.post('/commissions/paiements/paytech/cancel/', { token }),
+}
+
+// ── Reversements (gain artisan) ───────────────────────
+export const reversementService = {
+  list:   () => api.get('/commissions/reversements/'),
+  detail: (uid) => api.get(`/commissions/reversements/${uid}/`),
 }
 
 export default api

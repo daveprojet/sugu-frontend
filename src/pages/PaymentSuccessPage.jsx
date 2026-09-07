@@ -3,11 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CheckCircle, ShieldCheck, ChevronLeft, Loader2 } from 'lucide-react'
 import { usePaytechVerify } from '@/hooks/usePaiements'
+import { useAuth } from '@/context/AuthContext'
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
   const verify = usePaytechVerify()
+  const { user } = useAuth()
 
+  const isArtisan = user?.role === 'artisan'
   const token = useMemo(() => {
     return searchParams.get('token') || sessionStorage.getItem('paytech_token') || ''
   }, [searchParams])
@@ -56,28 +59,38 @@ export default function PaymentSuccessPage() {
             <h1 className="font-display text-2xl font-bold text-gray-900">Paiement à confirmer</h1>
             <p className="text-sm text-gray-500">{error}</p>
             <p className="text-xs text-gray-400">
-              La notification PayTech peut prendre quelques instants. Rendez-vous sur vos commissions
-              pour vérifier le statut.
+              La notification PayTech peut prendre quelques instants. Vérifiez le statut depuis votre tableau de bord.
             </p>
           </>
         ) : (
           <>
             <h1 className="font-display text-2xl font-bold text-gray-900">Paiement effectué !</h1>
             <p className="text-sm text-gray-500">
-              Votre commission a été réglée avec succès. Merci pour votre confiance.
+              {isArtisan
+                ? 'Votre commission a été réglée avec succès. Merci pour votre confiance.'
+                : 'Votre dépannage a été réglé avec succès. Merci pour votre confiance.'}
             </p>
           </>
         )}
 
         <div className="flex flex-col gap-3 pt-2">
+          {isArtisan ? (
+            <Link
+              to="/dashboard-artisan/commissions"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+            >
+              Mes commissions
+            </Link>
+          ) : (
+            <Link
+              to="/dashboard-client"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+            >
+              Mes demandes
+            </Link>
+          )}
           <Link
-            to="/dashboard-artisan/commissions"
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
-          >
-            Mes commissions
-          </Link>
-          <Link
-            to="/dashboard-artisan"
+            to={isArtisan ? '/dashboard-artisan' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" /> Retour au tableau de bord

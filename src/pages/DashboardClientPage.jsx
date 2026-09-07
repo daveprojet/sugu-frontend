@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
-import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
+import { useDemandes, useUpdateDemande, useConfirmerPaiement } from '@/hooks/useDemandes'
 import { useCreateAvis } from '@/hooks/useAvis'
+import { usePaytechInit } from '@/hooks/usePaiements'
 import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
@@ -27,6 +28,8 @@ import {
   Lock,
   Check,
   Ban,
+  Wallet,
+  HandCoins,
 } from 'lucide-react'
 
 const defaultAvis = { note: 5, commentaire: '' }
@@ -36,10 +39,15 @@ export default function DashboardClientPage() {
   const { data: demandes = [], isLoading } = useDemandes()
   const updateDemande = useUpdateDemande()
   const createAvis = useCreateAvis()
+  const confirmerPaiement = useConfirmerPaiement()
+  const paytechInit = usePaytechInit()
   const [avisOpen, setAvisOpen] = useState(null)
   const [avisForm, setAvisForm] = useState(defaultAvis)
   const [statutFilter, setStatutFilter] = useState('all')
   const [cancelDemande, setCancelDemande] = useState(null)
+  const [especesModal, setEspecesModal] = useState(null)
+  const [montantEspeces, setMontantEspeces] = useState('')
+  const [payingDemandeId, setPayingDemandeId] = useState(null)
   const avisRef = useRef(null)
 
   useEffect(() => {
@@ -84,13 +92,6 @@ export default function DashboardClientPage() {
     setAvisForm(defaultAvis)
   }
 
-  const confirmerPrix = async (demande) => {
-    await updateDemande.mutateAsync({
-      id: demande.id,
-      data: { prix_confirme: true },
-    })
-  }
-
   const openCancel = (demande) => {
     setCancelDemande(demande)
   }
@@ -107,6 +108,43 @@ export default function DashboardClientPage() {
       toast.error(extractApiError(err, "Impossible d'annuler la demande"))
     } finally {
       setCancelDemande(null)
+    }
+  }
+
+  // Paiement du dépannage en ligne (PayTech)
+  const payerEnLigne = async (demande) => {
+    setPayingDemandeId(demande.id)
+    try {
+      await paytechInit.mutateAsync({
+        demande: demande.id,
+        target_payment: 'Orange Money, Wave, Free Money, Carte Bancaire',
+      })
+    } catch (err) {
+      toast.error(extractApiError(err, "Impossible de lancer le paiement"))
+    } finally {
+      setPayingDemandeId(null)
+    }
+  }
+
+  // Confirmation du montant payé en espèces
+  const ouvrirEspeces = (demande) => {
+    setEspecesModal(demande)
+    setMontantEspeces(demande.prix_total != null ? String(demande.prix_total) : '')
+  }
+
+  const submitEspeces = async (e) => {
+    e.preventDefault()
+    if (!especesModal) return
+    const montant = parseInt(montantEspeces, 10)
+    if (!montant || montant <= 0) {
+      toast.error('Veuillez saisir un montant valide')
+      return
+    }
+    try {
+      await confirmerPaiement.mutateAsync({ id: especesModal.id, montant })
+      setEspecesModal(null)
+    } catch (err) {
+      toast.error(extractApiError(err, "Impossible de confirmer le paiement"))
     }
   }
 
@@ -313,31 +351,11 @@ export default function DashboardClientPage() {
                               <BadgeDollarSign className="w-4 h-4" />
                               {demande.prix_affiche.toLocaleString("fr-FR")} FCFA
                             </span>
-                          ) : demande.prix_propose != null && demande.prix_total == null && demande.statut === 'EN_ATTENTE' ? (
-                            <div className="flex flex-col gap-2">
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-                                <BadgeDollarSign className="w-3 h-3" />
-                                {demande.prix_propose.toLocaleString("fr-FR")} FCFA proposé
-                              </span>
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => confirmerPrix(demande)}
-                                  disabled={updateDemande.isLoading}
-                                  className="inline-flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-emerald-600 transition-colors"
-                                >
-                                  <Check className="w-3 h-3" />
-                                  Confirmer
-                                </button>
-                                <button
-                                  onClick={() => openCancel(demande)}
-                                  disabled={updateDemande.isLoading}
-                                  className="inline-flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-red-600 transition-colors"
-                                >
-                                  <Ban className="w-3 h-3" />
-                                  Refuser
-                                </button>
-                              </div>
-                            </div>
+                          ) : demande.statut === 'ACCEPTEE' ? (
+                            <span className="inline-flex items-center gap-1 text-xs italic text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                              <Clock className="w-3 h-3" />
+                              Prix en attente de l'artisan
+                            </span>
                           ) : (
                             <span className="text-xs text-gray-400 italic">—</span>
                           )}
@@ -346,7 +364,40 @@ export default function DashboardClientPage() {
                           <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${statusConfig.color}`}>
                             {statusConfig.label}
                           </span>
-                          {demande.statut === 'EN_ATTENTE' && !(demande.prix_propose != null && demande.prix_total == null) && (
+
+                          {/* Paiement du dépannage une fois terminé */}
+                          {demande.statut === 'TERMINEE' && !demande.est_payee && (
+                            <div className="mt-1.5">
+                              {demande.mode_paiement === 'en_ligne' ? (
+                                <button
+                                  onClick={() => payerEnLigne(demande)}
+                                  disabled={payingDemandeId === demande.id}
+                                  className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50/80 text-indigo-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 shadow-sm disabled:opacity-60"
+                                >
+                                  <Wallet className="w-3.5 h-3.5" />
+                                  {payingDemandeId === demande.id ? 'Paiement...' : 'Payer en ligne'}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => ouvrirEspeces(demande)}
+                                  disabled={confirmerPaiement.isLoading}
+                                  className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50/80 text-emerald-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-emerald-100 hover:border-emerald-300 transition-all duration-200 shadow-sm"
+                                >
+                                  <HandCoins className="w-3.5 h-3.5" />
+                                  Confirmer le paiement
+                                </button>
+                              )}
+                            </div>
+                          )}
+                          {demande.statut === 'TERMINEE' && demande.est_payee && (
+                            <div className="mt-1.5">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                                <CheckCircle className="w-3.5 h-3.5" /> Payée
+                              </span>
+                            </div>
+                          )}
+
+                          {demande.statut === 'EN_ATTENTE' && (
                             <div className="mt-1.5">
                               <button
                                 onClick={() => openCancel(demande)}
@@ -500,9 +551,7 @@ export default function DashboardClientPage() {
                 </div>
 
                 <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
-                  {cancelDemande.prix_propose != null && cancelDemande.prix_total == null
-                    ? 'Refuser le prix et annuler la demande ?'
-                    : 'Annuler cette demande ?'}
+                  Annuler cette demande ?
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   Votre demande à <strong>{cancelDemande.artisan_nom}</strong> sera annulée et
@@ -526,6 +575,76 @@ export default function DashboardClientPage() {
                     {updateDemande.isLoading ? 'Annulation...' : 'Confirmer l\'annulation'}
                   </button>
                 </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Confirmation paiement espèces */}
+        <AnimatePresence>
+          {especesModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.25 }}
+                className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
+                    <HandCoins className="w-6 h-6 text-emerald-500" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEspecesModal(null)}
+                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                  Confirmer le paiement en espèces
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                  Vous avez payé <strong>{especesModal.artisan_nom}</strong> en espèces. Indiquez le
+                  montant payé pour confirmer la transaction et libérer la commission de l'artisan.
+                </p>
+
+                <form onSubmit={submitEspeces} className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                      Montant payé (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      value={montantEspeces}
+                      onChange={e => setMontantEspeces(e.target.value)}
+                      min={0}
+                      required
+                      placeholder="Montant en FCFA"
+                      className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 shadow-sm"
+                    />
+                  </div>
+
+                  <div className="flex flex-col-reverse sm:flex-row gap-3 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setEspecesModal(null)}
+                      className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={confirmerPaiement.isLoading}
+                      className="inline-flex items-center justify-center flex-1 gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-3 rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-200 disabled:opacity-70"
+                    >
+                      {confirmerPaiement.isLoading ? 'Confirmation...' : 'Confirmer'}
+                    </button>
+                  </div>
+                </form>
               </motion.div>
             </div>
           )}
