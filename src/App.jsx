@@ -5,8 +5,10 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { useGeoLocation } from '@/hooks/useGeoLocation'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import PushPermissionBanner from '@/components/common/PushPermissionBanner'
 
 import HomePage           from '@/pages/HomePage'
 import AboutPage          from '@/pages/AboutPage'
@@ -45,6 +47,9 @@ function PrivateRoute({ children, role }) {
 
 function AppRoutes() {
   useGeoLocation()
+  const { user } = useAuth()
+  const { requestPermissionAndRegister, hasRegisteredToken } = usePushNotifications(user)
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -84,6 +89,12 @@ function AppRoutes() {
         </Routes>
       </div>
       <Footer />
+      {user && (
+        <PushPermissionBanner
+          onAllow={requestPermissionAndRegister}
+          hasRegisteredToken={hasRegisteredToken}
+        />
+      )}
       <ToastContainer position="bottom-right" theme="light" />
     </div>
   )

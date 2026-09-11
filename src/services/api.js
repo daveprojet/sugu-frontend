@@ -209,4 +209,11 @@ export const reversementService = {
   detail: (uid) => api.get(`/commissions/reversements/${uid}/`),
 }
 
+// ── FCM Push Notifications ─────────────────────────────
+export const fcmTokenService = {
+  check:     () => api.get('/fcm-tokens/'),
+  register:  (data) => api.post('/fcm-tokens/', data),
+  unregister: (id) => api.delete(`/fcm-tokens/${id}/`),
+}
+
 export default api
