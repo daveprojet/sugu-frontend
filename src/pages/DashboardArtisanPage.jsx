@@ -1,22 +1,64 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
-import { useDemandes, useUpdateDemande } from '@/hooks/useDemandes'
-import { useArtisanAvis, useUpdateArtisan } from '@/hooks/useArtisans'
+import { useDemandes, useUpdateDemande, useFixerPrix } from '@/hooks/useDemandes'
+import { useArtisanAvis, useUpdateArtisan, useIdentite } from '@/hooks/useArtisans'
+import { useCommissions } from '@/hooks/usePaiements'
 import { useRepondreAvis } from '@/hooks/useAvis'
+import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
-import { STATUTS_DEMANDE } from '@/utils/constants'
+import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
+import {
+  Inbox,
+  Clock,
+  CheckCircle,
+  ThumbsUp,
+  XCircle,
+  MessageSquare,
+  Calendar,
+  User,
+  IdCard,
+  Phone,
+  Filter,
+  Tag,
+  AlertTriangle,
+  Wallet,
+  BadgeDollarSign,
+  X
+} from 'lucide-react'
 
 export default function DashboardArtisanPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
+  const { data: identite } = useIdentite(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
-  const { data: avis = [], isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
-  const updateDemande  = useUpdateDemande()
-  const updateArtisan  = useUpdateArtisan()
+  const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
+  const avis = avisPage?.results || []
+  const updateDemande = useUpdateDemande()
+  const fixerPrix = useFixerPrix()
+  const updateArtisan = useUpdateArtisan()
   const repondreAvis = useRepondreAvis()
+  const { data: commissionsPage } = useCommissions()
+  const commissions = commissionsPage?.results || []
   const [disponible, setDisponible] = useState(user?.disponible ?? true)
   const [replyOpen, setReplyOpen] = useState(null)
   const [replyText, setReplyText] = useState('')
+  const [statutFilter, setStatutFilter] = useState('all')
+  const [prixInputs, setPrixInputs] = useState({})
+  const [blockedModal, setBlockedModal] = useState(null)
+  const [refusDemande, setRefusDemande] = useState(null)
+
+  const demandesFiltrees = statutFilter === 'all'
+    ? demandes
+    : demandes.filter((d) => d.statut === statutFilter)
+
+  const statutCounts = demandes.reduce((acc, d) => {
+    acc[d.statut] = (acc[d.statut] || 0) + 1
+    return acc
+  }, {})
 
   const toggleDispo = async () => {
     const next = !disponible
@@ -25,9 +67,56 @@ export default function DashboardArtisanPage() {
   }
 
   const stats = {
-    total:    demandes.length,
-    enAttente: demandes.filter(d => d.statut === 'EN_ATTENTE').length,
-    terminees: demandes.filter(d => d.statut === 'TERMINEE').length,
+    total: demandes.length,
+    enAttente: demandes.filter((d) => d.statut === 'EN_ATTENTE').length,
+    terminees: demandes.filter((d) => d.statut === 'TERMINEE').length,
+  }
+
+  const commissionsEnAttente = commissions.filter(c => c.statut === 'EN_ATTENTE' || c.statut === 'EN_RETARD')
+  const totalCommissionsDue = commissionsEnAttente.reduce((sum, c) => sum + c.montant_commission, 0)
+
+  const aEngagement = (d) =>
+    demandes.some(
+      (x) =>
+        x.id !== d.id &&
+        (x.statut === 'ACCEPTEE' ||
+          x.statut === 'PRIX_FIXE' ||
+          x.statut === 'EN_COURS')
+    )
+
+  const majDemande = (payload) =>
+    updateDemande.mutate(payload, {
+      onError: (e) => toast.error(extractApiError(e, 'Action impossible.')),
+    })
+
+  const soumettrePrix = (d) => {
+    const prix = parseInt(prixInputs[d.id], 10)
+    if (!prix || prix <= 0) {
+      toast.error('Veuillez saisir un montant valide')
+      return
+    }
+    fixerPrix.mutate({ id: d.id, prix }, {
+      onSuccess: () => setPrixInputs((prev) => ({ ...prev, [d.id]: '' })),
+    })
+  }
+
+  const verifierEngagement = (action, d) => {
+    if (commissionsEnAttente.length > 0) {
+      setBlockedModal('commission')
+      return
+    }
+    if (aEngagement(d)) {
+      setBlockedModal('mission')
+      return
+    }
+    action()
+  }
+
+  const submitRefus = () => {
+    if (!refusDemande) return
+    const id = refusDemande.id
+    setRefusDemande(null)
+    majDemande({ id, data: { statut: 'ANNULEE' } })
   }
 
   const openReply = (item) => {
@@ -46,178 +135,729 @@ export default function DashboardArtisanPage() {
     setReplyText('')
   }
 
+  const statCards = [
+    { label: 'Total demandes', value: stats.total, icon: Inbox, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    { label: 'En attente', value: stats.enAttente, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Terminées', value: stats.terminees, icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  ]
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+  }
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  }
+
   return (
-    <main className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-gray-900">
-            Bonjour, {user?.prenom} 👋
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">Voici un aperçu de votre activité</p>
-        </div>
-        <button
-          onClick={toggleDispo}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all ${
-            disponible ? 'bg-accent-100 text-accent-700 hover:bg-accent-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-          }`}
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+      <div className="max-w-6xl mx-auto space-y-10">
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
-          <span className={`w-2 h-2 rounded-full ${disponible ? 'bg-accent-500' : 'bg-gray-400'}`} />
-          {disponible ? 'Disponible' : 'Indisponible'}
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        {[
-          { label: 'Total demandes', value: stats.total,     color: 'text-gray-900' },
-          { label: 'En attente',     value: stats.enAttente, color: 'text-amber-600' },
-          { label: 'Terminées',      value: stats.terminees, color: 'text-accent-600' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="card p-5 text-center">
-            <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
-            <p className="text-xs text-gray-500 mt-1">{label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Demandes */}
-      <h2 className="font-display font-semibold text-gray-900 mb-4">Demandes reçues</h2>
-
-      {isLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
-      ) : demandes.length === 0 ? (
-        <div className="card p-10 text-center text-gray-400">
-          <p className="text-3xl mb-3">📭</p>
-          <p className="font-medium">Aucune demande pour le moment</p>
-          <p className="text-sm mt-1">Complétez votre profil pour être mieux visible</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {demandes.map(d => (
-            <div key={d.id} className="card p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-gray-900">{d.client_nom}</span>
-                    <span className={`badge ${STATUTS_DEMANDE[d.statut]?.color}`}>
-                      {STATUTS_DEMANDE[d.statut]?.label}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600">{d.description}</p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    {new Date(d.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-
-                {d.statut === 'EN_ATTENTE' && (
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ACCEPTEE' } })}
-                      className="btn-primary text-xs py-1.5 px-3"
-                    >
-                      Accepter
-                    </button>
-                    <button
-                      onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'ANNULEE' } })}
-                      className="btn-secondary text-xs py-1.5 px-3 text-red-500"
-                    >
-                      Refuser
-                    </button>
-                  </div>
-                )}
-                {d.statut === 'ACCEPTEE' && (
-                  <button
-                    onClick={() => updateDemande.mutate({ id: d.id, data: { statut: 'TERMINEE' } })}
-                    className="btn-secondary text-xs py-1.5 px-3 text-accent-600 flex-shrink-0"
-                  >
-                    Marquer terminé
-                  </button>
-                )}
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-indigo-500/30">
+              {user?.prenom?.charAt(0) || 'A'}
             </div>
-          ))}
-        </div>
-      )}
+            <div>
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
+                Bonjour, {user?.prenom}
+              </h1>
+              <p className="text-gray-500 text-sm font-medium mt-0.5">Voici un aperçu de votre activité</p>
+            </div>
+          </div>
 
-      <h2 className="font-display font-semibold text-gray-900 mt-10 mb-4">Avis clients</h2>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/dashboard-artisan/commissions"
+              className="inline-flex items-center gap-1.5 border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 px-4 py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm"
+            >
+              {commissionsEnAttente.length > 0 && (
+                <span className="relative flex h-3 w-3">
+                  <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-red-400" />
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                </span>
+              )}
+              <Wallet className="w-4 h-4" /> Commissions
+            </Link>
+            <button
+              onClick={toggleDispo}
+              className={`group relative flex items-center gap-3 px-6 py-2.5 rounded-full border-2 font-medium text-sm transition-all duration-300 shadow-sm hover:shadow-md
+                ${disponible
+                  ? 'border-emerald-500 text-emerald-700 bg-white hover:bg-emerald-50'
+                  : 'border-gray-300 text-gray-500 bg-white hover:bg-gray-50'
+                }`}
+            >
+            <span className="relative flex h-3 w-3">
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
+                  disponible ? 'bg-emerald-400' : 'bg-gray-400'
+                }`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-3 w-3 ${
+                  disponible ? 'bg-emerald-500' : 'bg-gray-400'
+                }`}
+              />
+            </span>
+            {disponible ? 'Disponible' : 'Indisponible'}
+          </button>
+          </div>
+        </motion.div>
 
-      {avisLoading ? (
-        <div className="flex justify-center py-12"><Spinner /></div>
-      ) : avis.length === 0 ? (
-        <div className="card p-8 text-center text-gray-400">
-          <p className="font-medium">Aucun avis pour le moment</p>
-          <p className="text-sm mt-1">Les commentaires apparaitront apres les prestations terminees.</p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {avis.map(item => (
-            <div key={item.id} className="card p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <div>
-                      <p className="font-medium text-gray-900">{item.client_nom}</p>
-                      <p className="text-xs text-gray-400">
-                        {new Date(item.created_at).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <StarRating note={item.note} size="sm" showNote={false} />
+        {/* Commission Alert */}
+        {user?.bloque && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-900">Votre profil est temporairement bloqué</p>
+              <p className="text-xs text-red-700 mt-0.5">
+                Une commission de {totalCommissionsDue.toLocaleString("fr-FR")} FCFA est due. Veuillez régulariser votre situation pour recevoir de nouvelles demandes.
+              </p>
+            </div>
+            <Link
+              to="/dashboard-artisan/commissions"
+              className="inline-flex items-center gap-1.5 bg-red-600 text-white px-4 py-2 rounded-full text-xs font-medium hover:bg-red-700 transition-colors flex-shrink-0"
+            >
+              <Wallet className="w-3.5 h-3.5" /> Payer
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Identity Status */}
+        {user?.artisan_uid && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Link
+              to="/mon-profil/identite"
+              className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:shadow-md ${
+                !identite?.statut || identite.statut === 'EN_ATTENTE'
+                  ? 'bg-amber-50 border-amber-200 hover:border-amber-300'
+                  : identite.statut === 'REJETEE'
+                  ? 'bg-red-50 border-red-200 hover:border-red-300'
+                  : 'bg-emerald-50 border-emerald-200 hover:border-emerald-300'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                !identite?.statut || identite.statut === 'EN_ATTENTE'
+                  ? 'bg-amber-100 text-amber-600'
+                  : identite.statut === 'REJETEE'
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-emerald-100 text-emerald-600'
+              }`}>
+                <IdCard className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Pièce d'identité</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {!identite?.statut
+                    ? 'Aucune pièce d\'identité fournie'
+                    : STATUTS_IDENTITE[identite.statut]?.label || identite.statut}
+                </p>
+              </div>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                !identite?.statut
+                  ? 'bg-gray-100 text-gray-600'
+                  : STATUTS_IDENTITE[identite.statut]?.color || 'bg-gray-100 text-gray-600'
+              }`}>
+                {!identite?.statut ? 'À faire' : STATUTS_IDENTITE[identite.statut]?.label?.split(' ')[0] || identite.statut}
+              </span>
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Refus Alert — Blocage permanent */}
+        {user?.bloque_refus && !user?.date_deblocage_refus && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-900">Profil définitivement bloqué</p>
+              <p className="text-xs text-red-700 mt-0.5">
+                Votre profil a été bloqué en raison de refus répétés de demandes catalogue.
+                Veuillez contacter le service client pour toute demande de réactivation.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Refus Alert — Blocage temporaire */}
+        {user?.bloque_refus && user?.date_deblocage_refus && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-center gap-4"
+          >
+            <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-orange-900">Profil temporairement bloqué</p>
+              <p className="text-xs text-orange-700 mt-0.5">
+                Votre profil est masqué des résultats de recherche jusqu'au{' '}
+                {new Date(user.date_deblocage_refus).toLocaleDateString('fr-FR', {
+                  day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                })}
+                {' '}suite à des refus de demandes catalogue.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Refus Alert — Avertissement */}
+        {!user?.bloque_refus && user?.nb_refus_catalogue > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`rounded-2xl p-4 flex items-center gap-4 border ${
+              user.nb_refus_catalogue >= 3
+                ? 'bg-red-50 border-red-200'
+                : 'bg-amber-50 border-amber-200'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+              user.nb_refus_catalogue >= 3
+                ? 'bg-red-100 text-red-600'
+                : 'bg-amber-100 text-amber-600'
+            }`}>
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className={`text-sm font-semibold ${
+                user.nb_refus_catalogue >= 3 ? 'text-red-900' : 'text-amber-900'
+              }`}>
+                {user.nb_refus_catalogue >= 3
+                  ? 'Attention, vous approchez du blocage !'
+                  : 'Rappel sur les refus de demande'}
+              </p>
+              <p className={`text-xs mt-0.5 ${
+                user.nb_refus_catalogue >= 3 ? 'text-red-700' : 'text-amber-700'
+              }`}>
+                Vous avez refusé <strong>{user.nb_refus_catalogue} demande{user.nb_refus_catalogue > 1 ? 's' : ''} catalogue</strong>
+                {user.nb_refus_catalogue >= 5
+                  ? '. Votre profil est actuellement masqué.'
+                  : ` sur 5 avant le blocage temporaire du profil.`}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Stats Cards */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          {statCards.map(({ label, value, icon: Icon, color, bg }) => (
+            <motion.div
+              key={label}
+              variants={itemVariants}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 border border-gray-100 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-xl ${bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <Icon className={`w-6 h-6 ${color}`} />
                   </div>
+                  <div>
+                    <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
+                    <p className="text-xs text-gray-500 font-medium">{label}</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
-                  {item.commentaire ? (
-                    <p className="text-sm text-gray-600">{item.commentaire}</p>
-                  ) : (
-                    <p className="text-sm text-gray-400 italic">Aucun commentaire ajoute.</p>
-                  )}
+        {/* Demandes */}
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="font-display text-xl font-bold text-gray-900">Demandes reçues</h2>
+            {!isLoading && demandes.length > 0 && (
+              <span className="inline-flex items-center justify-center bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                {demandes.length}
+              </span>
+            )}
+          </div>
 
-                  {item.reponse_artisan && replyOpen !== item.id && (
-                    <div className="mt-4 rounded-xl bg-sand-50 border border-sand-100 p-4">
-                      <p className="text-xs font-medium text-gray-500 mb-1">Votre reponse</p>
-                      <p className="text-sm text-gray-700">{item.reponse_artisan}</p>
-                      {item.reponse_artisan_at && (
-                        <p className="text-xs text-gray-400 mt-2">
-                          {new Date(item.reponse_artisan_at).toLocaleDateString('fr-FR')}
-                        </p>
+          {!isLoading && demandes.length > 0 && (
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              <button
+                onClick={() => setStatutFilter('all')}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                  statutFilter === 'all'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                    : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                }`}
+              >
+                <Filter className="w-3 h-3" />
+                Toutes
+                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === 'all' ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                  {demandes.length}
+                </span>
+              </button>
+              {Object.entries(STATUTS_DEMANDE).map(([key, { label }]) => {
+                const count = statutCounts[key] || 0
+                if (count === 0) return null
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setStatutFilter(key)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                      statutFilter === key
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                        : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                    }`}
+                  >
+                    {label}
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === key ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
+          ) : demandes.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+              <Inbox className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="font-medium text-gray-500">Aucune demande pour le moment</p>
+              <p className="text-sm text-gray-400 mt-1">Complétez votre profil pour être mieux visible</p>
+            </div>
+          ) : demandesFiltrees.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+              <Inbox className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="font-medium text-gray-500">Aucune demande avec ce statut</p>
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-4"
+            >
+              {demandesFiltrees.map((d) => {
+                const statusColor = STATUTS_DEMANDE[d.statut]?.color || 'bg-gray-100 text-gray-600';
+                return (
+                  <motion.div
+                    key={d.id}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.005 }}
+                    className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 p-5 md:p-6 transition-all duration-200"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                          <span className="font-medium text-gray-900 text-base">{d.client_nom}</span>
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}
+                          >
+                            {STATUTS_DEMANDE[d.statut]?.label || d.statut}
+                          </span>
+                          {d.prix_affiche != null && (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                              <BadgeDollarSign className="w-3 h-3" />
+                              {d.prix_affiche.toLocaleString("fr-FR")} FCFA
+                            </span>
+                          )}
+                          {d.statut === 'ACCEPTEE' && d.prix_total == null && (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                              <BadgeDollarSign className="w-3 h-3" />
+                              Prix à fixer
+                            </span>
+                          )}
+                        </div>
+                        {d.client_telephone && d.statut !== 'EN_ATTENTE' && (
+                          <a
+                            href={`tel:${d.client_telephone}`}
+                            className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 transition-colors mb-2"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                            {d.client_telephone}
+                          </a>
+                        )}
+                        {d.service_element_nom && (
+                          <p className="text-xs text-indigo-500 font-medium mt-1">
+                            {d.categorie_nom} — {d.service_element_nom}
+                          </p>
+                        )}
+                        <p className="text-sm text-gray-600 leading-relaxed">{d.description}</p>
+                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {new Date(d.created_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 flex-shrink-0 mt-2 md:mt-0">
+                        {d.statut === 'EN_ATTENTE' && (
+                          <>
+                            <button
+                              onClick={() => verifierEngagement(() => majDemande({ id: d.id, data: { statut: 'ACCEPTEE' } }), d)}
+                              className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <ThumbsUp className="w-3.5 h-3.5" /> Accepter
+                            </button>
+                            <button
+                              onClick={() => setRefusDemande(d)}
+                              className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <XCircle className="w-3.5 h-3.5" /> Refuser
+                            </button>
+                          </>
+                        )}
+                        {d.statut === 'ACCEPTEE' && d.prix_total == null && (
+                          <div className="flex flex-col gap-1.5 w-full md:w-auto">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                step="100"
+                                value={prixInputs[d.id] || ''}
+                                onChange={(e) => setPrixInputs(prev => ({ ...prev, [d.id]: e.target.value }))}
+                                placeholder="Prix FCFA"
+                                className="w-32 pl-3 pr-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                              />
+                              <button
+                                onClick={() => soumettrePrix(d)}
+                                disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0 || fixerPrix.isLoading}
+                                className="inline-flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm disabled:opacity-50"
+                              >
+                                <BadgeDollarSign className="w-3.5 h-3.5" /> Fixer le prix
+                              </button>
+                              <button
+                                onClick={() => setRefusDemande(d)}
+                                className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                              >
+                                <XCircle className="w-3.5 h-3.5" /> Refuser
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-gray-400 italic">
+                              Après avoir convenu du prix avec le client par téléphone.
+                            </p>
+                          </div>
+                        )}
+                        {d.statut === 'PRIX_FIXE' && (
+                          <>
+                            <button
+                              onClick={() => majDemande({ id: d.id, data: { statut: 'EN_COURS' } })}
+                              className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <Clock className="w-3.5 h-3.5" /> En cours
+                            </button>
+                            <button
+                              onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
+                              className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
+                            </button>
+                          </>
+                        )}
+                        {d.statut === 'EN_COURS' && (
+                          <button
+                            onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
+                            className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-full text-xs font-medium transition-colors shadow-sm"
+                          >
+                            <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
+        </section>
+
+        {/* Avis */}
+        <section>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="font-display text-xl font-bold text-gray-900">Avis clients</h2>
+            {!avisLoading && avis.length > 0 && (
+              <span className="inline-flex items-center justify-center bg-gray-200 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                {avis.length}
+              </span>
+            )}
+          </div>
+
+          {avisLoading ? (
+            <div className="flex justify-center py-12">
+              <Spinner />
+            </div>
+          ) : avis.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+              <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="font-medium text-gray-500">Aucun avis pour le moment</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Les commentaires apparaîtront après les prestations terminées.
+              </p>
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-4"
+            >
+              {avis.map((item) => (
+                <motion.div
+                  key={item.id}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.005 }}
+                  className="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-gray-100 p-5 md:p-6 transition-all duration-200"
+                >
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                        <div>
+                          <p className="font-medium text-gray-900">{item.client_nom}</p>
+                          <p className="text-xs text-gray-400 font-medium mt-0.5">
+                            {new Date(item.created_at).toLocaleDateString('fr-FR', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </p>
+                        </div>
+                        <StarRating note={item.note} size="sm" showNote={false} />
+                      </div>
+
+                      {item.commentaire ? (
+                        <p className="text-sm text-gray-600 leading-relaxed">{item.commentaire}</p>
+                      ) : (
+                        <p className="text-sm text-gray-400 italic">Aucun commentaire ajouté.</p>
+                      )}
+
+                      {item.reponse_artisan && replyOpen !== item.id && (
+                        <div className="mt-4 bg-indigo-50 border border-indigo-200/60 rounded-xl p-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <MessageSquare className="w-4 h-4 text-indigo-400" />
+                            <p className="text-xs font-semibold text-indigo-600">Votre réponse</p>
+                          </div>
+                          <p className="text-sm text-gray-700">{item.reponse_artisan}</p>
+                          {item.reponse_artisan_at && (
+                            <p className="text-xs text-gray-400 mt-2">
+                              {new Date(item.reponse_artisan_at).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {replyOpen === item.id && (
+                        <form onSubmit={(e) => submitReply(e, item)} className="mt-4 flex flex-col gap-3">
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            rows={3}
+                            required
+                            className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm resize-none"
+                            placeholder="Écrivez une réponse publique au client"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium px-5 py-2 rounded-full shadow-md shadow-indigo-500/30 transition-all duration-200 text-sm disabled:opacity-70"
+                              disabled={repondreAvis.isLoading}
+                            >
+                              {repondreAvis.isLoading ? 'Envoi...' : 'Publier la réponse'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setReplyOpen(null)}
+                              className="px-5 py-2 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        </form>
                       )}
                     </div>
-                  )}
 
-                  {replyOpen === item.id && (
-                    <form onSubmit={(e) => submitReply(e, item)} className="mt-4 flex flex-col gap-3">
-                      <textarea
-                        value={replyText}
-                        onChange={e => setReplyText(e.target.value)}
-                        rows={3}
-                        required
-                        className="input-field resize-none"
-                        placeholder="Ecrivez une reponse publique au client"
-                      />
-                      <div className="flex gap-2">
-                        <button type="submit" className="btn-primary text-sm" disabled={repondreAvis.isLoading}>
-                          {repondreAvis.isLoading ? 'Envoi...' : 'Publier la reponse'}
-                        </button>
-                        <button type="button" onClick={() => setReplyOpen(null)} className="btn-secondary text-sm">
-                          Annuler
-                        </button>
-                      </div>
-                    </form>
-                  )}
+                    {replyOpen !== item.id && (
+                      <button
+                        type="button"
+                        onClick={() => openReply(item)}
+                        className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full text-xs font-medium transition-colors flex-shrink-0 shadow-sm"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        {item.reponse_artisan ? 'Modifier' : 'Répondre'}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </section>
+      </div>
+
+      <AnimatePresence>
+        {blockedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.25 }}
+              className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-amber-500" />
                 </div>
-
-                {replyOpen !== item.id && (
-                  <button
-                    type="button"
-                    onClick={() => openReply(item)}
-                    className="btn-secondary text-xs py-1.5 px-3 flex-shrink-0"
-                  >
-                    {item.reponse_artisan ? 'Modifier' : 'Repondre'}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setBlockedModal(null)}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+
+              <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                {blockedModal === 'commission' ? 'Commission impayée' : 'Mission en cours'}
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {blockedModal === 'commission' ? (
+                  <>
+                    Vous avez <strong>{totalCommissionsDue.toLocaleString('fr-FR')} FCFA</strong> de commission en
+                    attente. Réglez-la avant d'accepter de nouvelles demandes.
+                  </>
+                ) : (
+                  <>
+                    Vous avez déjà une mission en cours ou une demande en attente de prix. Terminez-la avant d'accepter de nouvelles demandes.
+                  </>
+                )}
+              </p>
+
+              <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setBlockedModal(null)}
+                  className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  Plus tard
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBlockedModal(null)
+                    if (blockedModal === 'commission') navigate('/dashboard-artisan/commissions')
+                  }}
+                  className={
+                    blockedModal === 'commission'
+                      ? 'inline-flex items-center justify-center flex-1 gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium px-4 py-2 rounded-xl shadow-lg shadow-orange-500/30 transition-all duration-200'
+                      : 'inline-flex items-center justify-center flex-1 gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-xl shadow-lg shadow-indigo-500/30 transition-all duration-200'
+                  }
+                >
+                  {blockedModal === 'commission' ? (
+                    <>
+                      <Wallet className="w-4 h-4" /> Régler ma commission
+                    </>
+                  ) : (
+                    'Compris'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {refusDemande && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.25 }}
+              className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+                  <XCircle className="w-6 h-6 text-red-500" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRefusDemande(null)}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                Refuser cette demande ?
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {refusDemande.service_element_nom ? (
+                  <>
+                    La demande de <strong>{refusDemande.client_nom}</strong> pour{' '}
+                    <strong>{refusDemande.service_element_nom}</strong> sera refusée. Le client en
+                    sera prévenu par SMS. Cette action est irréversible.
+                  </>
+                ) : (
+                  <>
+                    La demande de <strong>{refusDemande.client_nom}</strong> sera refusée. Le client en
+                    sera prévenu par SMS. Cette action est irréversible.
+                  </>
+                )}
+              </p>
+
+              <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRefusDemande(null)}
+                  className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  Garder la demande
+                </button>
+                <button
+                  type="button"
+                  onClick={submitRefus}
+                  className="inline-flex items-center justify-center flex-1 gap-2 bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-xl shadow-lg shadow-red-500/30 transition-all duration-200"
+                >
+                  <XCircle className="w-4 h-4" /> Confirmer le refus
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </main>
   )
 }

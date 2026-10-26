@@ -30,9 +30,31 @@ export const VILLES = [
 export const STATUTS_DEMANDE = {
   EN_ATTENTE: { label: 'En attente',  color: 'bg-amber-100 text-amber-800' },
   ACCEPTEE:   { label: 'Acceptée',    color: 'bg-blue-100 text-blue-800' },
+  PRIX_FIXE:  { label: 'Prix fixé',   color: 'bg-purple-100 text-purple-800' },
   EN_COURS:   { label: 'En cours',    color: 'bg-orange-100 text-orange-800' },
   TERMINEE:   { label: 'Terminée',    color: 'bg-green-100 text-green-800' },
   ANNULEE:    { label: 'Annulée',     color: 'bg-red-100 text-red-800' },
 }
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+export const STATUTS_IDENTITE = {
+  EN_ATTENTE: { label: 'En attente de vérification', color: 'bg-amber-100 text-amber-800' },
+  VERIFIEE:   { label: 'Vérifiée',                   color: 'bg-emerald-100 text-emerald-800' },
+  REJETEE:    { label: 'Rejetée',                     color: 'bg-red-100 text-red-800' },
+}
+
+export const METIER_TO_CATEGORIE_NOM = {
+  plombier: 'Plomberie',
+  electricien: 'Électricité',
+  menuisier: 'Menuiserie',
+  macon: 'Maçonnerie',
+  peintre: 'Peinture',
+  carreleur: 'Carrelage',
+  climatisation: 'Climatisation',
+  soudeur: 'Soudure',
+  jardinier: 'Jardinage',
+  menage: 'Ménage',
+  chauffeur: null,
+  informatique: 'Informatique',
+}
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL

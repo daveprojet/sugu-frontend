@@ -4,19 +4,31 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { useGeoLocation } from '@/hooks/useGeoLocation'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import PushPermissionBanner from '@/components/common/PushPermissionBanner'
 
 import HomePage           from '@/pages/HomePage'
 import AboutPage          from '@/pages/AboutPage'
 import ContactPage        from '@/pages/ContactPage'
 import ArtisansPage       from '@/pages/ArtisansPage'
 import ArtisanDetailPage  from '@/pages/ArtisanDetailPage'
+import AvisArtisanPage    from '@/pages/AvisArtisanPage'
 import MonProfil from '@/pages/MonProfil'
+import IdentitePiecePage from '@/pages/IdentitePiecePage'
 import LoginPage          from '@/pages/LoginPage'
 import RegisterPage       from '@/pages/RegisterPage'
 import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
 import DashboardClientPage from '@/pages/DashboardClientPage'
+import TermsPage from '@/pages/TermsPage'
+import ConfidentialitePage from '@/pages/ConfidentialitePage'
+import CommissionDashboardPage from '@/pages/CommissionDashboardPage'
+import MotDePasseOubliePage from '@/pages/MotDePasseOubliePage'
+import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
+import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
+import PaymentCancelPage from '@/pages/PaymentCancelPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +46,10 @@ function PrivateRoute({ children, role }) {
 }
 
 function AppRoutes() {
+  useGeoLocation()
+  const { user } = useAuth()
+  const { requestPermissionAndRegister, hasRegisteredToken } = usePushNotifications(user)
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -44,23 +60,41 @@ function AppRoutes() {
           <Route path="/contact"           element={<ContactPage />} />
           <Route path="/artisans"          element={<ArtisansPage />} />
           <Route path="/artisans/:uid"      element={<ArtisanDetailPage />} />
+          <Route path="/artisans/:uid/avis"  element={<AvisArtisanPage />} />
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />
           <Route path="/mon-profil" element={
             <PrivateRoute><MonProfil /></PrivateRoute>
           } />
+          <Route path="/mon-profil/identite" element={
+            <PrivateRoute role="artisan"><IdentitePiecePage /></PrivateRoute>
+          } />
           <Route path="/dashboard-artisan" element={
             <PrivateRoute role="artisan"><DashboardArtisanPage /></PrivateRoute>
+          } />
+          <Route path="/dashboard-artisan/commissions" element={
+            <PrivateRoute role="artisan"><CommissionDashboardPage /></PrivateRoute>
           } />
           <Route path="/dashboard-client" element={
             <PrivateRoute role="client"><DashboardClientPage /></PrivateRoute>
           } />
-          {/* TODO: DashboardClientPage, MonProfilPage */}
+          <Route path="/cgu"              element={<TermsPage />} />
+          <Route path="/confidentialite"  element={<ConfidentialitePage />} />
+          <Route path="/mot-de-passe-oublie" element={<MotDePasseOubliePage />} />
+          <Route path="/reset-mot-de-passe"  element={<ResetMotDePassePage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/cancel" element={<PaymentCancelPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
       <Footer />
+      {user && (
+        <PushPermissionBanner
+          onAllow={requestPermissionAndRegister}
+          hasRegisteredToken={hasRegisteredToken}
+        />
+      )}
       <ToastContainer position="bottom-right" theme="light" />
     </div>
   )

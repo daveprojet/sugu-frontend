@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { demandeService } from '@/services/api'
 import { toast } from 'react-toastify'
+import { extractApiError } from '@/utils/errors'
 
 export function useDemandes(params = {}) {
   return useQuery(
@@ -46,6 +47,40 @@ export function useUpdateDemande() {
         qc.invalidateQueries(['demande', id])
         qc.invalidateQueries('demandes')
       },
+    }
+  )
+}
+
+export function useFixerPrix() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ id, prix }) => demandeService.fixerPrix(id, prix),
+    {
+      onSuccess: (_, { id }) => {
+        qc.invalidateQueries(['demande', id])
+        qc.invalidateQueries('demandes')
+        toast.success('Prix fixé avec succès !')
+      },
+      onError: (e) => toast.error(
+        extractApiError(e, 'Erreur lors de la fixation du prix')
+      ),
+    }
+  )
+}
+
+export function useConfirmerPaiement() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ id, montant }) => demandeService.confirmerPaiement(id, montant),
+    {
+      onSuccess: (_, { id }) => {
+        qc.invalidateQueries(['demande', id])
+        qc.invalidateQueries('demandes')
+        toast.success('Paiement confirmé avec succès !')
+      },
+      onError: (e) => toast.error(
+        e.response?.data?.montant?.[0] || 'Erreur lors de la confirmation du paiement'
+      ),
     }
   )
 }
