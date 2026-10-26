@@ -15,8 +15,8 @@ import {
 // 1. IMPORT DE L'IMAGE DE FOND DU HERO (locale)
 import heroBg from "/images/metiers/register-bg.jpg";
 
-const contactEmail = "contact@bricolibe.com";
-const contactPhone = "+221770000000";
+const contactEmail = "info@bricolibe.com";
+const contactPhone = "+221777234086";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -155,7 +155,7 @@ export default function ContactPage() {
                     value={form.telephone}
                     onChange={(e) => set("telephone", e.target.value)}
                     className="w-full pl-12 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm"
-                    placeholder="+221 77 000 00 00"
+                    placeholder="+221 77 723 40 86"
                   />
                 </div>
               </div>
