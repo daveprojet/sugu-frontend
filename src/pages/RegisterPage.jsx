@@ -100,9 +100,7 @@ export default function RegisterPage() {
       >
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center justify-center mb-6 group">
-            <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 group-hover:shadow-xl transition-all duration-300">
-              <span className="text-white font-bold text-2xl">S</span>
-            </div>
+            
           </Link>
           <h1 className="font-display text-3xl md:text-4xl font-bold text-white drop-shadow-md">
             Créer un compte
