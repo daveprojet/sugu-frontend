@@ -357,7 +357,7 @@ export default function RegisterPage() {
             Déjà un compte ?{" "}
             <Link
               to="/connexion"
-              className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors"
+              className="text-white font-semibold hover:text-purple-200  hover:underline transition-colors"
             >
               Se connecter
             </Link>
