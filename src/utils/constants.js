@@ -42,6 +42,13 @@ export const STATUTS_IDENTITE = {
   REJETEE:    { label: 'Rejetée',                     color: 'bg-red-100 text-red-800' },
 }
 
+export const TYPES_DOCUMENT_PRO = [
+  { value: 'CERTIFICAT',  label: 'Certificat / diplôme' },
+  { value: 'ATTESTATION', label: 'Attestation de travaux' },
+  { value: 'REALISATION', label: 'Photo de réalisation' },
+  { value: 'AUTRE',       label: 'Autre justificatif' },
+]
+
 export const METIER_TO_CATEGORIE_NOM = {
   plombier: 'Plomberie',
   electricien: 'Électricité',

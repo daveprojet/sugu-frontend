@@ -48,6 +48,7 @@ export default function IdentitePiecePage() {
   const statutConfig = STATUTS_IDENTITE[statut] || STATUTS_IDENTITE.EN_ATTENTE
   const isVerified = statut === 'VERIFIEE'
   const hasIdentity = !!identite
+  const versoRequis = typePiece !== 'passeport'
 
   const handleRectoChange = (e) => {
     const file = e.target.files?.[0]
@@ -93,8 +94,13 @@ export default function IdentitePiecePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!rectoFile && !selfieFile && !hasIdentity) {
-      toast.error('Veuillez sélectionner un fichier pour le recto et le selfie.')
+    const manquantes = [
+      !rectoFile && !identite?.recto && 'le recto',
+      versoRequis && !versoFile && !identite?.verso && 'le verso',
+      !selfieFile && !identite?.selfie && 'le selfie avec la pièce',
+    ].filter(Boolean)
+    if (manquantes.length) {
+      toast.error(`Photo manquante : ${manquantes.join(', ')}.`)
       return
     }
 
@@ -197,12 +203,13 @@ export default function IdentitePiecePage() {
               )}
               {statut === 'EN_ATTENTE' && (
                 <p className="mt-1 text-sm text-amber-700">
-                  Votre pièce d'identité est en cours de vérification par nos équipes.
+                  Votre pièce d'identité est en cours de vérification. Votre profil apparaîtra dans la recherche dès sa validation.
                 </p>
               )}
               {isVerified && (
                 <p className="mt-1 text-sm text-emerald-700">
-                  Votre identité a été vérifiée avec succès.
+                  Identité vérifiée : votre profil est visible dans la recherche. Pour obtenir le badge « Vérifié », complétez votre{' '}
+                  <Link to="/mon-profil/dossier" className="underline font-semibold">dossier professionnel</Link>.
                 </p>
               )}
             </div>
@@ -333,7 +340,7 @@ export default function IdentitePiecePage() {
                 {/* Selfie */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Selfie avec votre pièce d'identité <span className="text-red-500">*</span>
+                    Selfie avec la pièce à côté du visage <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-400 mb-3 ml-1">
                     Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage
@@ -371,7 +378,9 @@ export default function IdentitePiecePage() {
                 {/* Verso */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Verso <span className="text-gray-400 font-normal">(optionnel)</span>
+                    Verso {versoRequis
+                      ? <span className="text-red-500">*</span>
+                      : <span className="text-gray-400 font-normal">(facultatif pour un passeport)</span>}
                   </label>
                   <div className="flex items-start gap-4">
                     <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group">

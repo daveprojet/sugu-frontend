@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info } from "lucide-react";
+import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info, Award } from "lucide-react";
 import PhoneField from "@/components/common/PhoneField";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -282,10 +282,30 @@ export default function MonProfil() {
                     Pièce d'identité
                   </p>
                   <p className="text-[11px] text-gray-500 font-medium">
-                    Gérer et vérifier mon identité
+                    Validée = visible dans la recherche
                   </p>
                 </div>
                 <span className="text-xs text-gray-400 group-hover:text-amber-500 transition-colors">→</span>
+              </Link>
+            )}
+
+            {isArtisan && (
+              <Link
+                to="/mon-profil/dossier"
+                className="mt-3 flex items-center gap-3 w-full rounded-xl border border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 hover:from-indigo-100 hover:to-purple-100 px-4 py-3 transition-all duration-200 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-200 transition-colors">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">
+                    Dossier professionnel
+                  </p>
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    Certificats et travaux · badge « Vérifié »
+                  </p>
+                </div>
+                <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">→</span>
               </Link>
             )}
 

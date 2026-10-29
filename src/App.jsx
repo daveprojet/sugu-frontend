@@ -18,6 +18,7 @@ import ArtisanDetailPage  from '@/pages/ArtisanDetailPage'
 import AvisArtisanPage    from '@/pages/AvisArtisanPage'
 import MonProfil from '@/pages/MonProfil'
 import IdentitePiecePage from '@/pages/IdentitePiecePage'
+import DossierProPage from '@/pages/DossierProPage'
 import LoginPage          from '@/pages/LoginPage'
 import RegisterPage       from '@/pages/RegisterPage'
 import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
@@ -71,6 +72,9 @@ function AppRoutes() {
           } />
           <Route path="/mon-profil/identite" element={
             <PrivateRoute role="artisan"><IdentitePiecePage /></PrivateRoute>
+          } />
+          <Route path="/mon-profil/dossier" element={
+            <PrivateRoute role="artisan"><DossierProPage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan" element={
             <PrivateRoute role="artisan"><DashboardArtisanPage /></PrivateRoute>

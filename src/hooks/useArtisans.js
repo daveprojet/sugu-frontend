@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
-import { artisanService, identiteService } from '@/services/api'
+import { artisanService, dossierProService, identiteService } from '@/services/api'
 import { toast } from 'react-toastify'
 
 export function useArtisans(filters = {}) {
@@ -62,12 +62,53 @@ export function useUploadIdentite() {
         const msg = error.response?.data?.detail
           || error.response?.data?.recto?.[0]
           || error.response?.data?.verso?.[0]
+          || error.response?.data?.selfie?.[0]
           || error.response?.data?.type_piece?.[0]
           || 'Erreur lors du téléchargement'
         toast.error(msg)
       },
     }
   )
+}
+
+export function useDossierPro(uid) {
+  return useQuery(
+    ['artisan-dossier', uid],
+    () => dossierProService.get(uid).then(r => r.data).catch((error) => {
+      // Pas encore de dossier : on affiche un formulaire vide.
+      if (error.response?.status === 404) return null
+      throw error
+    }),
+    { enabled: !!uid }
+  )
+}
+
+function useDossierMutation(fn, successMessage) {
+  const qc = useQueryClient()
+  return useMutation(fn, {
+    onSuccess: (response, { uid }) => {
+      qc.setQueryData(['artisan-dossier', uid], response.data)
+      qc.invalidateQueries(['artisan', uid])
+      toast.success(successMessage)
+    },
+    onError: (error) => {
+      const data = error.response?.data || {}
+      const first = Object.values(data).flat()[0]
+      toast.error(data.detail || data.non_field_errors?.[0] || (typeof first === 'string' ? first : 'Erreur lors de l\'envoi'))
+    },
+  })
+}
+
+export function useSaveDossierPro() {
+  return useDossierMutation(({ uid, data }) => dossierProService.save(uid, data), 'Dossier enregistré !')
+}
+
+export function useAjouterDocumentPro() {
+  return useDossierMutation(({ uid, formData }) => dossierProService.addDocument(uid, formData), 'Justificatif ajouté !')
+}
+
+export function useSupprimerDocumentPro() {
+  return useDossierMutation(({ uid, docUid }) => dossierProService.removeDocument(uid, docUid), 'Justificatif supprimé')
 }
 
 export function useUploadArtisanPhoto() {

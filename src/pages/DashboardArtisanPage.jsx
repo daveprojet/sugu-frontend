@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande, useFixerPrix } from '@/hooks/useDemandes'
-import { useArtisanAvis, useUpdateArtisan, useIdentite } from '@/hooks/useArtisans'
+import { useArtisanAvis, useUpdateArtisan, useIdentite, useDossierPro } from '@/hooks/useArtisans'
 import { useCommissions } from '@/hooks/usePaiements'
 import { useRepondreAvis } from '@/hooks/useAvis'
 import { extractApiError } from '@/utils/errors'
@@ -21,6 +21,7 @@ import {
   Calendar,
   User,
   IdCard,
+  Award,
   Phone,
   Filter,
   Tag,
@@ -34,6 +35,7 @@ export default function DashboardArtisanPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { data: identite } = useIdentite(user?.artisan_uid)
+  const { data: dossierPro } = useDossierPro(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
   const avis = avisPage?.results || []
@@ -264,8 +266,12 @@ export default function DashboardArtisanPage() {
                 <p className="text-sm font-semibold text-gray-900">Pièce d'identité</p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {!identite?.statut
-                    ? 'Aucune pièce d\'identité fournie'
-                    : STATUTS_IDENTITE[identite.statut]?.label || identite.statut}
+                    ? 'Fournissez votre pièce pour apparaître dans la recherche'
+                    : identite.statut === 'EN_ATTENTE'
+                    ? 'En vérification · vous serez visible dans la recherche après validation'
+                    : identite.statut === 'REJETEE'
+                    ? 'Pièce rejetée : envoyez-en une nouvelle pour apparaître dans la recherche'
+                    : 'Identité vérifiée · vous êtes visible dans la recherche'}
                 </p>
               </div>
               <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
@@ -277,6 +283,41 @@ export default function DashboardArtisanPage() {
               </span>
             </Link>
           </motion.div>
+        )}
+
+        {/* Dossier professionnel — badge « Vérifié » */}
+        {user?.artisan_uid && (
+          <Link
+            to="/mon-profil/dossier"
+            className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 hover:shadow-md ${
+              dossierPro?.statut === 'VERIFIEE'
+                ? 'bg-emerald-50 border-emerald-200'
+                : dossierPro?.statut === 'REJETEE'
+                ? 'bg-red-50 border-red-200'
+                : 'bg-indigo-50 border-indigo-200'
+            }`}
+          >
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-indigo-600">
+              <Award className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-900">Dossier professionnel · badge « Vérifié »</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {!dossierPro
+                  ? 'Ajoutez vos certificats et vos travaux réalisés pour obtenir le badge'
+                  : dossierPro.statut === 'EN_ATTENTE'
+                  ? 'Dossier en cours de vérification'
+                  : dossierPro.statut === 'REJETEE'
+                  ? `Dossier rejeté${dossierPro.motif_rejet ? ` : ${dossierPro.motif_rejet}` : ''}`
+                  : 'Badge « Vérifié » obtenu'}
+              </p>
+            </div>
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+              !dossierPro ? 'bg-gray-100 text-gray-600' : STATUTS_IDENTITE[dossierPro.statut]?.color
+            }`}>
+              {!dossierPro ? 'À faire' : STATUTS_IDENTITE[dossierPro.statut]?.label?.split(' ')[0]}
+            </span>
+          </Link>
         )}
 
         {/* Refus Alert — Blocage permanent */}

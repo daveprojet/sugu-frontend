@@ -174,6 +174,16 @@ export const identiteService = {
   }),
 }
 
+// ── Dossier professionnel (badge « Vérifié ») ──────
+export const dossierProService = {
+  get:          (uid) => api.get(`/artisans/${uid}/dossier/`),
+  save:         (uid, data) => api.put(`/artisans/${uid}/dossier/`, data),
+  addDocument:  (uid, formData) => api.post(`/artisans/${uid}/dossier/documents/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  removeDocument: (uid, docUid) => api.delete(`/artisans/${uid}/dossier/documents/${docUid}/`),
+}
+
 // ── Partenaires ───────────────────────────────────────
 export const partenaireService = {
   candidater: (data) => api.post('/partenaires/candidatures/', data),
