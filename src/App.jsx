@@ -29,6 +29,7 @@ import MotDePasseOubliePage from '@/pages/MotDePasseOubliePage'
 import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
 import PaymentCancelPage from '@/pages/PaymentCancelPage'
+import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +65,7 @@ function AppRoutes() {
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />
+          <Route path="/devenir-partenaire" element={<DevenirPartenairePage />} />
           <Route path="/mon-profil" element={
             <PrivateRoute><MonProfil /></PrivateRoute>
           } />

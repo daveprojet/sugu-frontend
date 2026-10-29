@@ -69,10 +69,10 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/inscription-artisan"
+                  to="/devenir-partenaire"
                   className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200"
                 >
-                  Devenir artisan
+                  Devenir partenaire
                 </Link>
               </li>
             </ul>

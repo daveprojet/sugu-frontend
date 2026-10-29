@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info } from "lucide-react";
+import PhoneField from "@/components/common/PhoneField";
 import { useAuth } from "@/context/AuthContext";
 import {
   useArtisan,
@@ -514,22 +515,18 @@ export default function MonProfil() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Téléphone public
                     </label>
-                    <input
-                      type="tel"
+                    <PhoneField
                       value={artisanForm.telephone}
-                      onChange={(e) => setArtisan("telephone", e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                      onChange={(value) => setArtisan("telephone", value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       WhatsApp
                     </label>
-                    <input
-                      type="tel"
+                    <PhoneField
                       value={artisanForm.whatsapp}
-                      onChange={(e) => setArtisan("whatsapp", e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                      onChange={(value) => setArtisan("whatsapp", value)}
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -587,12 +584,10 @@ export default function MonProfil() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nouveau numéro
                 </label>
-                <input
-                  type="tel"
+                <PhoneField
                   value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
+                  onChange={setNewPhone}
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
                 />
               </div>
               <div>

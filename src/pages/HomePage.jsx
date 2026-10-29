@@ -180,19 +180,19 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-200/30 rounded-full blur-3xl" />
         <div className="relative z-10 max-w-4xl mx-auto text-center bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-200/40 border border-white/60 p-10 md:p-12">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Vous êtes artisan ?
+            Devenez partenaire de Bricolibe
           </h2>
           <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto leading-relaxed">
-            Créez votre profil gratuitement et recevez des demandes de clients
-            dans votre quartier.
+            Entreprise, confiez vos interventions à nos artisans. Artisan,
+            rejoignez l'équipe Bricolibe et intervenez pour nos partenaires.
           </p>
           <motion.a
-            href="/inscription-artisan"
+            href="/devenir-partenaire"
             whileHover={{ scale: 1.03, y: -2 }}
             whileTap={{ scale: 0.98 }}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 px-8 rounded-full shadow-xl shadow-indigo-500/30 hover:shadow-2xl transition-all duration-300"
           >
-            Créer mon profil artisan
+            Devenir partenaire
             <ArrowRight className="w-5 h-5" />
           </motion.a>
         </div>

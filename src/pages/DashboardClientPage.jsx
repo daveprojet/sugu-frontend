@@ -326,7 +326,7 @@ export default function DashboardClientPage() {
                               )}
                               {demande.artisan_whatsapp && (
                                 <a
-                                  href={`https://wa.me/${demande.artisan_whatsapp}`}
+                                  href={`https://wa.me/${demande.artisan_whatsapp.replace(/\D/g, "")}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 transition-colors"

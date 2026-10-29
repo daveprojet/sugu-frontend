@@ -56,10 +56,10 @@ export default function Navbar() {
           </Link>
           {!isArtisan && (
             <Link
-              to="/inscription-artisan"
+              to="/devenir-partenaire"
               className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
             >
-              Devenir prestataire
+              Devenir partenaire
             </Link>
           )}
           <Link
@@ -186,11 +186,11 @@ export default function Navbar() {
               </Link>
               {!isArtisan && (
                 <Link
-                  to="/inscription-artisan"
+                  to="/devenir-partenaire"
                   onClick={() => setBurgerOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
                 >
-                  Devenir prestataire
+                  Devenir partenaire
                 </Link>
               )}
               <Link

@@ -4,7 +4,8 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
-import { Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { Lock, Eye, EyeOff } from "lucide-react";
+import PhoneField from "@/components/common/PhoneField";
 
 import loginBg from "/images/metiers/register-bg.jpg";
 
@@ -103,21 +104,13 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
                 Numéro de téléphone
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-indigo-400">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <input
-                  type="tel"
-                  value={form.telephone}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, telephone: e.target.value }))
-                  }
-                  placeholder="+221 77 000 00 00"
-                  required
-                  className="w-full pl-12 pr-4 py-3.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
-                />
-              </div>
+              <PhoneField
+                variant="glass"
+                value={form.telephone}
+                onChange={(telephone) => setForm((f) => ({ ...f, telephone }))}
+                autoComplete="username"
+                required
+              />
             </div>
 
             <div>

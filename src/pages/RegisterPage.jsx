@@ -6,7 +6,8 @@ import { useCategories } from "@/hooks/useCategories";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Wrench, Phone, Lock, Check, Eye, EyeOff, Tag, MapPin, Info } from "lucide-react";
+import PhoneField from "@/components/common/PhoneField";
+import { User, Wrench, Lock, Check, Eye, EyeOff, Tag, MapPin, Info } from "lucide-react";
 import MapPicker from "@/components/common/MapPicker";
 
 import bgImage from '/images/metiers/register-bg.jpg';
@@ -161,19 +162,12 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Téléphone</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-indigo-400">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <input
-                  type="tel"
-                  value={form.telephone}
-                  onChange={(e) => set("telephone", e.target.value)}
-                  required
-                  className="w-full pl-12 pr-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
-                  placeholder="+221 77 000 00 00"
-                />
-              </div>
+              <PhoneField
+                variant="glass"
+                value={form.telephone}
+                onChange={(telephone) => set("telephone", telephone)}
+                required
+              />
             </div>
 
             <div>

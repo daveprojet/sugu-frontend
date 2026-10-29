@@ -95,10 +95,10 @@ export default function AboutPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link 
-                to="/inscription-artisan" 
+                to="/devenir-partenaire"
                 className="inline-flex items-center gap-2 border border-white/30 bg-white/10 backdrop-blur-sm text-white font-medium px-6 py-3 rounded-full hover:bg-white/20 transition-all duration-300"
               >
-                Devenir artisan
+                Devenir partenaire
               </Link>
             </div>
           </motion.div>

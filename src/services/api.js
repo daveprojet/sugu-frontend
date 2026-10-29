@@ -126,7 +126,7 @@ api.interceptors.response.use(
 
 // ── Auth ──────────────────────────────────────────
 export const authService = {
-  login:    (data) => api.post('/auth/token/', data),
+  login:    (data) => api.post('/auth/token/', { ...data, espace: 'plateforme' }),
   register: (data) => api.post('/auth/register/', data),
   logout:   ()     => api.post('/auth/logout/'),
   me:       ()     => api.get('/auth/me/'),
@@ -172,6 +172,11 @@ export const identiteService = {
   upsert: (uid, formData) => api.put(`/artisans/${uid}/identite/`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+}
+
+// ── Partenaires ───────────────────────────────────────
+export const partenaireService = {
+  candidater: (data) => api.post('/partenaires/candidatures/', data),
 }
 
 // ── Contacts ──────────────────────────────────────────

@@ -3,6 +3,10 @@ import { authService, setAuthToken, clearAuthToken, setSessionExpiredHandler } f
 
 const AuthContext = createContext(null)
 
+// Seuls les clients et artisans ont accès à la plateforme Bricolibe ;
+// l'équipe (directeur, assistance, admin) passe par le dashboard.
+const PLATFORM_ROLES = ['client', 'artisan']
+
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null)
   const [loading, setLoading] = useState(true)
@@ -10,7 +14,12 @@ export function AuthProvider({ children }) {
   const fetchMe = useCallback(async () => {
     try {
       const { data } = await authService.me()
-      setUser(data)
+      if (PLATFORM_ROLES.includes(data.role)) {
+        setUser(data)
+      } else {
+        clearAuthToken()
+        setUser(null)
+      }
     } catch {
       setUser(null)
     } finally {
