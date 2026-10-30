@@ -4,10 +4,12 @@ import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import BackLink from "@/components/common/BackLink";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import { useCreateDemande } from "@/hooks/useDemandes";
 import { useCategorie } from "@/hooks/useCategories";
 import { useAuth } from "@/context/AuthContext";
+import { getServerErrorMessage } from "@/utils/errors";
 import { normalizeCoord } from "@/utils/geo";
 import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
@@ -68,7 +70,7 @@ export default function ArtisanDetailPage() {
   const { uid } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: artisan, isLoading } = useArtisan(uid);
+  const { data: artisan, isLoading, error: artisanError } = useArtisan(uid);
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 });
   const avis = avisPage?.results || [];
   const totalAvis = avisPage?.count || 0;
@@ -82,6 +84,7 @@ export default function ArtisanDetailPage() {
   const [clientCoords, setClientCoords] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
+  const [photoAgrandie, setPhotoAgrandie] = useState(false);
   const [modePaiement, setModePaiement] = useState("en_ligne");
 
   const { data: categorieDetail } = useCategorie(selectedCategorie);
@@ -100,6 +103,15 @@ export default function ArtisanDetailPage() {
       );
     }
   }, [artisan?.latitude, artisan?.longitude, clientCoords]);
+
+  useEffect(() => {
+    if (!photoAgrandie) return undefined;
+    const fermerSurEchap = (e) => {
+      if (e.key === "Escape") setPhotoAgrandie(false);
+    };
+    document.addEventListener("keydown", fermerSurEchap);
+    return () => document.removeEventListener("keydown", fermerSurEchap);
+  }, [photoAgrandie]);
 
   const retryGeo = () => {
     if (!navigator.geolocation) return;
@@ -142,7 +154,7 @@ export default function ArtisanDetailPage() {
   if (!artisan)
     return (
       <div className="text-center py-24 text-gray-500">
-        Artisan introuvable.
+        {getServerErrorMessage(artisanError) ? "Impossible de charger ce profil pour le moment." : "Artisan introuvable."}
       </div>
     );
 
@@ -205,13 +217,13 @@ export default function ArtisanDetailPage() {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Link
-            to="/artisans"
+          <BackLink
+            fallback="/artisans"
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 hover:gap-2 transition-all duration-200 mb-6 font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour aux artisans
-          </Link>
+            Retour
+          </BackLink>
         </motion.div>
 
         <motion.div
@@ -224,11 +236,18 @@ export default function ArtisanDetailPage() {
           <motion.div variants={itemVariants} className="md:col-span-1">
             <div className="bg-white rounded-xl border border-line p-6 text-center">
               {artisan.photo ? (
-                <img
-                  src={artisan.photo}
-                  alt={artisan.prenom}
-                  className="w-28 h-28 rounded-full object-cover mx-auto mb-5 border border-line"
-                />
+                <button
+                  type="button"
+                  onClick={() => setPhotoAgrandie(true)}
+                  aria-label={`Agrandir la photo de ${artisan.prenom}`}
+                  className="block w-28 h-28 mx-auto mb-5 rounded-full cursor-zoom-in hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                >
+                  <img
+                    src={artisan.photo}
+                    alt={artisan.prenom}
+                    className="w-28 h-28 rounded-full object-cover border border-line"
+                  />
+                </button>
               ) : (
                 <div className="w-28 h-28 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-extrabold text-4xl uppercase mx-auto mb-5">
                   {artisan.prenom?.[0]}
@@ -301,7 +320,7 @@ export default function ArtisanDetailPage() {
               )}
 
               <div className="mt-4">
-                {artisan.bloque || artisan.bloque_refus ? (
+                {artisan.bloque || artisan.bloque_refus || artisan.suspendu ? (
                   <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold bg-canvas text-muted">
                     <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Temporairement indisponible
                   </span>
@@ -317,7 +336,7 @@ export default function ArtisanDetailPage() {
               </div>
 
               {/* Contact buttons */}
-              {!artisan.bloque && !artisan.bloque_refus && (
+              {!artisan.bloque && !artisan.bloque_refus && !artisan.suspendu && (
                 <div className="mt-6 flex flex-col gap-3">
                   <button
                     onClick={openDemandeOrAuth}
@@ -580,6 +599,36 @@ export default function ArtisanDetailPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Photo agrandie */}
+      {photoAgrandie && artisan.photo && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo de ${artisan.prenom} ${artisan.nom}`}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 cursor-zoom-out"
+          onClick={() => setPhotoAgrandie(false)}
+        >
+          <button
+            type="button"
+            autoFocus
+            aria-label="Fermer"
+            onClick={() => setPhotoAgrandie(false)}
+            className="absolute top-4 right-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors"
+          >
+            <X className="w-5 h-5 text-ink" />
+          </button>
+          <motion.img
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.15 }}
+            src={artisan.photo}
+            alt={`${artisan.prenom} ${artisan.nom}`}
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-full rounded-xl object-contain cursor-default"
+          />
+        </div>
+      )}
 
       {/* Fullscreen map modal */}
       {mapFullscreen && artisan.latitude && artisan.longitude && (

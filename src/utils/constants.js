@@ -42,9 +42,36 @@ export const STATUTS_IDENTITE = {
   REJETEE:    { label: 'Rejetée',                     color: 'bg-red-100 text-red-800' },
 }
 
+// Un client ne signale qu'un artisan qui a pris en charge sa demande.
+export const STATUTS_DEMANDE_SIGNALABLE = ['ACCEPTEE', 'PRIX_FIXE', 'EN_COURS', 'TERMINEE']
+
+export const MOTIFS_SIGNALEMENT = [
+  { value: 'TRAVAIL_NON_EXECUTE', label: 'Travail non exécuté' },
+  { value: 'TRAVAIL_MAL_FAIT', label: 'Travail mal fait' },
+  { value: 'DOMMAGE', label: 'Dommage matériel' },
+  { value: 'ABSENCE_RETARD', label: 'Absence ou retard' },
+  { value: 'PRIX', label: 'Désaccord sur le prix' },
+  { value: 'COMPORTEMENT', label: 'Comportement inapproprié' },
+  { value: 'FRAUDE', label: 'Fraude ou arnaque' },
+  { value: 'AUTRE', label: 'Autre' },
+]
+
+export const METHODES_PAYTECH = [
+  { value: 'Orange Money', label: 'Orange Money' },
+  { value: 'Wave', label: 'Wave' },
+  { value: 'Free Money', label: 'Free Money' },
+  { value: 'Carte Bancaire', label: 'Carte Bancaire' },
+]
+
+export const PROFILS_DOSSIER = [
+  { value: 'PROFESSIONNEL', label: 'Professionnel (attestation, certificat et CV)' },
+  { value: 'NON_PROFESSIONNEL', label: 'Non professionnel (historique sur Bricolibe)' },
+]
+
 export const TYPES_DOCUMENT_PRO = [
-  { value: 'CERTIFICAT',  label: 'Certificat / diplôme' },
   { value: 'ATTESTATION', label: 'Attestation de travaux' },
+  { value: 'CERTIFICAT',  label: 'Certificat / diplôme' },
+  { value: 'CV',          label: 'CV' },
   { value: 'REALISATION', label: 'Photo de réalisation' },
   { value: 'AUTRE',       label: 'Autre justificatif' },
 ]

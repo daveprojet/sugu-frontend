@@ -12,6 +12,7 @@ import {
   Upload,
   XCircle,
 } from 'lucide-react'
+import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import {
   useAjouterDocumentPro,
@@ -19,7 +20,7 @@ import {
   useSaveDossierPro,
   useSupprimerDocumentPro,
 } from '@/hooks/useArtisans'
-import { STATUTS_IDENTITE, TYPES_DOCUMENT_PRO } from '@/utils/constants'
+import { PROFILS_DOSSIER, STATUTS_IDENTITE, TYPES_DOCUMENT_PRO } from '@/utils/constants'
 import { MAX_FILE_SIZE, resolveImageUrl } from '@/utils/helpers'
 import Spinner from '@/components/common/Spinner'
 
@@ -57,12 +58,13 @@ export default function DossierProPage() {
   const ajouterDocument = useAjouterDocumentPro()
   const supprimerDocument = useSupprimerDocumentPro()
 
-  const [infos, setInfos] = useState({ nb_travaux_realises: '', annees_experience: '', description: '' })
+  const [infos, setInfos] = useState({ profil: 'PROFESSIONNEL', nb_travaux_realises: '', annees_experience: '', description: '' })
   const [document, setDocument] = useState(DOCUMENT_VIDE)
 
   useEffect(() => {
     if (dossier) {
       setInfos({
+        profil: dossier.profil || 'PROFESSIONNEL',
         nb_travaux_realises: dossier.nb_travaux_realises ?? '',
         annees_experience: dossier.annees_experience ?? '',
         description: dossier.description || '',
@@ -83,6 +85,7 @@ export default function DossierProPage() {
       await saveDossier.mutateAsync({
         uid,
         data: {
+          profil: infos.profil,
           nb_travaux_realises: Number(infos.nb_travaux_realises) || 0,
           annees_experience: infos.annees_experience === '' ? null : Number(infos.annees_experience),
           description: infos.description,
@@ -147,12 +150,12 @@ export default function DossierProPage() {
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
-          <Link
-            to="/mon-profil"
+          <BackLink
+            fallback="/mon-profil"
             className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center text-muted hover:text-indigo-700 hover:border-indigo-300 transition-colors duration-150"
           >
             <ArrowLeft className="w-5 h-5" />
-          </Link>
+          </BackLink>
           <div>
             <p className="text-sm font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">Espace Artisan</p>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Mon dossier professionnel</h1>
@@ -162,9 +165,9 @@ export default function DossierProPage() {
         <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-5 flex gap-4">
           <Award className="w-6 h-6 text-indigo-600 flex-shrink-0" />
           <p className="text-sm text-indigo-900">
-            Certificats, diplômes, attestations de travaux, photos de vos réalisations… Une fois votre dossier
-            validé par notre équipe, le badge <b>« Vérifié »</b> s'affiche sur votre profil. Toute modification
-            le renvoie en vérification.
+            Une fois votre dossier validé par notre équipe, activez le badge <b>« Vérifié »</b> (25 000 FCFA par an,
+            renouvelable) pour l'afficher sur votre profil. Toute modification renvoie le dossier en vérification,
+            sans perdre la période déjà payée.
           </p>
         </div>
 
@@ -196,7 +199,14 @@ export default function DossierProPage() {
                 <p className="mt-1 text-sm text-amber-700">Votre dossier est en cours de vérification par nos équipes.</p>
               )}
               {statut === 'VERIFIEE' && (
-                <p className="mt-1 text-sm text-emerald-700">Dossier validé : le badge « Vérifié » est affiché sur votre profil.</p>
+                <p className="mt-1 text-sm text-emerald-700">
+                  {dossier.badge_actif
+                    ? `Badge « Vérifié » actif jusqu'au ${new Date(dossier.badge_expire_le).toLocaleDateString('fr-FR')}. `
+                    : 'Dossier validé : il ne reste plus qu\'à activer votre badge. '}
+                  <Link to="/dashboard-artisan/abonnements" className="underline font-semibold">
+                    {dossier.badge_actif ? 'Gérer mon abonnement' : 'Activer mon badge'}
+                  </Link>
+                </p>
               )}
             </div>
           </div>
@@ -204,6 +214,32 @@ export default function DossierProPage() {
 
         <form onSubmit={enregistrerInfos} className="bg-white rounded-xl border border-line p-6 md:p-8 space-y-5">
           <h2 className="text-lg font-bold text-ink">Votre expérience</h2>
+          <div>
+            <label className="block text-sm font-semibold text-ink mb-2">Votre profil</label>
+            <select
+              value={infos.profil}
+              onChange={(e) => setInfos({ ...infos, profil: e.target.value })}
+              className={inputClass}
+            >
+              {PROFILS_DOSSIER.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </select>
+            {infos.profil === 'PROFESSIONNEL' ? (
+              <p className="text-xs text-muted mt-2">
+                Justificatifs obligatoires : une attestation, un certificat et un CV.
+              </p>
+            ) : (
+              <div className="mt-2 rounded-lg border border-line-soft bg-canvas-soft p-3 text-xs text-muted space-y-1">
+                <p>Conditions : au moins 20 clients traités et une note moyenne d'au moins 3,5/5. Notre équipe contacte ensuite certains clients pour confirmer.</p>
+                {dossier?.eligibilite && (
+                  <p className="font-semibold text-ink">
+                    Votre situation : {dossier.eligibilite.clients_traites} client(s) traité(s), note moyenne de {dossier.eligibilite.note_moyenne}/5.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-ink mb-2">Nombre de travaux réalisés</label>

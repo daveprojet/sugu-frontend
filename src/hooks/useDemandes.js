@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { demandeService } from '@/services/api'
 import { toast } from 'react-toastify'
-import { extractApiError } from '@/utils/errors'
+import { extractApiError, getServerErrorMessage } from '@/utils/errors'
 
 export function useDemandes(params = {}) {
   return useQuery(
@@ -33,7 +33,7 @@ export function useCreateDemande() {
         qc.invalidateQueries('demandes')
         toast.success('Demande envoyée avec succès !')
       },
-      onError: (e) => toast.error('Erreur lors de l\'envoi de la demande '),
+      onError: (e) => toast.error(extractApiError(e, 'Erreur lors de l\'envoi de la demande')),
     }
   )
 }
@@ -79,7 +79,7 @@ export function useConfirmerPaiement() {
         toast.success('Paiement confirmé avec succès !')
       },
       onError: (e) => toast.error(
-        e.response?.data?.montant?.[0] || 'Erreur lors de la confirmation du paiement'
+        getServerErrorMessage(e) || e.response?.data?.montant?.[0] || 'Erreur lors de la confirmation du paiement'
       ),
     }
   )

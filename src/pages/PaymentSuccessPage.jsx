@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle, ShieldCheck, ChevronLeft, Loader2 } from 'lucide-react'
 import { usePaytechVerify } from '@/hooks/usePaiements'
 import { useAuth } from '@/context/AuthContext'
+import { extractApiError } from '@/utils/errors'
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
@@ -24,9 +25,15 @@ export default function PaymentSuccessPage() {
   }, [token])
 
   const verifying = verify.isLoading
+  const reponse = verify.data
+  const typePaiement = reponse?.data?.paiement?.type
+  const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost'
+  // 202 : PayTech n'a pas encore confirmé, le paiement n'est donc pas acquis.
   const error = verify.isError
-    ? verify.error?.response?.data?.detail || 'Impossible de confirmer le paiement.'
-    : ''
+    ? extractApiError(verify.error, 'Impossible de confirmer le paiement.')
+    : reponse?.status === 202
+      ? 'Votre paiement est en cours de confirmation.'
+      : ''
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-emerald-50/40 via-white to-indigo-50/40 flex items-center justify-center px-4 py-16">
@@ -66,7 +73,9 @@ export default function PaymentSuccessPage() {
           <>
             <h1 className="font-display text-2xl font-bold text-gray-900">Paiement effectué !</h1>
             <p className="text-sm text-gray-500">
-              {isArtisan
+              {estAbonnement
+                ? 'Votre abonnement est activé. Merci pour votre confiance.'
+                : isArtisan
                 ? 'Votre commission a été réglée avec succès. Merci pour votre confiance.'
                 : 'Votre dépannage a été réglé avec succès. Merci pour votre confiance.'}
             </p>
@@ -76,10 +85,10 @@ export default function PaymentSuccessPage() {
         <div className="flex flex-col gap-3 pt-2">
           {isArtisan ? (
             <Link
-              to="/dashboard-artisan/commissions"
+              to={estAbonnement ? '/dashboard-artisan/abonnements' : '/dashboard-artisan/commissions'}
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
             >
-              Mes commissions
+              {estAbonnement ? 'Mes abonnements' : 'Mes commissions'}
             </Link>
           ) : (
             <Link

@@ -24,6 +24,8 @@ export default function PaymentCancelPage() {
   }, [token])
 
   const cancelling = cancel.isLoading
+  const typePaiement = cancel.data?.data?.paiement?.type
+  const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost'
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-amber-50/40 via-white to-indigo-50/40 flex items-center justify-center px-4 py-16">
@@ -43,7 +45,9 @@ export default function PaymentCancelPage() {
           <p className="text-sm text-gray-500 mt-2">
             {cancelling
               ? 'Nous enregistrons l\'annulation de votre paiement.'
-              : isArtisan
+              : estAbonnement
+                ? 'Vous avez annulé le paiement de votre abonnement. Aucun montant n\'a été débité.'
+                : isArtisan
                 ? 'Vous avez annulé le paiement de votre commission. Aucun montant n\'a été débité.'
                 : 'Vous avez annulé le paiement de votre dépannage. Aucun montant n\'a été débité.'}
           </p>
@@ -51,7 +55,7 @@ export default function PaymentCancelPage() {
 
         <div className="flex flex-col gap-3 pt-2">
           <Link
-            to={isArtisan ? '/dashboard-artisan/commissions' : '/dashboard-client'}
+            to={estAbonnement ? '/dashboard-artisan/abonnements' : isArtisan ? '/dashboard-artisan/commissions' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4" /> Réessayer le paiement

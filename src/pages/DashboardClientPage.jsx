@@ -9,7 +9,8 @@ import { usePaytechInit } from '@/hooks/usePaiements'
 import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
-import { STATUTS_DEMANDE } from '@/utils/constants'
+import SignalementModal from '@/components/common/SignalementModal'
+import { STATUTS_DEMANDE, STATUTS_DEMANDE_SIGNALABLE } from '@/utils/constants'
 import {
   Inbox,
   Clock,
@@ -48,6 +49,7 @@ export default function DashboardClientPage() {
   const [especesModal, setEspecesModal] = useState(null)
   const [montantEspeces, setMontantEspeces] = useState('')
   const [payingDemandeId, setPayingDemandeId] = useState(null)
+  const [demandeSignalee, setDemandeSignalee] = useState(null)
   const avisRef = useRef(null)
 
   useEffect(() => {
@@ -411,6 +413,15 @@ export default function DashboardClientPage() {
                         </td>
                         <td className="px-6 py-4 text-muted text-xs align-middle">
                           {new Date(demande.created_at).toLocaleDateString('fr-FR')}
+                          {STATUTS_DEMANDE_SIGNALABLE.includes(demande.statut) && (
+                            <button
+                              type="button"
+                              onClick={() => setDemandeSignalee(demande)}
+                              className="block mt-1 text-[11px] font-medium text-muted hover:text-red-600 hover:underline transition-colors"
+                            >
+                              Signaler
+                            </button>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-right align-middle">
                           {demande.statut !== 'TERMINEE' ? (
@@ -524,6 +535,14 @@ export default function DashboardClientPage() {
             </motion.section>
           )}
         </AnimatePresence>
+
+        {demandeSignalee && (
+          <SignalementModal
+            demandeId={demandeSignalee.id}
+            cibleNom={demandeSignalee.artisan_nom}
+            onClose={() => setDemandeSignalee(null)}
+          />
+        )}
 
         {/* Confirmation d'annulation */}
         <AnimatePresence>

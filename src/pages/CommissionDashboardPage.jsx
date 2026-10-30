@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import { useCommissions, usePaiements, usePaytechInit, useReversements } from '@/hooks/usePaiements'
 import Spinner from '@/components/common/Spinner'
+import { METHODES_PAYTECH } from '@/utils/constants'
 import {
   Wallet,
   Clock,
@@ -18,17 +19,18 @@ import {
   TrendingUp,
 } from 'lucide-react'
 
-const METHODES_PAYTECH = [
-  { value: 'Orange Money', label: 'Orange Money' },
-  { value: 'Wave', label: 'Wave' },
-  { value: 'Free Money', label: 'Free Money' },
-  { value: 'Carte Bancaire', label: 'Carte Bancaire' },
-]
+const OBJETS_PAIEMENT = {
+  commission: 'Commission',
+  depannage: 'Dépannage',
+  badge: 'Badge « Vérifié »',
+  boost: 'Boost',
+}
 
 const MOYENS_PAIEMENT = [
   { value: 'wave', label: 'Wave', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   { value: 'orange_money', label: 'Orange Money', color: 'bg-orange-50 text-orange-700 border-orange-200' },
   { value: 'paytech', label: 'PayTech', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { value: 'offert', label: 'Offert', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
 ]
 
 const STATUTS_PAIEMENT = {
@@ -109,12 +111,12 @@ export default function CommissionDashboardPage() {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div className="flex items-center gap-3">
-            <Link
-              to="/dashboard-artisan"
+            <BackLink
+              fallback="/dashboard-artisan"
               className="p-2 rounded-full border border-line bg-white hover:bg-canvas-soft text-muted hover:text-ink transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
-            </Link>
+            </BackLink>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
                 Mes commissions
@@ -367,6 +369,7 @@ export default function CommissionDashboardPage() {
                   <thead className="bg-canvas-soft text-xs uppercase tracking-wider text-muted">
                     <tr>
                       <th className="px-6 py-3.5 font-semibold">Date</th>
+                      <th className="px-6 py-3.5 font-semibold">Objet</th>
                       <th className="px-6 py-3.5 font-semibold">Montant</th>
                       <th className="px-6 py-3.5 font-semibold">Moyen</th>
                       <th className="px-6 py-3.5 font-semibold">Statut</th>
@@ -388,6 +391,7 @@ export default function CommissionDashboardPage() {
                               minute: '2-digit',
                             })}
                           </td>
+                          <td className="px-6 py-4 text-muted">{OBJETS_PAIEMENT[p.type] || p.type}</td>
                           <td className="px-6 py-4 font-semibold text-ink">
                             {p.montant.toLocaleString("fr-FR")} FCFA
                           </td>

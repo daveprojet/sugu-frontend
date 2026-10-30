@@ -218,6 +218,15 @@ export const paytechService = {
   cancel: (token) => api.post('/commissions/paiements/paytech/cancel/', { token }),
 }
 
+export const signalementService = {
+  create: (data) => api.post('/signalements/', data),
+}
+
+export const abonnementService = {
+  get:                () => api.get('/commissions/abonnements/'),
+  activerBoostOffert: () => api.post('/commissions/abonnements/boost-offert/'),
+}
+
 // ── Reversements (gain artisan) ───────────────────────
 export const reversementService = {
   list:   () => api.get('/commissions/reversements/'),

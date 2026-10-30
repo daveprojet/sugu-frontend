@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
 import { normalizeCoord } from "@/utils/geo";
+import RechercheAdresse from "@/components/common/RechercheAdresse";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -117,7 +118,11 @@ export default function MapPicker({ value, onChange }) {
   }, [value]);
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+    <div className="relative isolate rounded-2xl border border-gray-200 shadow-sm">
+      <div className="bg-white px-4 pt-3 rounded-t-2xl">
+        <RechercheAdresse onSelect={handlePositionSelect} />
+      </div>
+
       <div className="bg-white px-4 py-3 flex items-center justify-between gap-3">
         <button
           type="button"
@@ -181,8 +186,8 @@ export default function MapPicker({ value, onChange }) {
         )}
       </MapContainer>
 
-      <div className="bg-gray-50 px-4 py-2 text-[11px] text-gray-400 text-center">
-        Cliquez sur la carte ou utilisez "Ma position actuelle"
+      <div className="bg-gray-50 px-4 py-2 text-[11px] text-gray-400 text-center rounded-b-2xl">
+        Recherchez un lieu, cliquez sur la carte ou utilisez "Ma position actuelle"
       </div>
     </div>
   );
