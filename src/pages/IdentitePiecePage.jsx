@@ -156,15 +156,15 @@ export default function IdentitePiecePage() {
           <div className="flex items-center gap-4">
             <Link
               to="/mon-profil"
-              className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-indigo-600 hover:border-indigo-300 transition-all shadow-sm"
+              className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center text-muted hover:text-indigo-700 hover:border-indigo-300 transition-colors duration-150"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <p className="text-sm font-semibold text-indigo-600 mb-0.5 uppercase tracking-wider">
+              <p className="text-sm font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">
                 Espace Artisan
               </p>
-              <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
                 Ma pièce d'identité
               </h1>
             </div>
@@ -175,7 +175,7 @@ export default function IdentitePiecePage() {
         {hasIdentity && (
           <motion.div
             variants={itemVariants}
-            className={`rounded-2xl border p-5 flex items-center gap-4 ${
+            className={`rounded-xl border p-5 flex items-center gap-4 ${
               isVerified
                 ? 'bg-emerald-50 border-emerald-200'
                 : statut === 'REJETEE'
@@ -224,43 +224,43 @@ export default function IdentitePiecePage() {
         >
           {/* Current Documents Preview */}
           {hasIdentity && (identite.recto || identite.verso || identite.selfie) && (
-            <motion.div variants={itemVariants} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6 md:p-8">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-700">
                   <FileImage className="w-4 h-4" />
                 </div>
-                <h2 className="font-display text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-bold text-ink">
                   Documents actuels
                 </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {identite.recto && (
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Recto</p>
+                    <p className="text-xs font-semibold text-muted mb-2">Recto</p>
                     <img
                       src={rectoPreview || resolveImageUrl(identite.recto)}
                       alt="Recto pièce d'identité"
-                      className="w-full rounded-xl border border-gray-200 shadow-sm object-cover max-h-64"
+                      className="w-full rounded-lg border border-line object-cover max-h-64"
                     />
                   </div>
                 )}
                 {identite.selfie && (
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Selfie</p>
+                    <p className="text-xs font-semibold text-muted mb-2">Selfie</p>
                     <img
                       src={selfiePreview || resolveImageUrl(identite.selfie)}
                       alt="Selfie avec pièce d'identité"
-                      className="w-full rounded-xl border border-gray-200 shadow-sm object-cover max-h-64"
+                      className="w-full rounded-lg border border-line object-cover max-h-64"
                     />
                   </div>
                 )}
                 {identite.verso && (
                   <div>
-                    <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Verso</p>
+                    <p className="text-xs font-semibold text-muted mb-2">Verso</p>
                     <img
                       src={versoPreview || resolveImageUrl(identite.verso)}
                       alt="Verso pièce d'identité"
-                      className="w-full rounded-xl border border-gray-200 shadow-sm object-cover max-h-64"
+                      className="w-full rounded-lg border border-line object-cover max-h-64"
                     />
                   </div>
                 )}
@@ -270,12 +270,12 @@ export default function IdentitePiecePage() {
 
           {/* Upload Form — hidden when verified */}
           {!isVerified && (
-            <motion.div variants={itemVariants} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-700">
                   <Upload className="w-4 h-4" />
                 </div>
-                <h2 className="font-display text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-bold text-ink">
                   {hasIdentity ? 'Mettre à jour' : 'Ajouter'} ma pièce d'identité
                 </h2>
               </div>
@@ -283,13 +283,13 @@ export default function IdentitePiecePage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Type de pièce */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-ink mb-2">
                     Type de pièce
                   </label>
                   <select
                     value={typePiece}
                     onChange={(e) => setTypePiece(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                    className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                   >
                     {TYPE_PIECES.map((t) => (
                       <option key={t.value} value={t.value}>
@@ -301,16 +301,16 @@ export default function IdentitePiecePage() {
 
                 {/* Recto */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-ink mb-2">
                     Recto <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-start gap-4">
-                    <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group">
-                      <Upload className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 transition-colors mb-2" />
-                      <span className="text-sm font-medium text-gray-500 group-hover:text-indigo-600">
+                    <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group">
+                      <Upload className="w-8 h-8 text-muted group-hover:text-indigo-700 transition-colors mb-2" />
+                      <span className="text-sm font-medium text-muted group-hover:text-indigo-700">
                         {rectoFile ? rectoFile.name : 'Cliquez pour sélectionner'}
                       </span>
-                      <span className="text-xs text-gray-400 mt-1">JPG, PNG — max 5 Mo</span>
+                      <span className="text-xs text-muted mt-1">JPG, PNG — max 5 Mo</span>
                       <input
                         type="file"
                         accept="image/jpeg,image/jpg,image/png"
@@ -323,12 +323,12 @@ export default function IdentitePiecePage() {
                         <img
                           src={rectoPreview}
                           alt="Aperçu recto"
-                          className="h-40 w-32 rounded-xl border border-gray-200 object-cover shadow-sm"
+                          className="h-40 w-32 rounded-lg border border-line object-cover"
                         />
                         <button
                           type="button"
                           onClick={removeRecto}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors"
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                         >
                           ✕
                         </button>
@@ -339,34 +339,34 @@ export default function IdentitePiecePage() {
 
                 {/* Selfie */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-ink mb-2">
                     Selfie avec la pièce à côté du visage <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-400 mb-3 ml-1">
+                  <p className="text-xs text-muted mb-3 ml-1">
                     Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage
                   </p>
                   <div className="flex items-start gap-4">
                     <div
                       onClick={() => setShowCamera(true)}
-                      className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group"
+                      className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group"
                     >
-                      <Camera className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 transition-colors mb-2" />
-                      <span className="text-sm font-medium text-gray-500 group-hover:text-indigo-600">
+                      <Camera className="w-8 h-8 text-muted group-hover:text-indigo-700 transition-colors mb-2" />
+                      <span className="text-sm font-medium text-muted group-hover:text-indigo-700">
                         {selfieFile ? selfieFile.name : 'Prendre une photo avec la caméra'}
                       </span>
-                      <span className="text-xs text-gray-400 mt-1">JPG, PNG — max 5 Mo</span>
+                      <span className="text-xs text-muted mt-1">JPG, PNG — max 5 Mo</span>
                     </div>
                     {selfiePreview && (
                       <div className="relative flex-shrink-0">
                         <img
                           src={selfiePreview}
                           alt="Aperçu selfie"
-                          className="h-40 w-32 rounded-xl border border-gray-200 object-cover shadow-sm"
+                          className="h-40 w-32 rounded-lg border border-line object-cover"
                         />
                         <button
                           type="button"
                           onClick={removeSelfie}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors"
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                         >
                           ✕
                         </button>
@@ -377,18 +377,18 @@ export default function IdentitePiecePage() {
 
                 {/* Verso */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-ink mb-2">
                     Verso {versoRequis
                       ? <span className="text-red-500">*</span>
-                      : <span className="text-gray-400 font-normal">(facultatif pour un passeport)</span>}
+                      : <span className="text-muted font-normal">(facultatif pour un passeport)</span>}
                   </label>
                   <div className="flex items-start gap-4">
-                    <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all duration-200 group">
-                      <Upload className="w-8 h-8 text-gray-400 group-hover:text-indigo-500 transition-colors mb-2" />
-                      <span className="text-sm font-medium text-gray-500 group-hover:text-indigo-600">
+                    <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group">
+                      <Upload className="w-8 h-8 text-muted group-hover:text-indigo-700 transition-colors mb-2" />
+                      <span className="text-sm font-medium text-muted group-hover:text-indigo-700">
                         {versoFile ? versoFile.name : 'Cliquez pour sélectionner'}
                       </span>
-                      <span className="text-xs text-gray-400 mt-1">JPG, PNG — max 5 Mo</span>
+                      <span className="text-xs text-muted mt-1">JPG, PNG — max 5 Mo</span>
                       <input
                         type="file"
                         accept="image/jpeg,image/jpg,image/png"
@@ -401,12 +401,12 @@ export default function IdentitePiecePage() {
                         <img
                           src={versoPreview}
                           alt="Aperçu verso"
-                          className="h-40 w-32 rounded-xl border border-gray-200 object-cover shadow-sm"
+                          className="h-40 w-32 rounded-lg border border-line object-cover"
                         />
                         <button
                           type="button"
                           onClick={removeVerso}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors"
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                         >
                           ✕
                         </button>
@@ -420,7 +420,7 @@ export default function IdentitePiecePage() {
                   <button
                     type="submit"
                     disabled={uploadIdentite.isLoading}
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {uploadIdentite.isLoading ? (
                       <span className="flex items-center gap-2">

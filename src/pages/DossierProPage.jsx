@@ -24,7 +24,7 @@ import { MAX_FILE_SIZE, resolveImageUrl } from '@/utils/helpers'
 import Spinner from '@/components/common/Spinner'
 
 const inputClass =
-  'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none'
+  'w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none'
 
 const FORMATS_DOCUMENT = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
 const MAX_FICHIERS = 3
@@ -39,9 +39,9 @@ function VignetteFichier({ src, estPdf, nom, href }) {
   ) : (
     <img src={src} alt={nom || 'Justificatif'} className="w-full h-full object-cover" />
   )
-  const classe = 'block w-24 h-24 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50'
+  const classe = 'block w-24 h-24 rounded-lg overflow-hidden border border-line bg-canvas-soft'
   return href ? (
-    <a href={href} target="_blank" rel="noreferrer" className={`${classe} hover:ring-2 hover:ring-indigo-400 transition`}>
+    <a href={href} target="_blank" rel="noreferrer" className={`${classe} hover:border-indigo-300 transition-colors duration-150`}>
       {contenu}
     </a>
   ) : (
@@ -149,17 +149,17 @@ export default function DossierProPage() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
           <Link
             to="/mon-profil"
-            className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-indigo-600 hover:border-indigo-300 transition-all shadow-sm"
+            className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center text-muted hover:text-indigo-700 hover:border-indigo-300 transition-colors duration-150"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <p className="text-sm font-semibold text-indigo-600 mb-0.5 uppercase tracking-wider">Espace Artisan</p>
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">Mon dossier professionnel</h1>
+            <p className="text-sm font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">Espace Artisan</p>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Mon dossier professionnel</h1>
           </div>
         </motion.div>
 
-        <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 flex gap-4">
+        <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-5 flex gap-4">
           <Award className="w-6 h-6 text-indigo-600 flex-shrink-0" />
           <p className="text-sm text-indigo-900">
             Certificats, diplômes, attestations de travaux, photos de vos réalisations… Une fois votre dossier
@@ -170,7 +170,7 @@ export default function DossierProPage() {
 
         {statutConfig && (
           <div
-            className={`rounded-2xl border p-5 flex items-center gap-4 ${
+            className={`rounded-xl border p-5 flex items-center gap-4 ${
               statut === 'VERIFIEE'
                 ? 'bg-emerald-50 border-emerald-200'
                 : statut === 'REJETEE'
@@ -202,11 +202,11 @@ export default function DossierProPage() {
           </div>
         )}
 
-        <form onSubmit={enregistrerInfos} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-5">
-          <h2 className="font-display text-lg font-semibold text-gray-900">Votre expérience</h2>
+        <form onSubmit={enregistrerInfos} className="bg-white rounded-xl border border-line p-6 md:p-8 space-y-5">
+          <h2 className="text-lg font-bold text-ink">Votre expérience</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nombre de travaux réalisés</label>
+              <label className="block text-sm font-semibold text-ink mb-2">Nombre de travaux réalisés</label>
               <input
                 type="number"
                 min="0"
@@ -218,7 +218,7 @@ export default function DossierProPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Années d'expérience</label>
+              <label className="block text-sm font-semibold text-ink mb-2">Années d'expérience</label>
               <input
                 type="number"
                 min="0"
@@ -231,7 +231,7 @@ export default function DossierProPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Autres informations (optionnel)</label>
+            <label className="block text-sm font-semibold text-ink mb-2">Autres informations (optionnel)</label>
             <textarea
               rows="3"
               value={infos.description}
@@ -244,32 +244,32 @@ export default function DossierProPage() {
             <button
               type="submit"
               disabled={saveDossier.isLoading}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-60"
             >
               {saveDossier.isLoading ? 'Enregistrement…' : 'Enregistrer'}
             </button>
           </div>
         </form>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-5">
-          <h2 className="font-display text-lg font-semibold text-gray-900">Mes justificatifs</h2>
+        <div className="bg-white rounded-xl border border-line p-6 md:p-8 space-y-5">
+          <h2 className="text-lg font-bold text-ink">Mes justificatifs</h2>
           {documents.length ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {documents.map((doc) => (
-                <div key={doc.uid} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                <div key={doc.uid} className="rounded-lg border border-line-soft bg-canvas-soft p-4">
                   <div className="flex items-start gap-2 mb-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-ink">
                         {TYPES_DOCUMENT_PRO.find((t) => t.value === doc.type_document)?.label || doc.type_document}
                       </p>
-                      {doc.libelle && <p className="text-xs text-gray-500 truncate">{doc.libelle}</p>}
+                      {doc.libelle && <p className="text-xs text-muted truncate">{doc.libelle}</p>}
                     </div>
                     <button
                       type="button"
                       onClick={() => supprimerDocument.mutate({ uid, docUid: doc.uid })}
                       disabled={supprimerDocument.isLoading}
                       aria-label="Supprimer ce justificatif"
-                      className="p-2 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition"
+                      className="p-2 rounded-full text-muted hover:text-red-600 hover:bg-red-50 transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -288,13 +288,13 @@ export default function DossierProPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">Aucun justificatif pour l'instant.</p>
+            <p className="text-sm text-muted">Aucun justificatif pour l'instant.</p>
           )}
 
-          <form onSubmit={envoyerDocument} className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-            <h3 className="sm:col-span-2 text-sm font-semibold text-gray-900">Ajouter un justificatif</h3>
+          <form onSubmit={envoyerDocument} className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-line-soft">
+            <h3 className="sm:col-span-2 text-sm font-semibold text-ink">Ajouter un justificatif</h3>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type de justificatif</label>
+              <label className="block text-sm font-semibold text-ink mb-2">Type de justificatif</label>
               <select
                 value={document.type_document}
                 onChange={(e) => setDocument({ ...document, type_document: e.target.value })}
@@ -306,7 +306,7 @@ export default function DossierProPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Intitulé (optionnel)</label>
+              <label className="block text-sm font-semibold text-ink mb-2">Intitulé (optionnel)</label>
               <input
                 value={document.libelle}
                 maxLength={150}
@@ -325,7 +325,7 @@ export default function DossierProPage() {
                         type="button"
                         onClick={() => retirerFichier(index)}
                         aria-label={`Retirer ${f.file.name}`}
-                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs shadow-md hover:bg-red-600 transition-colors"
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                       >
                         ✕
                       </button>
@@ -334,14 +334,14 @@ export default function DossierProPage() {
                 </div>
               )}
               {document.fichiers.length < MAX_FICHIERS && (
-                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all group">
-                  <Upload className="w-7 h-7 text-gray-400 group-hover:text-indigo-500 mb-2" />
-                  <span className="text-sm font-medium text-gray-500 group-hover:text-indigo-600">
+                <label className="flex flex-col items-center justify-center h-32 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-all group">
+                  <Upload className="w-7 h-7 text-muted group-hover:text-indigo-700 mb-2" />
+                  <span className="text-sm font-medium text-muted group-hover:text-indigo-700">
                     {document.fichiers.length
                       ? `Ajouter un autre fichier (${document.fichiers.length}/${MAX_FICHIERS})`
                       : "Cliquez pour sélectionner jusqu'à 3 fichiers"}
                   </span>
-                  <span className="text-xs text-gray-400 mt-1">PDF, JPG, PNG — max 5 Mo chacun · 10 justificatifs max</span>
+                  <span className="text-xs text-muted mt-1">PDF, JPG, PNG — max 5 Mo chacun · 10 justificatifs max</span>
                   <input
                     type="file"
                     multiple
@@ -356,7 +356,7 @@ export default function DossierProPage() {
               <button
                 type="submit"
                 disabled={ajouterDocument.isLoading}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-60"
               >
                 <Upload className="w-4 h-4" /> {ajouterDocument.isLoading ? 'Envoi…' : 'Ajouter le justificatif'}
               </button>

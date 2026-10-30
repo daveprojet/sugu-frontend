@@ -118,22 +118,22 @@ export default function ArtisansPage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-4 md:p-6 mb-8 flex flex-wrap items-end gap-3 md:gap-4"
+          className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-end gap-3"
         >
-          <div className="flex items-center gap-2 text-sm font-medium text-gray-500 pr-2 border-r border-gray-200/70 hidden sm:flex">
+          <div className="items-center gap-2 text-xs font-semibold text-muted pr-3 py-3 border-r border-line hidden sm:flex">
             <Filter className="w-4 h-4" /> Filtres
           </div>
 
           <div className="flex-1 min-w-[140px]">
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Catégorie</label>
+            <label className="block text-xs font-semibold text-muted mb-1.5">Catégorie</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                 <Briefcase className="w-4 h-4" />
               </div>
               <select
                 value={filters.categorie}
                 onChange={e => handleFilter('categorie', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="">Toutes les catégories</option>
                 {categories.map(c => (
@@ -144,15 +144,15 @@ export default function ArtisansPage() {
           </div>
 
           <div className="flex-1 min-w-[140px]">
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Quartier</label>
+            <label className="block text-xs font-semibold text-muted mb-1.5">Quartier</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                 <MapPin className="w-4 h-4" />
               </div>
               <select
                 value={filters.quartier}
                 onChange={e => handleFilter('quartier', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="">Tous les quartiers</option>
                 {QUARTIERS_DAKAR.map(q => <option key={q} value={q}>{q}</option>)}
@@ -161,15 +161,15 @@ export default function ArtisansPage() {
           </div>
 
           <div className="flex-1 min-w-[140px]">
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Note min.</label>
+            <label className="block text-xs font-semibold text-muted mb-1.5">Note min.</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                 <Star className="w-4 h-4" />
               </div>
               <select
                 value={filters.note_moyenne}
                 onChange={e => handleFilter('note_moyenne', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="">Toutes les notes</option>
                 <option value="1">1 étoile et plus</option>
@@ -182,15 +182,15 @@ export default function ArtisansPage() {
           </div>
 
           <div className="flex-1 min-w-[140px]">
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Disponibilité</label>
+            <label className="block text-xs font-semibold text-muted mb-1.5">Disponibilité</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                 <CheckCircle className="w-4 h-4" />
               </div>
               <select
                 value={filters.disponible}
                 onChange={e => handleFilter('disponible', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="true">Disponible</option>
                 <option value="false">Non disponible</option>
@@ -201,7 +201,7 @@ export default function ArtisansPage() {
           {(filters.quartier || filters.categorie || filters.note_moyenne || filters.disponible) && (
             <button
               onClick={() => setSearchParams({}, { replace: true })}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full border border-gray-200 bg-white/50 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all duration-200 shadow-sm ml-auto md:ml-0"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-line bg-white text-[13px] font-semibold text-ink hover:bg-canvas-soft transition-colors duration-150 ml-auto md:ml-0"
             >
               Effacer <X className="w-3.5 h-3.5" />
             </button>

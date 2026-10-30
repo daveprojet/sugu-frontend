@@ -40,6 +40,11 @@ export default {
           800: '#3E2D14',
           900: '#1A1208',
         },
+        // tokens neutres de ArtisanCard
+        ink:    { DEFAULT: '#26354d', strong: '#1f2d44' },
+        muted:  '#5d6c84',
+        line:   { DEFAULT: '#dce5f2', soft: '#edf1f7' },
+        canvas: { DEFAULT: '#f3f6fc', soft: '#f7f9fd' },
       },
       fontFamily: {
         display: ['"Plus Jakarta Sans"', 'sans-serif'],

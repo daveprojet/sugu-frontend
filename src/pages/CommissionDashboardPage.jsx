@@ -34,7 +34,7 @@ const MOYENS_PAIEMENT = [
 const STATUTS_PAIEMENT = {
   EN_COURS: { label: 'En cours', color: 'bg-amber-50 text-amber-700 border-amber-200' },
   VALIDE:   { label: 'Validé',   color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  ANNULE:   { label: 'Annulé',   color: 'bg-gray-50 text-gray-700 border-gray-200' },
+  ANNULE:   { label: 'Annulé',   color: 'bg-canvas-soft text-ink border-line' },
   ECHEC:    { label: 'Échec',    color: 'bg-red-50 text-red-700 border-red-200' },
 }
 
@@ -111,15 +111,15 @@ export default function CommissionDashboardPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/dashboard-artisan"
-              className="p-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+              className="p-2 rounded-full border border-line bg-white hover:bg-canvas-soft text-muted hover:text-ink transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
                 Mes commissions
               </h1>
-              <p className="text-gray-500 text-sm font-medium mt-0.5">
+              <p className="text-muted text-sm font-medium mt-0.5">
                 Suivez et réglez vos commissions Bricolibe
               </p>
             </div>
@@ -130,21 +130,21 @@ export default function CommissionDashboardPage() {
         <motion.section
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5"
+          className="bg-white rounded-xl border border-line p-5"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h2 className="font-display text-lg font-bold text-gray-900">Mes gains</h2>
-                <p className="text-xs text-gray-500">Reversements de vos dépannages payés en ligne</p>
+                <h2 className="text-lg font-bold text-ink">Mes gains</h2>
+                <p className="text-xs text-muted">Reversements de vos dépannages payés en ligne</p>
               </div>
             </div>
             {totalReverses > 0 && (
               <div className="text-right">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Total reversé</p>
+                <p className="text-xs font-semibold text-muted">Total reversé</p>
                 <p className="font-display text-lg font-bold text-emerald-600">
                   {totalReverses.toLocaleString("fr-FR")} FCFA
                 </p>
@@ -155,7 +155,7 @@ export default function CommissionDashboardPage() {
           {reversementsLoading ? (
             <div className="flex justify-center py-6"><Spinner size="sm" /></div>
           ) : reversements.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">
+            <p className="text-sm text-muted text-center py-4">
               Aucun gain pour le moment. Vos reversements apparaîtront après le paiement en ligne de vos dépannages.
             </p>
           ) : (
@@ -165,24 +165,24 @@ export default function CommissionDashboardPage() {
                 return (
                   <div
                     key={r.uid}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border border-line-soft bg-canvas-soft px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-lg bg-white border border-line flex items-center justify-center">
                         <Banknote className="w-4 h-4 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-sm font-semibold text-ink">
                           {r.montant_gain.toLocaleString("fr-FR")} FCFA
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-muted">
                           Demande #{r.demande_id || '—'} · Commandé {r.montant_commande.toLocaleString("fr-FR")} FCFA
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {r.statut === 'REVERSE' && r.reference_wave && (
-                        <span className="text-[10px] text-gray-400 font-medium">
+                        <span className="text-[10px] text-muted font-medium">
                           Wave : {r.reference_wave}
                         </span>
                       )}
@@ -202,7 +202,7 @@ export default function CommissionDashboardPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`rounded-2xl p-5 flex items-center gap-4 ${
+            className={`rounded-xl p-5 flex items-center gap-4 ${
               user?.bloque
                 ? 'bg-red-50 border border-red-200'
                 : 'bg-amber-50 border border-amber-200'
@@ -236,15 +236,15 @@ export default function CommissionDashboardPage() {
               <button
                 key={key}
                 onClick={() => setFilter(key)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 ${
                   filter === key
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
-                    : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-line bg-white text-muted hover:bg-canvas-soft hover:border-indigo-300'
                 }`}
               >
                 {key === 'all' && <Filter className="w-3 h-3" />}
                 {label}
-                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${filter === key ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${filter === key ? 'bg-white/20' : 'bg-canvas text-muted'}`}>
                   {key === 'all' ? commissions.length : (statutCounts[key] || 0)}
                 </span>
               </button>
@@ -256,12 +256,12 @@ export default function CommissionDashboardPage() {
         {isLoading ? (
           <div className="flex justify-center py-16"><Spinner size="lg" /></div>
         ) : commissions.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
-            <div className="w-16 h-16 rounded-3xl bg-indigo-50 flex items-center justify-center mx-auto mb-4">
-              <Wallet className="w-8 h-8 text-indigo-400" />
+          <div className="bg-white rounded-xl border border-line p-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mx-auto mb-4">
+              <Wallet className="w-8 h-8 text-indigo-700" />
             </div>
-            <p className="font-medium text-gray-500">Aucune commission</p>
-            <p className="text-sm text-gray-400 mt-1">Elles apparaîtront après vos prestations terminées.</p>
+            <p className="font-medium text-muted">Aucune commission</p>
+            <p className="text-sm text-muted mt-1">Elles apparaîtront après vos prestations terminées.</p>
           </div>
         ) : (
           <motion.div
@@ -277,13 +277,12 @@ export default function CommissionDashboardPage() {
                 <motion.div
                   key={c.uid}
                   variants={itemVariants}
-                  whileHover={{ scale: 1.005 }}
-                  className={`bg-white rounded-2xl shadow-sm hover:shadow-lg border p-5 md:p-6 transition-all duration-200 ${
+                  className={`bg-white rounded-xl border p-5 md:p-6 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 ${
                     isOverdue
                       ? 'border-red-200 hover:border-red-300'
                       : isPaid
                       ? 'border-emerald-200 hover:border-emerald-300'
-                      : 'border-gray-100 hover:border-indigo-200'
+                      : 'border-line hover:border-indigo-300'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -304,7 +303,7 @@ export default function CommissionDashboardPage() {
                             <><Clock className="w-3 h-3" /> En attente</>
                           )}
                         </span>
-                        <span className="text-xs text-gray-400 font-medium">
+                        <span className="text-xs text-muted font-medium">
                           {new Date(c.created_at).toLocaleString('fr-FR', {
                             day: 'numeric',
                             month: 'long',
@@ -315,21 +314,21 @@ export default function CommissionDashboardPage() {
                         </span>
                       </div>
 
-                      <p className="text-xs text-gray-500 font-medium mb-1">
+                      <p className="text-xs text-muted font-medium mb-1">
                         Demande #{c.demande_id || '—'}
                       </p>
 
                       <div className="flex items-baseline gap-2 mt-2">
-                        <span className="font-display text-xl font-bold text-gray-900">
+                        <span className="font-display text-xl font-bold text-ink">
                           {c.montant_commission.toLocaleString("fr-FR")} FCFA
                         </span>
-                        <span className="text-xs text-gray-400 font-medium">
+                        <span className="text-xs text-muted font-medium">
                           (10% de {c.montant_commande?.toLocaleString("fr-FR")} FCFA)
                         </span>
                       </div>
 
                       {c.date_echeance && (
-                        <p className={`text-xs mt-2 font-medium ${isOverdue ? 'text-red-600' : 'text-gray-500'}`}>
+                        <p className={`text-xs mt-2 font-medium ${isOverdue ? 'text-red-600' : 'text-muted'}`}>
                           Échéance : {new Date(c.date_echeance).toLocaleString('fr-FR', {
                             day: 'numeric',
                             month: 'long',
@@ -345,7 +344,7 @@ export default function CommissionDashboardPage() {
                       {!isPaid && (
                         <button
                           onClick={() => openPay(c)}
-                          className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-5 py-2.5 rounded-full shadow-md shadow-indigo-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 text-sm"
+                          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-5 py-2.5 transition-colors duration-150"
                         >
                           <CreditCard className="w-4 h-4" /> Payer
                         </button>
@@ -361,11 +360,11 @@ export default function CommissionDashboardPage() {
         {/* Payment History */}
         {!paiementsLoading && paiements.length > 0 && (
           <section className="mt-10">
-            <h2 className="font-display text-lg font-bold text-gray-900 mb-4">Historique des paiements</h2>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <h2 className="text-lg font-bold text-ink mb-4">Historique des paiements</h2>
+            <div className="bg-white rounded-xl border border-line overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50/80 text-xs uppercase tracking-wider text-gray-500">
+                  <thead className="bg-canvas-soft text-xs uppercase tracking-wider text-muted">
                     <tr>
                       <th className="px-6 py-3.5 font-semibold">Date</th>
                       <th className="px-6 py-3.5 font-semibold">Montant</th>
@@ -375,12 +374,12 @@ export default function CommissionDashboardPage() {
                       <th className="px-6 py-3.5 font-semibold">Numéro</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100/80">
+                  <tbody className="divide-y divide-line-soft">
                     {paiements.map((p) => {
                       const statut = STATUTS_PAIEMENT[p.statut] || STATUTS_PAIEMENT.EN_COURS
                       return (
-                        <tr key={p.uid} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-6 py-4 text-gray-600">
+                        <tr key={p.uid} className="hover:bg-canvas-soft transition-colors">
+                          <td className="px-6 py-4 text-muted">
                             {new Date(p.date_paiement).toLocaleString('fr-FR', {
                               day: 'numeric',
                               month: 'long',
@@ -389,12 +388,12 @@ export default function CommissionDashboardPage() {
                               minute: '2-digit',
                             })}
                           </td>
-                          <td className="px-6 py-4 font-semibold text-gray-900">
+                          <td className="px-6 py-4 font-semibold text-ink">
                             {p.montant.toLocaleString("fr-FR")} FCFA
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                              MOYENS_PAIEMENT.find(m => m.value === p.methode)?.color || 'bg-gray-50 text-gray-600 border-gray-200'
+                              MOYENS_PAIEMENT.find(m => m.value === p.methode)?.color || 'bg-canvas-soft text-muted border-line'
                             }`}>
                               {MOYENS_PAIEMENT.find(m => m.value === p.methode)?.label || p.methode}
                             </span>
@@ -404,10 +403,10 @@ export default function CommissionDashboardPage() {
                               {statut.label}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-gray-500 text-xs font-mono">
+                          <td className="px-6 py-4 text-muted text-xs font-mono">
                             {p.reference_transaction || '—'}
                           </td>
-                          <td className="px-6 py-4 text-gray-600 font-mono text-xs">
+                          <td className="px-6 py-4 text-muted font-mono text-xs">
                             {p.telephone || '—'}
                           </td>
                         </tr>
@@ -426,18 +425,18 @@ export default function CommissionDashboardPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6 space-y-6"
+              className="bg-white rounded-xl border border-line w-full max-w-md p-6 space-y-6"
             >
               <div>
-                <h3 className="font-display text-lg font-bold text-gray-900">Payer une commission</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Montant dû : <span className="font-bold text-gray-900">{payModal.montant_commission.toLocaleString("fr-FR")} FCFA</span>
+                <h3 className="text-lg font-bold text-ink">Payer une commission</h3>
+                <p className="text-sm text-muted mt-1">
+                  Montant dû : <span className="font-bold text-ink">{payModal.montant_commission.toLocaleString("fr-FR")} FCFA</span>
                 </p>
               </div>
 
               <form onSubmit={submitPay} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-muted mb-1.5">
                     Moyen de paiement
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -446,10 +445,10 @@ export default function CommissionDashboardPage() {
                         key={value || 'all'}
                         type="button"
                         onClick={() => setMethode(value)}
-                        className={`px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all duration-200 ${
+                        className={`px-4 py-3 rounded-lg border text-sm font-semibold transition-colors duration-150 ${
                           methode === value
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm'
-                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                            ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                            : 'border-line bg-white text-muted hover:bg-canvas-soft'
                         }`}
                       >
                         {label}
@@ -458,7 +457,7 @@ export default function CommissionDashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5 bg-indigo-50/60 border border-indigo-100 rounded-xl p-3.5">
+                <div className="flex items-start gap-2.5 bg-indigo-50/60 border border-indigo-100 rounded-lg p-3.5">
                   <ShieldCheck className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-indigo-800 leading-relaxed">
                     Vous serez redirigé vers la page sécurisée <strong>PayTech</strong> pour finaliser votre paiement
@@ -469,7 +468,7 @@ export default function CommissionDashboardPage() {
                 <div className="flex gap-3 pt-2">
                   <button
                     type="submit"
-                    className="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70"
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-70"
                     disabled={paytechInit.isLoading}
                   >
                     {paytechInit.isLoading ? 'Redirection...' : (
@@ -481,7 +480,7 @@ export default function CommissionDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setPayModal(null)}
-                    className="px-6 py-3 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 rounded-lg border border-line text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors"
                   >
                     Annuler
                   </button>

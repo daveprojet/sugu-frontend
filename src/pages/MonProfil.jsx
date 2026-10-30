@@ -202,13 +202,13 @@ export default function MonProfil() {
         className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10"
       >
         <div>
-          <p className="text-sm font-semibold text-indigo-600 mb-1 uppercase tracking-wider">
+          <p className="text-sm font-semibold text-indigo-700 mb-1 uppercase tracking-wider">
             {isArtisan ? "Espace Artisan" : "Espace Client"}
           </p>
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-gray-900">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-ink">
             Mon profil
           </h1>
-          <p className="text-gray-500 text-sm mt-1.5">
+          <p className="text-muted text-sm mt-1.5">
             Consultez et modifiez vos informations personnelles.
           </p>
         </div>
@@ -216,7 +216,7 @@ export default function MonProfil() {
         {isArtisan && user.artisan_uid && (
           <Link
             to={`/artisans/${user.artisan_uid}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-line bg-white text-sm font-semibold text-ink hover:border-indigo-300 hover:text-indigo-700 transition-colors duration-150"
           >
             <User className="w-4 h-4" />
             Voir mon profil public
@@ -227,18 +227,16 @@ export default function MonProfil() {
       <div className="grid lg:grid-cols-[300px_1fr] gap-8">
         {/* Sidebar - Profile Card */}
         <motion.aside variants={itemVariants} className="h-fit">
-          <div className="bg-white rounded-3xl shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 p-8 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent" />
-            
+          <div className="bg-white rounded-xl border border-line p-8 text-center">
             <div className="relative mx-auto w-28 h-28 group mb-5 mt-2">
               {artisan?.photo ? (
                 <img
                   src={artisan.photo}
                   alt="Profil"
-                  className="w-28 h-28 rounded-full object-cover ring-4 ring-offset-2 ring-indigo-200/70 shadow-md"
+                  className="w-28 h-28 rounded-full object-cover border border-line"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-display font-bold text-3xl shadow-md ring-4 ring-offset-2 ring-indigo-200/70">
+                <div className="w-28 h-28 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-extrabold text-3xl uppercase">
                   {user.prenom?.[0]}
                   {user.nom?.[0]}
                 </div>
@@ -260,57 +258,57 @@ export default function MonProfil() {
               )}
             </div>
 
-            <h2 className="font-display text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-ink">
               {user.prenom} {user.nom}
             </h2>
-            <p className="text-sm text-gray-500 mt-1 font-medium">{user.telephone}</p>
+            <p className="text-sm text-muted mt-1 font-medium">{user.telephone}</p>
             
-            <div className="mt-4 inline-flex items-center rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 px-4 py-1.5 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">
+            <div className="mt-4 inline-flex items-center rounded-full bg-indigo-50 px-4 py-1.5 text-xs font-bold text-indigo-700">
               {isArtisan ? "Artisan" : "Client"}
             </div>
 
             {isArtisan && (
               <Link
                 to="/mon-profil/identite"
-                className="mt-6 flex items-center gap-3 w-full rounded-xl border border-gray-100 bg-gradient-to-r from-amber-50/50 to-orange-50/50 hover:from-amber-100 hover:to-orange-100 px-4 py-3 transition-all duration-200 group"
+                className="mt-6 flex items-center gap-3 w-full rounded-lg border border-line-soft bg-canvas-soft hover:border-indigo-300 px-4 py-3 transition-colors duration-150 group"
               >
                 <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-200 transition-colors">
                   <IdCard className="w-4 h-4" />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-amber-700 transition-colors">
+                  <p className="text-sm font-semibold text-ink group-hover:text-amber-700 transition-colors">
                     Pièce d'identité
                   </p>
-                  <p className="text-[11px] text-gray-500 font-medium">
+                  <p className="text-[11px] text-muted font-medium">
                     Validée = visible dans la recherche
                   </p>
                 </div>
-                <span className="text-xs text-gray-400 group-hover:text-amber-500 transition-colors">→</span>
+                <span className="text-xs text-muted group-hover:text-amber-500 transition-colors">→</span>
               </Link>
             )}
 
             {isArtisan && (
               <Link
                 to="/mon-profil/dossier"
-                className="mt-3 flex items-center gap-3 w-full rounded-xl border border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 hover:from-indigo-100 hover:to-purple-100 px-4 py-3 transition-all duration-200 group"
+                className="mt-3 flex items-center gap-3 w-full rounded-lg border border-line-soft bg-canvas-soft hover:border-indigo-300 px-4 py-3 transition-colors duration-150 group"
               >
                 <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-200 transition-colors">
                   <Award className="w-4 h-4" />
                 </div>
                 <div className="text-left flex-1">
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-indigo-700 transition-colors">
+                  <p className="text-sm font-semibold text-ink group-hover:text-indigo-700 transition-colors">
                     Dossier professionnel
                   </p>
-                  <p className="text-[11px] text-gray-500 font-medium">
+                  <p className="text-[11px] text-muted font-medium">
                     Certificats et travaux · badge « Vérifié »
                   </p>
                 </div>
-                <span className="text-xs text-gray-400 group-hover:text-indigo-500 transition-colors">→</span>
+                <span className="text-xs text-muted group-hover:text-indigo-500 transition-colors">→</span>
               </Link>
             )}
 
             {isArtisan && artisan && (
-              <div className="mt-4 pt-4 border-t border-gray-100 text-left">
+              <div className="mt-4 pt-4 border-t border-line-soft text-left">
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {artisan.categories?.map((cat) => (
                     <span
@@ -321,7 +319,7 @@ export default function MonProfil() {
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5">
+                <p className="text-xs text-muted font-medium flex items-center gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-gray-300" />
                   {artisan.quartier}, {artisan.ville}
                 </p>
@@ -329,7 +327,7 @@ export default function MonProfil() {
                   <div className="flex items-center gap-1.5">
                     <StarRating note={artisan.note_moyenne || 0} size="sm" />
                   </div>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted">
                     {artisan.nb_avis || 0} avis
                   </span>
                 </div>
@@ -342,53 +340,53 @@ export default function MonProfil() {
         <motion.div variants={itemVariants} className="flex flex-col gap-6">
           
           {/* Account Form */}
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+          <div className="bg-white rounded-xl border border-line p-6 md:p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-700">
                 <Pencil className="w-4 h-4" />
               </div>
-              <h2 className="font-display text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-bold text-ink">
                 Informations du compte
               </h2>
             </div>
             <form onSubmit={saveAccount} className="grid md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Prénom
                 </label>
                 <input
                   value={accountForm.prenom}
                   onChange={(e) => setAccount("prenom", e.target.value)}
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Nom
                 </label>
                 <input
                   value={accountForm.nom}
                   onChange={(e) => setAccount("nom", e.target.value)}
                   required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                  className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Téléphone (identifiant de connexion)
                 </label>
                 <button
                   type="button"
                   onClick={openPhoneModal}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-sm text-gray-500 cursor-pointer hover:border-indigo-300 hover:bg-gray-50 transition-all outline-none"
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-line bg-canvas text-sm text-muted cursor-pointer hover:border-indigo-300 hover:bg-canvas-soft transition-all outline-none"
                 >
                   <span>{accountForm.telephone}</span>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 shrink-0">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 shrink-0">
                     <Pencil className="w-3.5 h-3.5" /> Modifier
                   </span>
                 </button>
-                <p className="text-xs text-gray-400 mt-1.5">
+                <p className="text-xs text-muted mt-1.5">
                   Votre numéro est votre identifiant de connexion : sa modification
                   nécessite votre mot de passe.
                 </p>
@@ -397,7 +395,7 @@ export default function MonProfil() {
                 <button
                   type="submit"
                   disabled={savingAccount}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {savingAccount ? (
                     <span className="flex items-center gap-2">
@@ -415,12 +413,12 @@ export default function MonProfil() {
 
           {/* Artisan Form */}
           {isArtisan && (
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <div className="bg-white rounded-xl border border-line p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-700">
                   <User className="w-4 h-4" />
                 </div>
-                <h2 className="font-display text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-bold text-ink">
                   Informations artisan
                 </h2>
               </div>
@@ -430,7 +428,7 @@ export default function MonProfil() {
                   <Spinner />
                 </div>
               ) : !artisan ? (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted">
                   Profil artisan introuvable.
                 </p>
               ) : (
@@ -439,19 +437,19 @@ export default function MonProfil() {
                   className="grid md:grid-cols-2 gap-5"
                 >
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       Catégories (choix multiples)
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border border-gray-200 rounded-2xl max-h-48 overflow-y-auto bg-gray-50/30">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border border-line rounded-lg max-h-48 overflow-y-auto bg-canvas-soft">
                       {allCategories.map((cat) => {
                         const isChecked = artisanForm.categories?.includes(cat.uid);
                         return (
                           <label
                             key={cat.uid}
-                            className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
+                            className={`flex items-center gap-2.5 p-2.5 rounded-lg cursor-pointer transition-colors duration-150 border ${
                               isChecked
-                                ? "bg-indigo-50 border-indigo-300 shadow-sm text-indigo-700"
-                                : "bg-white border-transparent hover:border-gray-200 hover:bg-gray-50 text-gray-600"
+                                ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                                : "bg-white border-transparent hover:border-line hover:bg-canvas-soft text-muted"
                             }`}
                           >
                             <input
@@ -467,14 +465,14 @@ export default function MonProfil() {
                     </div>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <label className="block text-sm font-semibold text-ink mb-2 flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       Votre position géographique
                     </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-3 mb-3">
+                    <div className="bg-canvas-soft border border-line-soft rounded-lg p-3 mb-3">
                       <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
-                        <p className="text-xs text-gray-500 leading-relaxed">
+                        <Info className="w-4 h-4 text-muted mt-0.5 shrink-0" />
+                        <p className="text-xs text-muted leading-relaxed">
                           Indiquez votre position pour que les clients proches vous trouvent.
                           Elle correspond à l&apos;endroit où vous travaillez ou habitez habituellement.
                         </p>
@@ -490,24 +488,24 @@ export default function MonProfil() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       Quartier
                     </label>
                     <input
                       value={artisanForm.quartier}
                       onChange={(e) => setArtisan("quartier", e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                      className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                       placeholder="Rempli automatiquement ou saisissez"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       Ville
                     </label>
                     <select
                       value={artisanForm.ville}
                       onChange={(e) => setArtisan("ville", e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                      className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                     >
                       {VILLES.map((v) => (
                         <option key={v} value={v}>
@@ -517,7 +515,7 @@ export default function MonProfil() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       Disponibilité
                     </label>
                     <select
@@ -525,14 +523,14 @@ export default function MonProfil() {
                       onChange={(e) =>
                         setArtisan("disponible", e.target.value === "true")
                       }
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                      className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                     >
                       <option value="true">Disponible</option>
                       <option value="false">Indisponible</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       Téléphone public
                     </label>
                     <PhoneField
@@ -541,7 +539,7 @@ export default function MonProfil() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       WhatsApp
                     </label>
                     <PhoneField
@@ -550,14 +548,14 @@ export default function MonProfil() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-ink mb-2">
                       Présentation
                     </label>
                     <textarea
                       value={artisanForm.bio}
                       onChange={(e) => setArtisan("bio", e.target.value)}
                       rows={4}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none resize-none"
+                      className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none resize-none"
                       placeholder="Présentez votre expérience, vos spécialités et votre zone d'intervention."
                     />
                   </div>
@@ -565,7 +563,7 @@ export default function MonProfil() {
                     <button
                       type="submit"
                       disabled={updateArtisan.isLoading}
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                      className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {updateArtisan.isLoading ? (
                         <span className="flex items-center gap-2">
@@ -590,18 +588,18 @@ export default function MonProfil() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 md:p-8"
+            className="bg-white rounded-xl border border-line w-full max-w-md p-6 md:p-8"
           >
-            <h3 className="font-display text-lg font-semibold text-gray-900 mb-1">
+            <h3 className="text-lg font-bold text-ink mb-1">
               Modifier mon numéro
             </h3>
-            <p className="text-sm text-gray-500 mb-5">
+            <p className="text-sm text-muted mb-5">
               Votre numéro de téléphone est votre identifiant de connexion. Saisissez
               votre mot de passe actuel pour confirmer le changement.
             </p>
             <form onSubmit={savePhone} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Nouveau numéro
                 </label>
                 <PhoneField
@@ -611,17 +609,17 @@ export default function MonProfil() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-ink mb-2">
                   Mot de passe actuel
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     value={phonePassword}
                     onChange={(e) => setPhonePassword(e.target.value)}
                     required
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-sm outline-none"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                   />
                 </div>
               </div>
@@ -634,14 +632,14 @@ export default function MonProfil() {
                 <button
                   type="button"
                   onClick={() => setPhoneModal(false)}
-                  className="px-5 py-2.5 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+                  className="px-5 py-2.5 rounded-lg border border-line text-sm font-semibold text-ink hover:bg-canvas-soft transition-colors duration-150"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={savingPhone}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-2.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-2.5 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {savingPhone ? (
                     <Spinner size="sm" color="white" />

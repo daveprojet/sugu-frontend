@@ -11,7 +11,6 @@ import { useAuth } from "@/context/AuthContext";
 import { normalizeCoord } from "@/utils/geo";
 import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
-import Badge from "@/components/common/Badge";
 import Spinner from "@/components/common/Spinner";
 import {
   MapPin,
@@ -223,65 +222,61 @@ export default function ArtisanDetailPage() {
         >
           {/* Profil card */}
           <motion.div variants={itemVariants} className="md:col-span-1">
-            <div className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-6 text-center relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent" />
-
+            <div className="bg-white rounded-xl border border-line p-6 text-center">
               {artisan.photo ? (
                 <img
                   src={artisan.photo}
                   alt={artisan.prenom}
-                  className="w-28 h-28 rounded-full object-cover mx-auto mb-5 shadow-md ring-4 ring-indigo-200/70"
+                  className="w-28 h-28 rounded-full object-cover mx-auto mb-5 border border-line"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-4xl font-display mx-auto mb-5 shadow-md ring-4 ring-indigo-200/70">
+                <div className="w-28 h-28 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-extrabold text-4xl uppercase mx-auto mb-5">
                   {artisan.prenom?.[0]}
                   {artisan.nom?.[0]}
                 </div>
               )}
 
-              <h1 className="font-display font-bold text-2xl text-gray-900">
+              <h1 className="text-2xl font-bold text-ink">
                 {artisan.prenom} {artisan.nom}
               </h1>
               {artisan.est_verifie && (
-                <Badge variant="success" className="mt-2">
+                <span className="inline-flex items-center mt-2 rounded-full px-2.5 py-1 text-xs font-bold bg-[#dff3e8] text-[#1f6b45]">
                   <BadgeCheck className="w-3.5 h-3.5 mr-1" /> Vérifié
-                </Badge>
+                </span>
               )}
 
               <div className="flex flex-wrap justify-center gap-1.5 mt-2">
                 {artisan.categories?.map((cat) => (
                   <span
                     key={cat.uid}
-                    className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200/60"
+                    className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700"
                   >
                     {cat.nom}
                   </span>
                 ))}
               </div>
 
-              <div className="flex flex-col items-center mt-3">
-                <div className="flex items-center gap-2">
-                  <StarRating note={artisan.note_moyenne || 0} size="md" />
-                  <span className="text-sm font-semibold text-gray-700">({totalAvis})</span>
-                </div>
+              <div className="flex items-center justify-center gap-2 mt-3 bg-canvas-soft border border-line-soft rounded-lg px-2.5 py-2">
+                <StarRating note={artisan.note_moyenne || 0} size="md" />
+                <span className="text-sm font-bold text-ink">({totalAvis})</span>
               </div>
 
-              <div className="flex items-center justify-center gap-1.5 mt-4 text-sm text-gray-600 bg-gray-50/80 rounded-full px-4 py-1.5 border border-gray-100">
-                <MapPin className="w-4 h-4 text-gray-400" />
+              <div className="flex items-center justify-center gap-1.5 mt-4 text-sm text-muted bg-canvas-soft border border-line-soft rounded-lg px-4 py-1.5">
+                <MapPin className="w-4 h-4" />
                 {artisan.quartier}, {artisan.ville}
               </div>
 
               {artisan.distance_km != null && (
-                <div className="flex items-center justify-center gap-1.5 mt-2 text-sm text-indigo-600">
+                <div className="flex items-center justify-center gap-1.5 mt-2 text-sm text-indigo-700">
                   <Navigation className="w-4 h-4" />
                   <span className="font-semibold">{artisan.distance_km} km</span>
-                  <span className="text-gray-400">de vous</span>
+                  <span className="text-muted">de vous</span>
                 </div>
               )}
 
               {/* Map */}
               {artisan.latitude && artisan.longitude && (
-                <div className="mt-5 rounded-2xl overflow-hidden border border-gray-200 relative" style={{ height: 180 }}>
+                <div className="mt-5 rounded-lg overflow-hidden border border-line relative isolate" style={{ height: 180 }}>
                   <button
                     onClick={() => setMapFullscreen(true)}
                     className="absolute top-2 right-2 z-[1000] bg-white/80 hover:bg-white rounded-full p-1.5 shadow-md transition-colors"
@@ -307,13 +302,17 @@ export default function ArtisanDetailPage() {
 
               <div className="mt-4">
                 {artisan.bloque || artisan.bloque_refus ? (
-                  <Badge variant="default">
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold bg-canvas text-muted">
                     <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Temporairement indisponible
-                  </Badge>
+                  </span>
                 ) : artisan.disponible ? (
-                  <Badge variant="disponible">Disponible maintenant</Badge>
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold bg-[#dff3e8] text-[#1f6b45]">
+                    Disponible maintenant
+                  </span>
                 ) : (
-                  <Badge variant="default">Pas disponible</Badge>
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold bg-canvas text-muted">
+                    Pas disponible
+                  </span>
                 )}
               </div>
 
@@ -322,7 +321,7 @@ export default function ArtisanDetailPage() {
                 <div className="mt-6 flex flex-col gap-3">
                   <button
                     onClick={openDemandeOrAuth}
-                    className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-4 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+                    className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-3 transition-colors duration-150"
                   >
                     Demander un rendez-vous
                   </button>
@@ -334,11 +333,11 @@ export default function ArtisanDetailPage() {
           {/* Détails + avis */}
           <div className="md:col-span-2 flex flex-col gap-6">
             {artisan.bio && (
-              <motion.div variants={itemVariants} className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-6">
-                <h2 className="font-display font-semibold text-gray-900 mb-3 text-lg">
+              <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6">
+                <h2 className="text-lg font-bold text-ink mb-3">
                   À propos
                 </h2>
-                <p className="text-gray-600 leading-relaxed">{artisan.bio}</p>
+                <p className="text-muted leading-relaxed">{artisan.bio}</p>
               </motion.div>
             )}
 
@@ -347,10 +346,10 @@ export default function ArtisanDetailPage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="bg-white/90 backdrop-blur-sm rounded-3xl border-2 border-indigo-300/50 shadow-2xl shadow-indigo-200/40 p-6"
+                className="bg-white rounded-xl border border-indigo-300 p-6"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-display font-semibold text-gray-900 text-lg">
+                  <h2 className="text-lg font-bold text-ink">
                     Décrivez votre besoin
                   </h2>
                   <button
@@ -365,11 +364,11 @@ export default function ArtisanDetailPage() {
 
                   {/* 1. Select catégorie */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                    <label className="block text-xs font-semibold text-muted mb-1.5">
                       Type de dépannage
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                         <List className="w-4 h-4" />
                       </div>
                       <select
@@ -379,7 +378,7 @@ export default function ArtisanDetailPage() {
                           setSelectedCategorie(val);
                           setSelectedServiceUid(null);
                         }}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                        className="w-full pl-10 pr-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
                       >
                         <option value="">-- Choisir une catégorie --</option>
                         {artisan.categories?.map((cat) => (
@@ -392,17 +391,17 @@ export default function ArtisanDetailPage() {
                   {/* 2. Select service (affiché si catégorie réelle choisie) */}
                   {selectedCategorie && (
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                      <label className="block text-xs font-semibold text-muted mb-1.5">
                         Prestation
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                           <Tag className="w-4 h-4" />
                         </div>
                         <select
                           value={selectedServiceUid || ""}
                           onChange={(e) => setSelectedServiceUid(e.target.value || null)}
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                          className="w-full pl-10 pr-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
                         >
                           <option value="">-- Choisir une prestation --</option>
                           {servicesList.map((svc) => (
@@ -418,14 +417,14 @@ export default function ArtisanDetailPage() {
 
                   {/* Note pour la prestation "Autre" */}
                   {selectedServiceUid === "autre" && (
-                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
                       Vous pouvez décrire votre besoin dans la section ci-dessous. L'artisan fixera le prix après discussion avec vous.
                     </p>
                   )}
 
                   {/* 3. Textarea description */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                    <label className="block text-xs font-semibold text-muted mb-1.5">
                       Description de votre besoin
                     </label>
                     <textarea
@@ -434,26 +433,26 @@ export default function ArtisanDetailPage() {
                       placeholder="Décrivez votre problème en détail (ex: Fuite sous l'évier, besoin d'intervention rapide...). L'artisan fixera le prix après discussion."
                       rows={4}
                       required
-                      className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm resize-none"
+                      className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 resize-none"
                     />
                   </div>
 
                   {/* Geolocation status */}
-                  <div className="flex items-center justify-between rounded-xl bg-gray-50/80 border border-gray-200 px-4 py-3">
+                  <div className="flex items-center justify-between rounded-lg bg-canvas-soft border border-line-soft px-4 py-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <LocateFixed className={`w-4 h-4 ${clientCoords ? 'text-emerald-600' : 'text-gray-400'}`} />
+                      <LocateFixed className={`w-4 h-4 ${clientCoords ? 'text-emerald-600' : 'text-muted'}`} />
                       {clientCoords ? (
                         <span className="text-emerald-700 font-medium">
                           Position captée
                         </span>
                       ) : geoLoading ? (
-                        <span className="text-gray-500">Détection de votre position...</span>
+                        <span className="text-muted">Détection de votre position...</span>
                       ) : (
-                        <span className="text-gray-400 italic">Position non disponible</span>
+                        <span className="text-muted">Position non disponible</span>
                       )}
                     </div>
                     {!clientCoords && !geoLoading && (
-                      <button type="button" onClick={retryGeo} className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                      <button type="button" onClick={retryGeo} className="text-xs text-indigo-700 hover:text-indigo-800 font-semibold">
                         Activer
                       </button>
                     )}
@@ -461,11 +460,11 @@ export default function ArtisanDetailPage() {
 
                   {/* Mode de paiement */}
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                    <label className="block text-xs font-semibold text-muted mb-1.5">
                       Moyen de paiement
                     </label>
                     <div className="grid grid-cols-2 gap-3">
-                      <label className={`flex items-start gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${modePaiement === "en_ligne" ? "border-indigo-500 bg-indigo-50" : "border-gray-200 bg-gray-50/80"}`}>
+                      <label className={`flex items-start gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors duration-150 ${modePaiement === "en_ligne" ? "border-indigo-500 bg-indigo-50" : "border-line bg-canvas-soft"}`}>
                         <input
                           type="radio"
                           name="mode_paiement"
@@ -475,11 +474,11 @@ export default function ArtisanDetailPage() {
                           className="mt-1"
                         />
                         <span>
-                          <span className="block text-sm font-semibold text-gray-900">En ligne</span>
-                          <span className="block text-xs text-gray-500">Wave, Orange Money, Free Money ou carte — paiement recommandé, sécurisé.</span>
+                          <span className="block text-sm font-bold text-ink">En ligne</span>
+                          <span className="block text-xs text-muted">Wave, Orange Money, Free Money ou carte — paiement recommandé, sécurisé.</span>
                         </span>
                       </label>
-                      <label className={`flex items-start gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-200 ${modePaiement === "especes" ? "border-indigo-500 bg-indigo-50" : "border-gray-200 bg-gray-50/80"}`}>
+                      <label className={`flex items-start gap-2 px-4 py-3 rounded-lg border cursor-pointer transition-colors duration-150 ${modePaiement === "especes" ? "border-indigo-500 bg-indigo-50" : "border-line bg-canvas-soft"}`}>
                         <input
                           type="radio"
                           name="mode_paiement"
@@ -489,8 +488,8 @@ export default function ArtisanDetailPage() {
                           className="mt-1"
                         />
                         <span>
-                          <span className="block text-sm font-semibold text-gray-900">En espèces</span>
-                          <span className="block text-xs text-gray-500">Paiement comptant à l'artisan, à confirmer sur la plateforme.</span>
+                          <span className="block text-sm font-bold text-ink">En espèces</span>
+                          <span className="block text-xs text-muted">Paiement comptant à l'artisan, à confirmer sur la plateforme.</span>
                         </span>
                       </label>
                     </div>
@@ -499,7 +498,7 @@ export default function ArtisanDetailPage() {
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-2.5 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70"
+                      className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-2.5 transition-colors duration-150 disabled:opacity-70"
                       disabled={createDemande.isLoading}
                     >
                       {createDemande.isLoading ? "Envoi..." : (
@@ -514,13 +513,13 @@ export default function ArtisanDetailPage() {
             )}
 
             {/* Avis */}
-            <motion.div variants={itemVariants} className="bg-white/90 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-6">
-              <h2 className="font-display font-semibold text-gray-900 mb-4 text-lg flex items-center gap-2">
-                Avis clients <span className="text-sm font-normal text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">({totalAvis})</span>
+            <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6">
+              <h2 className="text-lg font-bold text-ink mb-4 flex items-center gap-2">
+                Avis clients <span className="text-xs font-semibold text-muted bg-canvas px-2 py-0.5 rounded-full">{totalAvis}</span>
               </h2>
 
               {totalAvis === 0 ? (
-                <p className="text-gray-400 text-sm italic">
+                <p className="text-sm text-muted">
                   Aucun avis pour le moment.
                 </p>
               ) : (
@@ -529,13 +528,13 @@ export default function ArtisanDetailPage() {
                     {avis.slice(0, 5).map((a) => (
                       <div
                         key={a.id}
-                        className="border-b border-gray-100 pb-5 last:border-0 last:pb-0"
+                        className="border-b border-line-soft pb-5 last:border-0 last:pb-0"
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-sm text-gray-900">
+                          <span className="text-sm font-bold text-ink">
                             {a.client_nom}
                           </span>
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-muted">
                             {new Date(a.created_at).toLocaleDateString("fr-FR")}
                           </span>
                         </div>
@@ -543,23 +542,23 @@ export default function ArtisanDetailPage() {
                           <StarRating note={a.note} size="sm" showNote={false} />
                         </div>
                         {a.commentaire && (
-                          <p className="text-sm text-gray-600 leading-relaxed">
+                          <p className="text-sm text-muted leading-relaxed">
                             {a.commentaire}
                           </p>
                         )}
                         {a.reponse_artisan && (
-                          <div className="mt-3 bg-indigo-50/80 border border-indigo-200/60 rounded-xl p-4">
+                          <div className="mt-3 bg-canvas-soft border border-line-soft rounded-lg p-4">
                             <div className="flex items-center justify-between gap-3 mb-1">
-                              <p className="text-xs font-semibold text-indigo-600">
+                              <p className="text-xs font-semibold text-indigo-700">
                                 Réponse de l'artisan
                               </p>
                               {a.reponse_artisan_at && (
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-muted">
                                   {new Date(a.reponse_artisan_at).toLocaleDateString("fr-FR")}
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-sm text-ink">
                               {a.reponse_artisan}
                             </p>
                           </div>
@@ -570,7 +569,7 @@ export default function ArtisanDetailPage() {
                   {totalAvis > 5 && (
                     <Link
                       to={`/artisans/${uid}/avis`}
-                      className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:gap-3 transition-all duration-200"
+                      className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-800 transition-colors duration-150"
                     >
                       Voir les {totalAvis} avis →
                     </Link>
@@ -641,14 +640,14 @@ export default function ArtisanDetailPage() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+            className="bg-white rounded-xl border border-line w-full max-w-md p-6"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+              <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center">
                 {authModal === "artisan" ? (
-                  <Briefcase className="w-6 h-6 text-white" />
+                  <Briefcase className="w-6 h-6" />
                 ) : (
-                  <LogIn className="w-6 h-6 text-white" />
+                  <LogIn className="w-6 h-6" />
                 )}
               </div>
               <button
@@ -660,13 +659,13 @@ export default function ArtisanDetailPage() {
               </button>
             </div>
 
-            <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+            <h3 className="text-lg font-bold text-ink mb-2">
               {authModal === "artisan"
                 ? "Connexion client requise"
                 : "Connectez-vous pour envoyer votre demande"}
             </h3>
 
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-muted leading-relaxed">
               {authModal === "artisan"
                 ? "Les demandes de rendez-vous sont réservées aux comptes clients. Connectez-vous avec un compte client pour envoyer une demande à cet artisan."
                 : "Pour envoyer une demande à cet artisan, vous devez être connecté : cela lui permet de vous recontacter, de suivre le statut de votre demande et de confirmer le prix depuis votre tableau de bord."}
@@ -676,14 +675,14 @@ export default function ArtisanDetailPage() {
               <button
                 type="button"
                 onClick={goToLogin}
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-4 py-3 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+                className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-3 transition-colors duration-150"
               >
                 <LogIn className="w-4 h-4" /> Se connecter
               </button>
               {authModal === "login" && (
                 <Link
                   to="/inscription"
-                  className="inline-flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="inline-flex items-center justify-center text-sm font-semibold text-indigo-700 hover:text-indigo-800 transition-colors"
                 >
                   Créer un compte
                 </Link>

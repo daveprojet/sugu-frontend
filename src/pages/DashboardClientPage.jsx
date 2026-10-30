@@ -167,10 +167,10 @@ export default function DashboardClientPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="font-display text-2xl md:text-3xl font-bold text-gray-900">
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
             Bonjour, {user?.prenom}
           </h1>
-          <p className="text-gray-500 text-sm mt-1 font-medium">
+          <p className="text-muted text-sm mt-1 font-medium">
             Suivez vos demandes et laissez un avis après une prestation terminée.
           </p>
         </motion.div>
@@ -190,14 +190,13 @@ export default function DashboardClientPage() {
             <motion.div
               key={label}
               variants={itemVariants}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-6 text-center hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300"
+              className="bg-white rounded-xl border border-line p-6 text-center hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150"
             >
-              <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center mx-auto mb-3`}>
+              <div className={`w-12 h-12 rounded-full ${bg} flex items-center justify-center mx-auto mb-3`}>
                 <Icon className={`w-6 h-6 ${color}`} />
               </div>
               <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
-              <p className="text-xs text-gray-500 mt-1 font-medium">{label}</p>
+              <p className="text-xs text-muted mt-1 font-medium">{label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -207,20 +206,20 @@ export default function DashboardClientPage() {
           variants={itemVariants}
           initial="hidden"
           animate="visible"
-          className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 overflow-hidden"
+          className="bg-white rounded-xl border border-line overflow-hidden"
         >
-          <div className="px-6 py-5 border-b border-gray-100/80 flex items-center justify-between gap-3">
-            <h2 className="font-display font-semibold text-lg text-gray-900 flex items-center gap-2">
+          <div className="px-6 py-5 border-b border-line-soft flex items-center justify-between gap-3">
+            <h2 className="text-lg font-bold text-ink flex items-center gap-2">
               Mes demandes
               {demandes.length > 0 && (
-                <span className="bg-gray-100 text-gray-600 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                <span className="bg-canvas text-muted text-xs px-2.5 py-0.5 rounded-full font-medium">
                   {demandes.length}
                 </span>
               )}
             </h2>
             <Link
               to="/artisans"
-              className="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium px-4 py-2 rounded-full shadow-md shadow-indigo-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2 transition-colors duration-150"
             >
               <Search className="w-4 h-4" />
               Trouver un artisan
@@ -228,18 +227,18 @@ export default function DashboardClientPage() {
           </div>
 
           {demandes.length > 0 && (
-            <div className="px-6 py-3 border-b border-gray-100/80 flex items-center gap-2 flex-wrap">
+            <div className="px-6 py-3 border-b border-line-soft flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setStatutFilter('all')}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 ${
                   statutFilter === 'all'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
-                    : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-line bg-white text-muted hover:bg-canvas-soft hover:border-indigo-300'
                 }`}
               >
                 <Filter className="w-3 h-3" />
                 Toutes
-                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === 'all' ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`ml-0.5 text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === 'all' ? 'bg-white/20' : 'bg-canvas text-muted'}`}>
                   {demandes.length}
                 </span>
               </button>
@@ -250,14 +249,14 @@ export default function DashboardClientPage() {
                   <button
                     key={key}
                     onClick={() => setStatutFilter(key)}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shadow-sm ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 ${
                       statutFilter === key
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
-                        : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                        ? 'bg-indigo-600 text-white'
+                        : 'border border-line bg-white text-muted hover:bg-canvas-soft hover:border-indigo-300'
                     }`}
                   >
                     {label}
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === key ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${statutFilter === key ? 'bg-white/20' : 'bg-canvas text-muted'}`}>
                       {count}
                     </span>
                   </button>
@@ -268,11 +267,11 @@ export default function DashboardClientPage() {
 
           {demandes.length === 0 ? (
             <div className="p-16 text-center">
-              <div className="w-16 h-16 rounded-3xl bg-indigo-50 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mx-auto mb-4">
                 <Inbox className="w-8 h-8 text-indigo-400" />
               </div>
-              <p className="font-medium text-gray-500">Aucune demande envoyée</p>
-              <p className="text-sm text-gray-400 mt-1">Choisissez un artisan et envoyez votre première demande.</p>
+              <p className="font-medium text-muted">Aucune demande envoyée</p>
+              <p className="text-sm text-muted mt-1">Choisissez un artisan et envoyez votre première demande.</p>
               <Link
                 to="/artisans"
                 className="inline-flex items-center gap-1 mt-4 text-indigo-600 hover:text-indigo-700 font-medium text-sm"
@@ -283,7 +282,7 @@ export default function DashboardClientPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[750px] text-sm text-left">
-                <thead className="bg-gray-50/80 text-xs uppercase tracking-wider text-gray-500">
+                <thead className="bg-canvas-soft text-xs uppercase tracking-wider text-muted">
                   <tr>
                     <th className="px-6 py-3.5 font-semibold">Artisan</th>
                     <th className="px-6 py-3.5 font-semibold">Contact</th>
@@ -294,23 +293,23 @@ export default function DashboardClientPage() {
                     <th className="px-6 py-3.5 font-semibold text-right">Avis</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100/80">
+                <tbody className="divide-y divide-line-soft">
                   {demandesFiltrees.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center">
-                        <p className="font-medium text-gray-500">Aucune demande avec ce statut</p>
+                        <p className="font-medium text-muted">Aucune demande avec ce statut</p>
                       </td>
                     </tr>
                   ) : demandesFiltrees.map((demande) => {
-                    const statusConfig = STATUTS_DEMANDE[demande.statut] || { color: 'bg-gray-100 text-gray-600', label: demande.statut };
+                    const statusConfig = STATUTS_DEMANDE[demande.statut] || { color: 'bg-canvas text-muted', label: demande.statut };
                     return (
-                      <tr key={demande.id} className="group hover:bg-gray-50/50 transition-colors">
+                      <tr key={demande.id} className="group hover:bg-canvas-soft transition-colors">
                         <td className="px-6 py-4 align-middle">
                           <Link to={`/artisans/${demande.artisan_uid}`} className="block group/link">
-                            <span className="font-medium text-gray-900 group-hover/link:text-indigo-600 transition-colors">
+                            <span className="font-bold text-ink group-hover/link:text-indigo-700 transition-colors">
                               {demande.artisan_nom}
                             </span>
-                            <p className="text-xs text-gray-400 mt-0.5">{Array.isArray(demande.artisan_categories) ? demande.artisan_categories.join(', ') : demande.artisan_categories}</p>
+                            <p className="text-xs text-muted mt-0.5">{Array.isArray(demande.artisan_categories) ? demande.artisan_categories.join(', ') : demande.artisan_categories}</p>
                           </Link>
                         </td>
                         <td className="px-6 py-4 align-middle">
@@ -318,7 +317,7 @@ export default function DashboardClientPage() {
                               {demande.artisan_telephone && (
                                 <a
                                   href={`tel:${demande.artisan_telephone}`}
-                                  className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-indigo-600 transition-colors"
+                                  className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-indigo-700 transition-colors"
                                 >
                                   <Phone className="w-3.5 h-3.5" />
                                   {demande.artisan_telephone}
@@ -329,7 +328,7 @@ export default function DashboardClientPage() {
                                   href={`https://wa.me/${demande.artisan_whatsapp.replace(/\D/g, "")}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 transition-colors"
+                                  className="inline-flex items-center gap-1.5 text-xs text-emerald-700 hover:text-emerald-800 transition-colors"
                                 >
                                   <MessageCircle className="w-3.5 h-3.5" />
                                   {demande.artisan_whatsapp}
@@ -337,31 +336,31 @@ export default function DashboardClientPage() {
                               )}
                             </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-600 max-w-xs align-middle">
+                        <td className="px-6 py-4 text-muted max-w-xs align-middle">
                           <p className="line-clamp-2 leading-relaxed">{demande.description}</p>
                           {demande.service_element_nom && (
-                            <p className="text-xs text-indigo-500 font-medium mt-1">
+                            <p className="text-xs text-indigo-700 font-semibold mt-1">
                               {demande.service_element_nom}
                             </p>
                           )}
                         </td>
                         <td className="px-6 py-4 align-middle">
                           {demande.prix_affiche != null ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
                               <BadgeDollarSign className="w-4 h-4" />
                               {demande.prix_affiche.toLocaleString("fr-FR")} FCFA
                             </span>
                           ) : demande.statut === 'ACCEPTEE' ? (
-                            <span className="inline-flex items-center gap-1 text-xs italic text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
                               <Clock className="w-3 h-3" />
                               Prix en attente de l'artisan
                             </span>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">—</span>
+                            <span className="text-xs text-muted">—</span>
                           )}
                         </td>
                         <td className="px-6 py-4 align-middle">
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm ${statusConfig.color}`}>
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${statusConfig.color}`}>
                             {statusConfig.label}
                           </span>
 
@@ -372,7 +371,7 @@ export default function DashboardClientPage() {
                                 <button
                                   onClick={() => payerEnLigne(demande)}
                                   disabled={payingDemandeId === demande.id}
-                                  className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50/80 text-indigo-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 shadow-sm disabled:opacity-60"
+                                  className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150 disabled:opacity-60"
                                 >
                                   <Wallet className="w-3.5 h-3.5" />
                                   {payingDemandeId === demande.id ? 'Paiement...' : 'Payer en ligne'}
@@ -381,7 +380,7 @@ export default function DashboardClientPage() {
                                 <button
                                   onClick={() => ouvrirEspeces(demande)}
                                   disabled={confirmerPaiement.isLoading}
-                                  className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50/80 text-emerald-700 text-[11px] font-medium px-3 py-1.5 rounded-full hover:bg-emerald-100 hover:border-emerald-300 transition-all duration-200 shadow-sm"
+                                  className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-100 hover:border-emerald-300 transition-colors duration-150"
                                 >
                                   <HandCoins className="w-3.5 h-3.5" />
                                   Confirmer le paiement
@@ -391,7 +390,7 @@ export default function DashboardClientPage() {
                           )}
                           {demande.statut === 'TERMINEE' && demande.est_payee && (
                             <div className="mt-1.5">
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
                                 <CheckCircle className="w-3.5 h-3.5" /> Payée
                               </span>
                             </div>
@@ -410,23 +409,23 @@ export default function DashboardClientPage() {
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-gray-500 text-xs align-middle">
+                        <td className="px-6 py-4 text-muted text-xs align-middle">
                           {new Date(demande.created_at).toLocaleDateString('fr-FR')}
                         </td>
                         <td className="px-6 py-4 text-right align-middle">
                           {demande.statut !== 'TERMINEE' ? (
-                            <span className="text-xs text-gray-400 font-medium italic">
+                            <span className="text-xs text-muted font-medium">
                               Après fin de prestation
                             </span>
                           ) : demande.avis_id ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
                               <CheckCircle className="w-3 h-3" /> Avis envoyé
                             </span>
                           ) : (
                             <button
                               type="button"
                               onClick={() => openAvis(demande)}
-                              className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50/80 text-indigo-700 text-xs font-medium px-3 py-1.5 rounded-full hover:bg-indigo-100 hover:border-indigo-300 transition-all duration-200 shadow-sm"
+                              className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150"
                             >
                               <MessageSquare className="w-3 h-3" /> Laisser un avis
                             </button>
@@ -450,18 +449,18 @@ export default function DashboardClientPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.25 }}
-              className="mt-6 bg-white/90 backdrop-blur-sm rounded-3xl border-2 border-indigo-300/50 shadow-2xl shadow-indigo-200/40 p-6"
+              className="mt-6 bg-white rounded-xl border border-indigo-300 p-6"
             >
               {demandes.filter(d => d.id === avisOpen).map(demande => (
                 <form key={demande.id} onSubmit={(e) => submitAvis(e, demande)} className="flex flex-col gap-5">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-display font-semibold text-gray-900 text-lg">
+                    <h3 className="text-lg font-bold text-ink">
                       Avis pour {demande.artisan_nom}
                     </h3>
                     <button
                       type="button"
                       onClick={() => setAvisOpen(null)}
-                      className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                      className="p-2 rounded-full hover:bg-canvas text-muted hover:text-ink transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -469,13 +468,13 @@ export default function DashboardClientPage() {
 
                   <div className="grid md:grid-cols-[200px_1fr_auto] gap-6 items-start">
                     <div className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1">
+                      <label className="text-xs font-semibold text-muted">
                         Note
                       </label>
                       <select
                         value={avisForm.note}
                         onChange={e => setAvisForm(f => ({ ...f, note: e.target.value }))}
-                        className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none"
+                        className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
                       >
                         {[5, 4, 3, 2, 1].map(note => (
                           <option key={note} value={note}>{note} / 5</option>
@@ -487,7 +486,7 @@ export default function DashboardClientPage() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-1 mb-2 block">
+                      <label className="text-xs font-semibold text-muted mb-2 block">
                         Commentaire
                       </label>
                       <textarea
@@ -495,14 +494,14 @@ export default function DashboardClientPage() {
                         onChange={e => setAvisForm(f => ({ ...f, commentaire: e.target.value }))}
                         placeholder={`Votre retour sur ${demande.artisan_nom}`}
                         rows={4}
-                        className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm resize-none"
+                        className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 resize-none"
                       />
                     </div>
 
                     <div className="flex md:flex-col gap-2 pt-6 md:pt-0">
                       <button
                         type="submit"
-                        className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-6 py-3 transition-colors duration-150 disabled:opacity-70"
                         disabled={createAvis.isLoading}
                       >
                         {createAvis.isLoading ? 'Envoi...' : (
@@ -514,7 +513,7 @@ export default function DashboardClientPage() {
                       <button
                         type="button"
                         onClick={() => setAvisOpen(null)}
-                        className="inline-flex items-center justify-center border border-gray-200 bg-white/80 text-gray-700 font-medium px-6 py-3 rounded-full hover:bg-gray-50 transition-colors shadow-sm"
+                        className="inline-flex items-center justify-center border border-line bg-white text-ink text-sm font-semibold px-6 py-3 rounded-lg hover:bg-canvas-soft transition-colors"
                       >
                         Annuler
                       </button>
@@ -535,25 +534,25 @@ export default function DashboardClientPage() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.25 }}
-                className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+                className="bg-white rounded-xl border border-line w-full max-w-md p-6"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
                     <Ban className="w-6 h-6 text-red-500" />
                   </div>
                   <button
                     type="button"
                     onClick={() => setCancelDemande(null)}
-                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                    className="p-2 rounded-full hover:bg-canvas text-muted hover:text-ink transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                <h3 className="text-lg font-bold text-ink mb-2">
                   Annuler cette demande ?
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-muted leading-relaxed">
                   Votre demande à <strong>{cancelDemande.artisan_nom}</strong> sera annulée et
                   l'artisan en sera prévenu. Cette action est irréversible.
                 </p>
@@ -562,7 +561,7 @@ export default function DashboardClientPage() {
                   <button
                     type="button"
                     onClick={() => setCancelDemande(null)}
-                    className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center justify-center flex-1 border border-line bg-white text-ink text-sm font-semibold px-4 py-3 rounded-lg hover:bg-canvas-soft transition-colors"
                   >
                     Garder ma demande
                   </button>
@@ -570,7 +569,7 @@ export default function DashboardClientPage() {
                     type="button"
                     onClick={submitCancel}
                     disabled={updateDemande.isLoading}
-                    className="inline-flex items-center justify-center flex-1 gap-2 bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-3 rounded-xl shadow-lg shadow-red-500/30 transition-all duration-200 disabled:opacity-70"
+                    className="inline-flex items-center justify-center flex-1 gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-3 rounded-lg transition-colors duration-150 disabled:opacity-70"
                   >
                     {updateDemande.isLoading ? 'Annulation...' : 'Confirmer l\'annulation'}
                   </button>
@@ -589,32 +588,32 @@ export default function DashboardClientPage() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.25 }}
-                className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md p-6"
+                className="bg-white rounded-xl border border-line w-full max-w-md p-6"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
                     <HandCoins className="w-6 h-6 text-emerald-500" />
                   </div>
                   <button
                     type="button"
                     onClick={() => setEspecesModal(null)}
-                    className="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                    className="p-2 rounded-full hover:bg-canvas text-muted hover:text-ink transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <h3 className="font-display font-semibold text-gray-900 text-lg mb-2">
+                <h3 className="text-lg font-bold text-ink mb-2">
                   Confirmer le paiement en espèces
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                <p className="text-sm text-muted leading-relaxed mb-4">
                   Vous avez payé <strong>{especesModal.artisan_nom}</strong> en espèces. Indiquez le
                   montant payé pour confirmer la transaction et libérer la commission de l'artisan.
                 </p>
 
                 <form onSubmit={submitEspeces} className="flex flex-col gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+                    <label className="block text-xs font-semibold text-muted mb-1.5">
                       Montant payé (FCFA)
                     </label>
                     <input
@@ -624,7 +623,7 @@ export default function DashboardClientPage() {
                       min={0}
                       required
                       placeholder="Montant en FCFA"
-                      className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 shadow-sm"
+                      className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors duration-150"
                     />
                   </div>
 
@@ -632,14 +631,14 @@ export default function DashboardClientPage() {
                     <button
                       type="button"
                       onClick={() => setEspecesModal(null)}
-                      className="inline-flex items-center justify-center flex-1 border border-gray-200 bg-white text-gray-700 font-medium px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+                      className="inline-flex items-center justify-center flex-1 border border-line bg-white text-ink text-sm font-semibold px-4 py-3 rounded-lg hover:bg-canvas-soft transition-colors"
                     >
                       Annuler
                     </button>
                     <button
                       type="submit"
                       disabled={confirmerPaiement.isLoading}
-                      className="inline-flex items-center justify-center flex-1 gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-3 rounded-xl shadow-lg shadow-emerald-500/30 transition-all duration-200 disabled:opacity-70"
+                      className="inline-flex items-center justify-center flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-3 rounded-lg transition-colors duration-150 disabled:opacity-70"
                     >
                       {confirmerPaiement.isLoading ? 'Confirmation...' : 'Confirmer'}
                     </button>
