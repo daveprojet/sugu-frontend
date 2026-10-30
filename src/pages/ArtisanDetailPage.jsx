@@ -302,7 +302,7 @@ export default function ArtisanDetailPage() {
               )}
 
               <div className="mt-4">
-                {artisan.bloque || artisan.bloque_refus ? (
+                {artisan.bloque || artisan.bloque_refus || artisan.suspendu ? (
                   <span className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold bg-canvas text-muted">
                     <AlertTriangle className="w-3.5 h-3.5 mr-1" /> Temporairement indisponible
                   </span>
@@ -318,7 +318,7 @@ export default function ArtisanDetailPage() {
               </div>
 
               {/* Contact buttons */}
-              {!artisan.bloque && !artisan.bloque_refus && (
+              {!artisan.bloque && !artisan.bloque_refus && !artisan.suspendu && (
                 <div className="mt-6 flex flex-col gap-3">
                   <button
                     onClick={openDemandeOrAuth}

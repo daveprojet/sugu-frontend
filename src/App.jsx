@@ -28,6 +28,7 @@ import DashboardClientPage from '@/pages/DashboardClientPage'
 import TermsPage from '@/pages/TermsPage'
 import ConfidentialitePage from '@/pages/ConfidentialitePage'
 import CommissionDashboardPage from '@/pages/CommissionDashboardPage'
+import AbonnementsPage from '@/pages/AbonnementsPage'
 import MotDePasseOubliePage from '@/pages/MotDePasseOubliePage'
 import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
@@ -88,6 +89,9 @@ function AppRoutes() {
           } />
           <Route path="/dashboard-artisan" element={
             <PrivateRoute role="artisan"><DashboardArtisanPage /></PrivateRoute>
+          } />
+          <Route path="/dashboard-artisan/abonnements" element={
+            <PrivateRoute role="artisan"><AbonnementsPage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan/commissions" element={
             <PrivateRoute role="artisan"><CommissionDashboardPage /></PrivateRoute>

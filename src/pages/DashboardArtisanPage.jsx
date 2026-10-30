@@ -10,6 +10,7 @@ import { useRepondreAvis } from '@/hooks/useAvis'
 import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
+import SignalementModal from '@/components/common/SignalementModal'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
 import {
   Inbox,
@@ -27,6 +28,7 @@ import {
   Tag,
   AlertTriangle,
   Wallet,
+  Rocket,
   BadgeDollarSign,
   X
 } from 'lucide-react'
@@ -52,6 +54,7 @@ export default function DashboardArtisanPage() {
   const [prixInputs, setPrixInputs] = useState({})
   const [blockedModal, setBlockedModal] = useState(null)
   const [refusDemande, setRefusDemande] = useState(null)
+  const [demandeSignalee, setDemandeSignalee] = useState(null)
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -187,6 +190,12 @@ export default function DashboardArtisanPage() {
               )}
               <Wallet className="w-4 h-4" /> Commissions
             </Link>
+            <Link
+              to="/dashboard-artisan/abonnements"
+              className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+            >
+              <Rocket className="w-4 h-4" /> Abonnements
+            </Link>
             <button
               onClick={toggleDispo}
               className={`group relative flex items-center gap-3 px-6 py-2.5 rounded-lg border font-semibold text-sm transition-colors duration-150
@@ -211,6 +220,25 @@ export default function DashboardArtisanPage() {
           </button>
           </div>
         </motion.div>
+
+        {/* Sanction suite à des signalements avérés */}
+        {user?.sanction && user.sanction !== 'AUCUNE' && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-900">
+                {user.sanction === 'SUSPENDU' ? 'Votre compte est suspendu' : 'La visibilité de votre profil est réduite'}
+              </p>
+              <p className="text-xs text-red-700 mt-0.5">
+                {user.sanction === 'SUSPENDU'
+                  ? 'Suite à des signalements vérifiés par notre équipe, votre profil n\'apparaît plus dans la recherche. Contactez le service client.'
+                  : 'Suite à des signalements vérifiés par notre équipe, votre profil apparaît après les autres et le Boost n\'est plus accessible. Contactez le service client.'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Commission Alert */}
         {user?.bloque && (
@@ -309,7 +337,9 @@ export default function DashboardArtisanPage() {
                   ? 'Dossier en cours de vérification'
                   : dossierPro.statut === 'REJETEE'
                   ? `Dossier rejeté${dossierPro.motif_rejet ? ` : ${dossierPro.motif_rejet}` : ''}`
-                  : 'Badge « Vérifié » obtenu'}
+                  : dossierPro.badge_actif
+                  ? `Badge « Vérifié » actif jusqu'au ${new Date(dossierPro.badge_expire_le).toLocaleDateString('fr-FR')}`
+                  : 'Dossier validé · activez votre badge pour l\'afficher sur votre profil'}
               </p>
             </div>
             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
@@ -555,6 +585,13 @@ export default function DashboardArtisanPage() {
                               year: 'numeric',
                             })}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => setDemandeSignalee(d)}
+                            className="hover:text-red-600 hover:underline transition-colors"
+                          >
+                            Signaler ce client
+                          </button>
                         </div>
                       </div>
 
@@ -763,6 +800,14 @@ export default function DashboardArtisanPage() {
           )}
         </section>
       </div>
+
+      {demandeSignalee && (
+        <SignalementModal
+          demandeId={demandeSignalee.id}
+          cibleNom={demandeSignalee.client_nom}
+          onClose={() => setDemandeSignalee(null)}
+        />
+      )}
 
       <AnimatePresence>
         {blockedModal && (

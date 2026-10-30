@@ -98,6 +98,7 @@ export function usePaytechVerify() {
         qc.invalidateQueries('commissions')
         qc.invalidateQueries('paiements')
         qc.invalidateQueries('demandes')
+        qc.invalidateQueries('abonnements')
         return res
       },
     }

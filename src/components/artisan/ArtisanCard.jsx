@@ -37,6 +37,12 @@ export default function ArtisanCard({ artisan }) {
       transition={{ duration: 0.3 }}
       className="bg-white rounded-xl border border-line p-4 hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 flex flex-col gap-3.5"
     >
+      {artisan.est_booste && (
+        <span className="self-start rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+          Mis en avant
+        </span>
+      )}
+
       {/* En-tête */}
       <div className="flex items-start gap-3">
         <div className="relative flex-shrink-0">
