@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import { avisService } from '@/services/api'
+import { getServerErrorMessage } from '@/utils/errors'
 
 export function useCreateAvis() {
   const qc = useQueryClient()
@@ -15,7 +16,8 @@ export function useCreateAvis() {
         toast.success('Avis publie avec succes.')
       },
       onError: (error) => {
-        const detail = error.response?.data?.non_field_errors?.[0]
+        const detail = getServerErrorMessage(error)
+          || error.response?.data?.non_field_errors?.[0]
           || error.response?.data?.detail
           || 'Impossible de publier cet avis.'
         toast.error(detail)
@@ -37,7 +39,8 @@ export function useRepondreAvis() {
         toast.success('Reponse publiee.')
       },
       onError: (error) => {
-        const detail = error.response?.data?.reponse_artisan?.[0]
+        const detail = getServerErrorMessage(error)
+          || error.response?.data?.reponse_artisan?.[0]
           || error.response?.data?.detail
           || 'Impossible de publier la reponse.'
         toast.error(detail)

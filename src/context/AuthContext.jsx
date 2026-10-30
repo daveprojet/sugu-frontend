@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { toast } from 'react-toastify'
 import { authService, setAuthToken, clearAuthToken, setSessionExpiredHandler } from '@/services/api'
+import { extractApiError, isTransientError } from '@/utils/errors'
 
 const AuthContext = createContext(null)
 
@@ -7,10 +9,13 @@ const AuthContext = createContext(null)
 // l'équipe (directeur, assistance, admin) passe par le dashboard.
 const PLATFORM_ROLES = ['client', 'artisan']
 
+const RESTORE_RETRY_MAX_MS = 30 * 1000
+
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // Renvoie le message d'erreur si l'échec est transitoire : l'utilisateur n'est alors pas déconnecté.
   const fetchMe = useCallback(async () => {
     try {
       const { data } = await authService.me()
@@ -20,18 +25,36 @@ export function AuthProvider({ children }) {
         clearAuthToken()
         setUser(null)
       }
-    } catch {
+    } catch (err) {
+      if (isTransientError(err)) return extractApiError(err)
       setUser(null)
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
+    return null
   }, [])
 
   // Au chargement : le refresh token est dans un cookie httpOnly (invisible JS),
   // donc on tente toujours /me/ — un 401 déclenche un refresh silencieux dans
-  // l'intercepteur ; s'il échoue, user reste null.
+  // l'intercepteur ; s'il échoue, user reste null. Une erreur transitoire ne dit
+  // rien de la session : on réessaie au lieu de renvoyer vers /connexion.
   useEffect(() => {
-    fetchMe()
+    let cancelled = false
+    let timer = null
+    let attempt = 0
+
+    const restore = async () => {
+      const transientError = await fetchMe()
+      if (!transientError || cancelled) return
+      if (attempt === 0) toast.error(transientError, { toastId: transientError })
+      timer = setTimeout(restore, Math.min(1000 * 2 ** attempt, RESTORE_RETRY_MAX_MS))
+      attempt += 1
+    }
+    restore()
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [fetchMe])
 
   // Session réellement expirée (refresh refusé par le serveur) : l'intercepteur

@@ -8,6 +8,7 @@ import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import { useCreateDemande } from "@/hooks/useDemandes";
 import { useCategorie } from "@/hooks/useCategories";
 import { useAuth } from "@/context/AuthContext";
+import { getServerErrorMessage } from "@/utils/errors";
 import { normalizeCoord } from "@/utils/geo";
 import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
@@ -68,7 +69,7 @@ export default function ArtisanDetailPage() {
   const { uid } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: artisan, isLoading } = useArtisan(uid);
+  const { data: artisan, isLoading, error: artisanError } = useArtisan(uid);
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 });
   const avis = avisPage?.results || [];
   const totalAvis = avisPage?.count || 0;
@@ -142,7 +143,7 @@ export default function ArtisanDetailPage() {
   if (!artisan)
     return (
       <div className="text-center py-24 text-gray-500">
-        Artisan introuvable.
+        {getServerErrorMessage(artisanError) ? "Impossible de charger ce profil pour le moment." : "Artisan introuvable."}
       </div>
     );
 

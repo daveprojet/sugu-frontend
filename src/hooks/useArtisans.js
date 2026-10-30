@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { artisanService, dossierProService, identiteService } from '@/services/api'
 import { toast } from 'react-toastify'
+import { extractApiError, getServerErrorMessage } from '@/utils/errors'
 
 export function useArtisans(filters = {}) {
   return useQuery(
@@ -35,7 +36,7 @@ export function useUpdateArtisan() {
         qc.invalidateQueries(['artisan', uid])
         toast.success('Profil mis à jour !')
       },
-      onError: () => toast.error('Erreur lors de la mise à jour'),
+      onError: (error) => toast.error(extractApiError(error, 'Erreur lors de la mise à jour')),
     }
   )
 }
@@ -59,7 +60,8 @@ export function useUploadIdentite() {
         toast.success('Pièce d\'identité mise à jour !')
       },
       onError: (error) => {
-        const msg = error.response?.data?.detail
+        const msg = getServerErrorMessage(error)
+          || error.response?.data?.detail
           || error.response?.data?.recto?.[0]
           || error.response?.data?.verso?.[0]
           || error.response?.data?.selfie?.[0]
@@ -92,6 +94,11 @@ function useDossierMutation(fn, successMessage) {
       toast.success(successMessage)
     },
     onError: (error) => {
+      const serverMessage = getServerErrorMessage(error)
+      if (serverMessage) {
+        toast.error(serverMessage)
+        return
+      }
       const data = error.response?.data || {}
       const first = Object.values(data).flat()[0]
       toast.error(data.detail || data.non_field_errors?.[0] || (typeof first === 'string' ? first : 'Erreur lors de l\'envoi'))
@@ -120,7 +127,7 @@ export function useUploadArtisanPhoto() {
         qc.invalidateQueries(['artisan', uid])
         toast.success('Photo de profil mise à jour !')
       },
-      onError: () => toast.error('Erreur lors du téléchargement'),
+      onError: (error) => toast.error(extractApiError(error, 'Erreur lors du téléchargement')),
     }
   )
 }

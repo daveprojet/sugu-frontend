@@ -1,14 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from 'react-query'
-import { ToastContainer } from 'react-toastify'
+import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
+import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { getServerErrorMessage } from '@/utils/errors'
 import { useGeoLocation } from '@/hooks/useGeoLocation'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import PushPermissionBanner from '@/components/common/PushPermissionBanner'
+import Spinner from '@/components/common/Spinner'
 
 import HomePage           from '@/pages/HomePage'
 import AboutPage          from '@/pages/AboutPage'
@@ -33,6 +35,14 @@ import PaymentCancelPage from '@/pages/PaymentCancelPage'
 import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
 
 const queryClient = new QueryClient({
+  // Sans cela, une liste qui ne se charge pas à cause du serveur s'affiche comme vide.
+  // Le toastId évite d'afficher le même message pour chaque requête en échec.
+  queryCache: new QueryCache({
+    onError: (error) => {
+      const message = getServerErrorMessage(error)
+      if (message) toast.error(message, { toastId: message })
+    },
+  }),
   defaultOptions: {
     queries: { retry: 1, refetchOnWindowFocus: false },
   },
@@ -41,7 +51,7 @@ const queryClient = new QueryClient({
 // Route protégée
 function PrivateRoute({ children, role }) {
   const { user, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>
   if (!user) return <Navigate to="/connexion" replace />
   if (role && user.role !== role) return <Navigate to="/" replace />
   return children

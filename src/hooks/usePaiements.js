@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { commissionService, paiementService, paytechService, reversementService } from '@/services/api'
 import { toast } from 'react-toastify'
+import { getServerErrorMessage } from '@/utils/errors'
 
 export function useReversements() {
   return useQuery(
@@ -53,7 +54,8 @@ export function useCreatePaiement() {
         toast.success('Paiement enregistré avec succès !')
       },
       onError: (e) => {
-        const msg = e.response?.data?.detail
+        const msg = getServerErrorMessage(e)
+          || e.response?.data?.detail
           || e.response?.data?.montant?.[0]
           || 'Erreur lors du paiement'
         toast.error(msg)
@@ -77,7 +79,8 @@ export function usePaytechInit() {
         }
       },
       onError: (e) => {
-        const msg = e.response?.data?.detail
+        const msg = getServerErrorMessage(e)
+          || e.response?.data?.detail
           || e.response?.data?.commission?.[0]
           || 'Erreur lors de la création du paiement'
         toast.error(msg)

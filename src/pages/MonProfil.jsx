@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info, Award } from "lucide-react";
 import PhoneField from "@/components/common/PhoneField";
 import { useAuth } from "@/context/AuthContext";
+import { extractApiError, getServerErrorMessage } from "@/utils/errors";
 import {
   useArtisan,
   useUpdateArtisan,
@@ -116,6 +117,7 @@ export default function MonProfil() {
       toast.success("Profil mis a jour.");
     } catch (error) {
       const detail =
+        getServerErrorMessage(error) ||
         error.response?.data?.telephone?.[0] ||
         error.response?.data?.detail ||
         "Impossible de mettre a jour le profil.";
@@ -143,6 +145,7 @@ export default function MonProfil() {
       toast.success("Numero mis a jour.");
     } catch (error) {
       const detail =
+        getServerErrorMessage(error) ||
         error.response?.data?.current_password?.[0] ||
         error.response?.data?.telephone?.[0] ||
         error.response?.data?.detail ||

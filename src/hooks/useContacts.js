@@ -1,6 +1,7 @@
 import {useMutation} from 'react-query'
 import {contactService} from '@/services/api'
 import {toast} from 'react-toastify'
+import {extractApiError} from '@/utils/errors'
 
 
 export function useCreateContact() {
@@ -10,7 +11,7 @@ export function useCreateContact() {
             onSuccess: () => {
                 toast.success('Message envoyé avec succès !')
             },
-            onError: () => toast.error('Erreur lors de l\'envoi'),
+            onError: (error) => toast.error(extractApiError(error, 'Erreur lors de l\'envoi')),
         }
     )
 }

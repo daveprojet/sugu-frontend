@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle, ShieldCheck, ChevronLeft, Loader2 } from 'lucide-react'
 import { usePaytechVerify } from '@/hooks/usePaiements'
 import { useAuth } from '@/context/AuthContext'
+import { extractApiError } from '@/utils/errors'
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
@@ -25,7 +26,7 @@ export default function PaymentSuccessPage() {
 
   const verifying = verify.isLoading
   const error = verify.isError
-    ? verify.error?.response?.data?.detail || 'Impossible de confirmer le paiement.'
+    ? extractApiError(verify.error, 'Impossible de confirmer le paiement.')
     : ''
 
   return (
