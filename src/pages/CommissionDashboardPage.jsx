@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import { useCommissions, usePaiements, usePaytechInit, useReversements } from '@/hooks/usePaiements'
 import Spinner from '@/components/common/Spinner'
@@ -111,12 +111,12 @@ export default function CommissionDashboardPage() {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div className="flex items-center gap-3">
-            <Link
-              to="/dashboard-artisan"
+            <BackLink
+              fallback="/dashboard-artisan"
               className="p-2 rounded-full border border-line bg-white hover:bg-canvas-soft text-muted hover:text-ink transition-colors"
             >
               <ChevronLeft className="w-5 h-5" />
-            </Link>
+            </BackLink>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
                 Mes commissions

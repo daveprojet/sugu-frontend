@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, BadgeCheck, ChevronLeft, Gift, Rocket, ShieldCheck } from 'lucide-react'
+import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import { useAbonnements, useBoostOffert } from '@/hooks/useAbonnements'
 import { useDossierPro } from '@/hooks/useArtisans'
@@ -110,13 +111,13 @@ export default function AbonnementsPage() {
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
-          <Link
-            to="/dashboard-artisan"
+          <BackLink
+            fallback="/dashboard-artisan"
             aria-label="Retour au tableau de bord"
             className="p-2 rounded-full border border-line bg-white hover:bg-canvas-soft text-muted hover:text-ink transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
-          </Link>
+          </BackLink>
           <div>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Mes abonnements</h1>
             <p className="text-muted text-sm font-medium mt-0.5">Gagnez en visibilité et en crédibilité auprès des clients</p>

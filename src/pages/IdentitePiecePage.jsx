@@ -12,6 +12,7 @@ import {
   FileImage,
   Camera,
 } from 'lucide-react'
+import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import { useIdentite, useUploadIdentite } from '@/hooks/useArtisans'
 import { STATUTS_IDENTITE } from '@/utils/constants'
@@ -154,12 +155,12 @@ export default function IdentitePiecePage() {
           className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
-            <Link
-              to="/mon-profil"
+            <BackLink
+              fallback="/mon-profil"
               className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center text-muted hover:text-indigo-700 hover:border-indigo-300 transition-colors duration-150"
             >
               <ArrowLeft className="w-5 h-5" />
-            </Link>
+            </BackLink>
             <div>
               <p className="text-sm font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">
                 Espace Artisan

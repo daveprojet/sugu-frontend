@@ -12,6 +12,7 @@ import {
   Upload,
   XCircle,
 } from 'lucide-react'
+import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import {
   useAjouterDocumentPro,
@@ -149,12 +150,12 @@ export default function DossierProPage() {
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
-          <Link
-            to="/mon-profil"
+          <BackLink
+            fallback="/mon-profil"
             className="w-10 h-10 rounded-full bg-white border border-line flex items-center justify-center text-muted hover:text-indigo-700 hover:border-indigo-300 transition-colors duration-150"
           >
             <ArrowLeft className="w-5 h-5" />
-          </Link>
+          </BackLink>
           <div>
             <p className="text-sm font-semibold text-indigo-700 mb-0.5 uppercase tracking-wider">Espace Artisan</p>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Mon dossier professionnel</h1>

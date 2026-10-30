@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
+import BackLink from "@/components/common/BackLink";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
@@ -76,13 +77,13 @@ export default function AvisArtisanPage() {
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <Link
-            to={`/artisans/${uid}`}
+          <BackLink
+            fallback={`/artisans/${uid}`}
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 hover:gap-2 transition-all duration-200 mb-6 font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour au profil
-          </Link>
+            Retour
+          </BackLink>
         </motion.div>
 
         <motion.div
