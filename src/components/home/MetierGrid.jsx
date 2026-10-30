@@ -160,11 +160,7 @@ export default function MetierGrid() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: idx * 0.07, duration: 0.4 }}
-            whileHover={{
-              y: -8,
-              transition: { duration: 0.25, type: "spring", stiffness: 300 },
-            }}
-            className="group relative bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-100"
+            className="group relative bg-white rounded-xl overflow-hidden border border-line hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 cursor-pointer"
           >
             {/* Zone image ou dégradé avec icône */}
             <div
@@ -178,17 +174,13 @@ export default function MetierGrid() {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
-                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                  <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
                 </>
               ) : (
                 <>
                   <div className="absolute inset-0 bg-black/10" />
-                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-                  <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
                 </>
               )}
-              <div className="absolute -bottom-6 left-6 w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-white/80 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <div className="absolute -bottom-6 left-6 w-14 h-14 bg-white rounded-full flex items-center justify-center border border-line">
                 <Icon className={`w-7 h-7 ${asset.iconColor}`} />
               </div>
             </div>
@@ -196,14 +188,14 @@ export default function MetierGrid() {
             {/* Contenu texte */}
             <div className="p-6 pt-10 text-left">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">
+                <h3 className="text-base font-bold text-ink group-hover:text-indigo-700 transition-colors duration-150">
                   {m.label}
                 </h3>
-                <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
+                <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1 font-medium">
+              <p className="text-xs text-muted mt-1 font-medium">
                 Voir les professionnels
               </p>
             </div>

@@ -15,9 +15,9 @@ const labels = {
 
 const variants = {
   glass:
-    'w-full px-4 py-3.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 focus-within:border-white focus-within:ring-2 focus-within:ring-white/50 transition-all duration-200 shadow-sm',
+    'w-full px-4 py-3.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 focus-within:border-white focus-within:ring-2 focus-within:ring-white/50 transition-all duration-200 shadow-sm',
   default:
-    'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all text-sm',
+    'w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft text-ink focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-colors duration-150 text-sm',
 }
 
 /**

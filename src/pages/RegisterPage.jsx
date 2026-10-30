@@ -144,7 +144,7 @@ export default function RegisterPage() {
                   value={form.prenom}
                   onChange={(e) => set("prenom", e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                   placeholder="Moussa"
                 />
               </div>
@@ -154,7 +154,7 @@ export default function RegisterPage() {
                   value={form.nom}
                   onChange={(e) => set("nom", e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                   placeholder="Diallo"
                 />
               </div>
@@ -182,7 +182,7 @@ export default function RegisterPage() {
                   onChange={(e) => set("password", e.target.value)}
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-12 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  className="w-full pl-12 pr-12 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                   placeholder="6 caractères minimum"
                 />
                 <button
@@ -267,7 +267,7 @@ export default function RegisterPage() {
                       <input
                         value={form.quartier}
                         onChange={(e) => set("quartier", e.target.value)}
-                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                         placeholder="Rempli automatiquement ou saisissez"
                       />
                     </div>
@@ -278,7 +278,7 @@ export default function RegisterPage() {
                       <select
                         value={form.ville}
                         onChange={(e) => set("ville", e.target.value)}
-                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm appearance-none"
+                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm appearance-none"
                       >
                         {VILLES.map((v) => (
                           <option key={v} value={v}>
@@ -297,7 +297,7 @@ export default function RegisterPage() {
                       value={form.bio}
                       onChange={(e) => set("bio", e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm resize-none"
+                      className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm resize-none"
                       placeholder="Décrivez votre expérience, vos spécialités..."
                     />
                   </div>

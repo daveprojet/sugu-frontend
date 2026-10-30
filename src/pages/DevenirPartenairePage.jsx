@@ -12,7 +12,7 @@ import PhoneField from "@/components/common/PhoneField";
 import bgImage from "/images/metiers/register-bg.jpg";
 
 const inputClass =
-  "w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm";
+  "w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm";
 const labelClass = "block text-sm font-medium text-indigo-200 mb-2 ml-1";
 
 const PROFILS = [

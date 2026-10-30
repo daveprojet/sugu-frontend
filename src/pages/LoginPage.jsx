@@ -129,7 +129,7 @@ export default function LoginPage() {
                   }
                   placeholder="••••••••"
                   required
-                  className="w-full pl-12 pr-12 py-3.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  className="w-full pl-12 pr-12 py-3.5 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                 />
                 <button
                   type="button"

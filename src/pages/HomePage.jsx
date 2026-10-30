@@ -104,10 +104,10 @@ export default function HomePage() {
       {/* Catégories */}
       <section className="max-w-7xl mx-auto px-4 py-16 md:py-20">
         <div className="text-center md:text-left mb-12">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mb-3">
             Parcourir par métier
           </h2>
-          <p className="text-gray-500 text-lg">
+          <p className="text-muted text-lg">
             Sélectionnez le type d'artisan dont vous avez besoin
           </p>
         </div>
@@ -115,13 +115,13 @@ export default function HomePage() {
       </section>
 
       {/* Comment ça marche */}
-      <section className="bg-gradient-to-br from-gray-50/50 to-indigo-50/30 py-16 md:py-20 px-4">
+      <section className="bg-canvas-soft py-16 md:py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display text-3xl md:text-4xl font-bold text-center text-gray-900 mb-14"
+            className="font-display text-3xl md:text-4xl font-bold text-center text-ink mb-14"
           >
             Comment ça marche ?
           </motion.h2>
@@ -155,19 +155,18 @@ export default function HomePage() {
               <motion.div
                 key={step}
                 variants={fadeUpVariant}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="group bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-md hover:shadow-xl hover:shadow-indigo-500/10 border border-gray-100/80 hover:border-indigo-200 transition-all duration-300 relative"
+                className="bg-white rounded-xl p-8 border border-line hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 relative"
               >
-                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-indigo-500/30">
+                <div className="absolute -top-3 -right-3 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                   {step}
                 </div>
-                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-indigo-100 group-hover:scale-110 transition-all duration-300">
-                  <Icon className="w-8 h-8 text-indigo-600" />
+                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-5">
+                  <Icon className="w-8 h-8 text-indigo-700" />
                 </div>
-                <h3 className="font-display text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-ink mb-2">
                   {title}
                 </h3>
-                <p className="text-gray-500 leading-relaxed">{desc}</p>
+                <p className="text-muted leading-relaxed">{desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -175,22 +174,18 @@ export default function HomePage() {
       </section>
 
       {/* CTA artisan */}
-      <section className="relative bg-gradient-to-br from-indigo-50/50 to-purple-50/50 py-16 md:py-20 px-4 overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-200/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-200/30 rounded-full blur-3xl" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-200/40 border border-white/60 p-10 md:p-12">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      <section className="bg-white py-16 md:py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center bg-white rounded-xl border border-line p-10 md:p-12">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-ink mb-4">
             Devenez partenaire de Bricolibe
           </h2>
-          <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto leading-relaxed">
+          <p className="text-muted text-lg mb-8 max-w-lg mx-auto leading-relaxed">
             Entreprise, confiez vos interventions à nos artisans. Artisan,
             rejoignez l'équipe Bricolibe et intervenez pour nos partenaires.
           </p>
           <motion.a
             href="/devenir-partenaire"
-            whileHover={{ scale: 1.03, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 px-8 rounded-full shadow-xl shadow-indigo-500/30 hover:shadow-2xl transition-all duration-300"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 transition-colors duration-150"
           >
             Devenir partenaire
             <ArrowRight className="w-5 h-5" />
