@@ -15,6 +15,7 @@ import Spinner from '@/components/common/Spinner'
 import HomePage           from '@/pages/HomePage'
 import AboutPage          from '@/pages/AboutPage'
 import ContactPage        from '@/pages/ContactPage'
+import RappelIdentiteModal from '@/components/common/RappelIdentiteModal'
 import ArtisansPage       from '@/pages/ArtisansPage'
 import ArtisanDetailPage  from '@/pages/ArtisanDetailPage'
 import AvisArtisanPage    from '@/pages/AvisArtisanPage'
@@ -109,6 +110,7 @@ function AppRoutes() {
         </Routes>
       </div>
       <Footer />
+      {user?.role === 'artisan' && <RappelIdentiteModal artisanUid={user.artisan_uid} />}
       {user && (
         <PushPermissionBanner
           onAllow={requestPermissionAndRegister}

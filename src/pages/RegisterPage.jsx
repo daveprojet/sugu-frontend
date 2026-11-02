@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
 import { useCategories } from "@/hooks/useCategories";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
@@ -9,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import PhoneField from "@/components/common/PhoneField";
 import { User, Wrench, Lock, Check, Eye, EyeOff, Tag, MapPin, Info } from "lucide-react";
 import MapPicker from "@/components/common/MapPicker";
+import ChampsZone from "@/components/common/ChampsZone";
+import { chercherZoneProche } from "@/hooks/useZones";
 
 import bgImage from '/images/metiers/register-bg.jpg';
 
@@ -29,6 +30,8 @@ export default function RegisterPage() {
     categories: [],
     quartier: "",
     ville: "Dakar",
+    zone_ville: null,
+    zone_quartier: null,
     bio: "",
     latitude: null,
     longitude: null,
@@ -48,7 +51,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handlePositionChange = ({ latitude, longitude, quartier, commune }) => {
+  const handlePositionChange = async ({ latitude, longitude, quartier, commune }) => {
     setForm((f) => ({
       ...f,
       latitude,
@@ -56,6 +59,10 @@ export default function RegisterPage() {
       quartier: quartier || f.quartier,
       ville: commune || f.ville,
     }));
+    const zone = await chercherZoneProche(latitude, longitude, quartier);
+    if (zone.ville) {
+      setForm((f) => ({ ...f, zone_ville: zone.ville.id, zone_quartier: zone.quartier?.id ?? null }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -260,33 +267,15 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
-                        Quartier
-                      </label>
-                      <input
-                        value={form.quartier}
-                        onChange={(e) => set("quartier", e.target.value)}
-                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
-                        placeholder="Rempli automatiquement ou saisissez"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
-                        Ville
-                      </label>
-                      <select
-                        value={form.ville}
-                        onChange={(e) => set("ville", e.target.value)}
-                        className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm appearance-none"
-                      >
-                        {VILLES.map((v) => (
-                          <option key={v} value={v}>
-                            {v}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <ChampsZone
+                      zoneVille={form.zone_ville}
+                      zoneQuartier={form.zone_quartier}
+                      quartierSaisi={form.quartier}
+                      onChange={(zone) => setForm((f) => ({ ...f, ...zone }))}
+                      onQuartierSaisi={(valeur) => set("quartier", valeur)}
+                      labelClass="block text-sm font-medium text-indigo-200 mb-2 ml-1"
+                      champClass="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                    />
                   </div>
 
                   <div>

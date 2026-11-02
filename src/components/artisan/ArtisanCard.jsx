@@ -83,7 +83,7 @@ export default function ArtisanCard({ artisan }) {
           <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted min-w-0">
             <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">
-              {artisan.quartier}, {artisan.ville}
+              {[artisan.quartier, artisan.ville].filter(Boolean).join(", ")}
             </span>
             {artisan.distance_km != null && (
               <span className="inline-flex items-center gap-1 text-indigo-700 font-semibold whitespace-nowrap">

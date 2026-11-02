@@ -13,14 +13,6 @@ export const METIERS = [
   { id: 'informatique',  label: 'Technicien info',   icon: '💻', description: 'Réparation PC, réseau' },
 ]
 
-export const QUARTIERS_DAKAR = [
-  'Plateau', 'Médina', 'Fann', 'Point E', 'Mermoz',
-  'Sacré-Cœur', 'Liberté', 'Grand Dakar', 'Biscuiterie',
-  'Parcelles Assainies', 'Pikine', 'Guédiawaye', 'Rufisque',
-  'Almadies', 'Ngor', 'Yoff', 'HLM', 'Grand Yoff',
-  'Ouakam', 'Cambérène', 'Thiaroye', 'Mbao',
-]
-
 export const VILLES = [
   'Dakar', 'Thiès', 'Saint-Louis', 'Kaolack',
   'Ziguinchor', 'Diourbel', 'Tambacounda', 'Louga',
