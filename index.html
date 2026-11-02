@@ -3,6 +3,8 @@
 <head>
   <!-- Meta Pixel Code -->
   <script>
+  // Uniquement sur le domaine de production : l'UAT et le local ne faussent pas les statistiques.
+  if (['bricolibe.com', 'www.bricolibe.com'].includes(location.hostname)) {
   !function(f,b,e,v,n,t,s)
   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -13,6 +15,7 @@
   'https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', '1421704612853450');
   fbq('track', 'PageView');
+  }
   </script>
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1421704612853450&ev=PageView&noscript=1"
