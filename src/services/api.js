@@ -194,6 +194,11 @@ export const contactService = {
   create: (data) => api.post('/contacts/', data),
 }
 
+// ── Questions fréquentes ──────────────────────────────
+export const faqService = {
+  list: () => api.get('/faq/'),
+}
+
 // ── Catégories / Prestations ──────────────────────────
 export const categorieService = {
   list:          ()      => api.get('/categories/'),
@@ -216,6 +221,11 @@ export const paytechService = {
   init:   (data) => api.post('/commissions/paiements/paytech/init/', data),
   verify: (token) => api.post('/commissions/paiements/paytech/verify/', { token }),
   cancel: (token) => api.post('/commissions/paiements/paytech/cancel/', { token }),
+}
+
+export const zoneService = {
+  list:   () => api.get('/artisans/zones/'),
+  proche: (lat, lng, nom) => api.get('/artisans/zones/proche/', { params: { lat, lng, nom } }),
 }
 
 export const signalementService = {

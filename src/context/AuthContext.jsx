@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { toast } from 'react-toastify'
 import { authService, setAuthToken, clearAuthToken, setSessionExpiredHandler } from '@/services/api'
 import { extractApiError, isTransientError } from '@/utils/errors'
+import { reinitialiserRappelIdentite } from '@/utils/rappelIdentite'
 
 const AuthContext = createContext(null)
 
@@ -66,6 +67,7 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const { data } = await authService.login(credentials)
+    reinitialiserRappelIdentite()
     setAuthToken(data.access)
     await fetchMe()
     return data

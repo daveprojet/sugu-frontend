@@ -29,8 +29,12 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form);
-      toast.success("Bienvenue !");
+      const { user } = await login(form);
+      if (user?.sanction === "SUSPENDU") {
+        toast.warning("Votre compte artisan est suspendu. Contactez le service client pour en savoir plus.");
+      } else {
+        toast.success("Bienvenue !");
+      }
       navigate(redirectTo(), { replace: true });
     } catch (err) {
       toast.error(extractApiError(err, "Téléphone ou mot de passe incorrect"));

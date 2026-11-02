@@ -15,7 +15,8 @@ import { useCategories } from "@/hooks/useCategories";
 import Spinner from "@/components/common/Spinner";
 import StarRating from "@/components/common/StarRating";
 import MapPicker from "@/components/common/MapPicker";
-import { QUARTIERS_DAKAR, VILLES } from "@/utils/constants";
+import ChampsZone from "@/components/common/ChampsZone";
+import { chercherZoneProche } from "@/hooks/useZones";
 
 export default function MonProfil() {
   const { user, loading, updateMe, fetchMe } = useAuth();
@@ -36,6 +37,8 @@ export default function MonProfil() {
     categories: [],
     ville: "Dakar",
     quartier: "",
+    zone_ville: null,
+    zone_quartier: null,
     bio: "",
     telephone: "",
     whatsapp: "",
@@ -64,7 +67,9 @@ export default function MonProfil() {
     setArtisanForm({
       categories: artisan.categories?.map(c => c.uid) || [],
       ville: artisan.ville || "Dakar",
-      quartier: artisan.quartier || "",
+      quartier: artisan.quartier_saisi || "",
+      zone_ville: artisan.zone_ville ?? null,
+      zone_quartier: artisan.zone_quartier ?? null,
       bio: artisan.bio || "",
       telephone: artisan.telephone || "",
       whatsapp: artisan.whatsapp || "",
@@ -99,7 +104,7 @@ export default function MonProfil() {
     }
   };
 
-  const handlePositionChange = ({ latitude, longitude, quartier, commune }) => {
+  const handlePositionChange = async ({ latitude, longitude, quartier, commune }) => {
     setArtisanForm((f) => ({
       ...f,
       latitude,
@@ -107,6 +112,10 @@ export default function MonProfil() {
       quartier: quartier || f.quartier,
       ville: commune || f.ville,
     }));
+    const zone = await chercherZoneProche(latitude, longitude, quartier);
+    if (zone.ville) {
+      setArtisanForm((f) => ({ ...f, zone_ville: zone.ville.id, zone_quartier: zone.quartier?.id ?? null }));
+    }
   };
 
   const saveAccount = async (e) => {
@@ -324,7 +333,7 @@ export default function MonProfil() {
                 </div>
                 <p className="text-xs text-muted font-medium flex items-center gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-gray-300" />
-                  {artisan.quartier}, {artisan.ville}
+                  {[artisan.quartier, artisan.ville].filter(Boolean).join(", ")}
                 </p>
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
@@ -490,33 +499,15 @@ export default function MonProfil() {
                       onChange={handlePositionChange}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-ink mb-2">
-                      Quartier
-                    </label>
-                    <input
-                      value={artisanForm.quartier}
-                      onChange={(e) => setArtisan("quartier", e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
-                      placeholder="Rempli automatiquement ou saisissez"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-ink mb-2">
-                      Ville
-                    </label>
-                    <select
-                      value={artisanForm.ville}
-                      onChange={(e) => setArtisan("ville", e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
-                    >
-                      {VILLES.map((v) => (
-                        <option key={v} value={v}>
-                          {v}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <ChampsZone
+                    zoneVille={artisanForm.zone_ville}
+                    zoneQuartier={artisanForm.zone_quartier}
+                    quartierSaisi={artisanForm.quartier}
+                    onChange={(zone) => setArtisanForm((f) => ({ ...f, ...zone }))}
+                    onQuartierSaisi={(valeur) => setArtisan("quartier", valeur)}
+                    labelClass="block text-sm font-semibold text-ink mb-2"
+                    champClass="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
+                  />
                   <div>
                     <label className="block text-sm font-semibold text-ink mb-2">
                       Disponibilité

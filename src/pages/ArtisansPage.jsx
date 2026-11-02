@@ -8,9 +8,13 @@ import ArtisanCard from '@/components/artisan/ArtisanCard'
 import Spinner from '@/components/common/Spinner'
 import EmptyState from '@/components/common/EmptyState'
 import Pagination from '@/components/common/Pagination'
-import { QUARTIERS_DAKAR } from '@/utils/constants'
+import SelectRecherche from '@/components/common/SelectRecherche'
+import { useZones } from '@/hooks/useZones'
 import { normalizeCoord } from '@/utils/geo'
-import { Filter, X, MapPin, CheckCircle, Star, Briefcase } from 'lucide-react'
+import { Building2, Filter, X, MapPin, Star, Briefcase } from 'lucide-react'
+
+// D'anciens liens contiennent le nom du quartier : on ignore ce qui n'est pas un identifiant.
+const idZone = (valeur) => (/^\d+$/.test(valeur || '') ? valeur : '')
 
 export default function ArtisansPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -18,14 +22,16 @@ export default function ArtisansPage() {
   const [page, setPage] = useState(1)
 
   const filters = {
-    quartier:    searchParams.get('quartier') || '',
+    ville:       idZone(searchParams.get('ville')),
+    quartier:    idZone(searchParams.get('quartier')),
     categorie:   searchParams.get('categorie') || '',
     note_moyenne: searchParams.get('note_moyenne') || '',
-    disponible:  searchParams.get('disponible') || '',
   }
 
   const { user } = useAuth()
   const { data: categories = [] } = useCategories()
+  const { data: zones = [] } = useZones()
+  const villeChoisie = zones.find(v => String(v.id) === filters.ville)
 
   const [anonPos, setAnonPos] = useState(null)
   const anonRequested = useRef(false)
@@ -51,7 +57,7 @@ export default function ArtisansPage() {
   const isCategoryActive = !!filters.categorie
 
   const { data, isLoading, isError } = useArtisans(
-    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => k === 'note_moyenne' ? ['note_min', v] : [k, v])), ...(position ? { lat: position.latitude, lng: position.longitude } : {}), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
+    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => [{ note_moyenne: 'note_min', ville: 'zone_ville', quartier: 'zone_quartier' }[k] || k, v])), ...(position ? { lat: position.latitude, lng: position.longitude } : {}), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
   )
 
   const artisans = data?.results || data || []
@@ -67,6 +73,17 @@ export default function ArtisansPage() {
       next.set(key, value)
     } else {
       next.delete(key)
+    }
+    setSearchParams(next, { replace: true })
+  }
+
+  const handleVille = (value) => {
+    const next = new URLSearchParams(searchParams)
+    next.delete('quartier')
+    if (value) {
+      next.set('ville', value)
+    } else {
+      next.delete('ville')
     }
     setSearchParams(next, { replace: true })
   }
@@ -144,19 +161,40 @@ export default function ArtisansPage() {
           </div>
 
           <div className="flex-1 min-w-[140px]">
+            <label className="block text-xs font-semibold text-muted mb-1.5">Ville</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <select
+                value={filters.ville}
+                onChange={e => handleVille(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
+              >
+                <option value="">Toutes les villes</option>
+                {zones.map(v => <option key={v.id} value={v.id}>{v.nom}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Quartier</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
                 <MapPin className="w-4 h-4" />
               </div>
-              <select
-                value={filters.quartier}
-                onChange={e => handleFilter('quartier', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
-              >
-                <option value="">Tous les quartiers</option>
-                {QUARTIERS_DAKAR.map(q => <option key={q} value={q}>{q}</option>)}
-              </select>
+              <SelectRecherche
+                value={String(filters.quartier)}
+                onChange={valeur => handleFilter('quartier', valeur)}
+                disabled={!villeChoisie}
+                ariaLabel="Quartier"
+                placeholderRecherche="Rechercher un quartier…"
+                options={[
+                  { value: '', label: villeChoisie ? 'Tous les quartiers' : "Choisissez d'abord une ville" },
+                  ...(villeChoisie?.quartiers || []).map(q => ({ value: String(q.id), label: q.nom })),
+                ]}
+                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 disabled:opacity-60"
+              />
             </div>
           </div>
 
@@ -181,24 +219,7 @@ export default function ArtisansPage() {
             </div>
           </div>
 
-          <div className="flex-1 min-w-[140px]">
-            <label className="block text-xs font-semibold text-muted mb-1.5">Disponibilité</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
-                <CheckCircle className="w-4 h-4" />
-              </div>
-              <select
-                value={filters.disponible}
-                onChange={e => handleFilter('disponible', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
-              >
-                <option value="true">Disponible</option>
-                <option value="false">Non disponible</option>
-              </select>
-            </div>
-          </div>
-
-          {(filters.quartier || filters.categorie || filters.note_moyenne || filters.disponible) && (
+          {(filters.ville || filters.quartier || filters.categorie || filters.note_moyenne) && (
             <button
               onClick={() => setSearchParams({}, { replace: true })}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-line bg-white text-[13px] font-semibold text-ink hover:bg-canvas-soft transition-colors duration-150 ml-auto md:ml-0"

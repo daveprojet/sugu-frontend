@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useCreateContact } from "@/hooks/useContacts";
+import { useFaq } from "@/hooks/useFaq";
 import {
   Mail,
   Phone,
@@ -17,6 +18,49 @@ import heroBg from "/images/metiers/register-bg.jpg";
 
 const contactEmail = "info@bricolibe.com";
 const contactPhone = "+221777234086";
+
+function grouperParCategorie(questions) {
+  const groupes = new Map();
+  questions.forEach((question) => {
+    const categorie = question.categorie || "Général";
+    groupes.set(categorie, [...(groupes.get(categorie) || []), question]);
+  });
+  return [...groupes];
+}
+
+function QuestionsFrequentes() {
+  const { data: questions = [] } = useFaq();
+  if (!questions.length) return null;
+
+  return (
+    <section className="mt-8 bg-white/80 backdrop-blur-sm p-8 rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60">
+      <h2 className="font-display text-lg font-semibold text-gray-900 mb-6">
+        Questions fréquentes
+      </h2>
+      <div className="flex flex-col gap-6">
+        {grouperParCategorie(questions).map(([categorie, items]) => (
+          <div key={categorie}>
+            <h3 className="text-sm font-semibold text-indigo-600 mb-2">
+              {categorie}
+            </h3>
+            <div className="divide-y divide-gray-100 border-y border-gray-100">
+              {items.map((item) => (
+                <details key={item.id} className="py-3">
+                  <summary className="cursor-pointer font-medium text-gray-900">
+                    {item.question}
+                  </summary>
+                  <p className="text-sm text-gray-600 leading-relaxed mt-2 whitespace-pre-line">
+                    {item.reponse}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -284,6 +328,8 @@ export default function ContactPage() {
             </motion.section>
           </aside>
         </motion.div>
+
+        <QuestionsFrequentes />
       </motion.div>
     </main>
   );

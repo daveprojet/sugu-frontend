@@ -282,7 +282,7 @@ export default function ArtisanDetailPage() {
 
               <div className="flex items-center justify-center gap-1.5 mt-4 text-sm text-muted bg-canvas-soft border border-line-soft rounded-lg px-4 py-1.5">
                 <MapPin className="w-4 h-4" />
-                {artisan.quartier}, {artisan.ville}
+                {[artisan.quartier, artisan.ville].filter(Boolean).join(", ")}
               </div>
 
               {artisan.distance_km != null && (
