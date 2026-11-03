@@ -177,7 +177,7 @@ export default function DashboardArtisanPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               to="/dashboard-artisan/commissions"
               className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
@@ -290,7 +290,7 @@ export default function DashboardArtisanPage() {
               }`}>
                 <IdCard className="w-5 h-5" />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-ink">Pièce d'identité</p>
                 <p className="text-xs text-muted mt-0.5">
                   {!identite?.statut
@@ -302,12 +302,12 @@ export default function DashboardArtisanPage() {
                     : 'Identité vérifiée · vous êtes visible dans la recherche'}
                 </p>
               </div>
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+              <span className={`inline-flex flex-shrink-0 items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold ${
                 !identite?.statut
                   ? 'bg-canvas text-muted'
                   : STATUTS_IDENTITE[identite.statut]?.color || 'bg-canvas text-muted'
               }`}>
-                {!identite?.statut ? 'À faire' : STATUTS_IDENTITE[identite.statut]?.label?.split(' ')[0] || identite.statut}
+                {!identite?.statut ? 'À faire' : identite.statut === 'EN_ATTENTE' ? 'En attente' : STATUTS_IDENTITE[identite.statut]?.label || identite.statut}
               </span>
             </Link>
           </motion.div>
@@ -328,7 +328,7 @@ export default function DashboardArtisanPage() {
             <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-indigo-600">
               <Award className="w-5 h-5" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-ink">Dossier professionnel · badge « Vérifié »</p>
               <p className="text-xs text-muted mt-0.5">
                 {!dossierPro
@@ -342,10 +342,10 @@ export default function DashboardArtisanPage() {
                   : 'Dossier validé · activez votre badge pour l\'afficher sur votre profil'}
               </p>
             </div>
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+            <span className={`inline-flex flex-shrink-0 items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold ${
               !dossierPro ? 'bg-canvas text-muted' : STATUTS_IDENTITE[dossierPro.statut]?.color
             }`}>
-              {!dossierPro ? 'À faire' : STATUTS_IDENTITE[dossierPro.statut]?.label?.split(' ')[0]}
+              {!dossierPro ? 'À faire' : dossierPro.statut === 'EN_ATTENTE' ? 'En attente' : STATUTS_IDENTITE[dossierPro.statut]?.label}
             </span>
           </Link>
         )}

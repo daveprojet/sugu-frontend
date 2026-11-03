@@ -141,7 +141,7 @@ export default function ArtisansPage() {
             <Filter className="w-4 h-4" /> Filtres
           </div>
 
-          <div className="flex-1 min-w-[140px]">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Catégorie</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
@@ -150,7 +150,7 @@ export default function ArtisansPage() {
               <select
                 value={filters.categorie}
                 onChange={e => handleFilter('categorie', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
+                className="w-full pl-10 pr-9 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="">Toutes les catégories</option>
                 {categories.map(c => (
@@ -160,7 +160,7 @@ export default function ArtisansPage() {
             </div>
           </div>
 
-          <div className="flex-1 min-w-[140px]">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Ville</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
@@ -169,7 +169,7 @@ export default function ArtisansPage() {
               <select
                 value={filters.ville}
                 onChange={e => handleVille(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
+                className="w-full pl-10 pr-9 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="">Toutes les villes</option>
                 {zones.map(v => <option key={v.id} value={v.id}>{v.nom}</option>)}
@@ -177,7 +177,7 @@ export default function ArtisansPage() {
             </div>
           </div>
 
-          <div className="flex-1 min-w-[140px]">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Quartier</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
@@ -198,7 +198,7 @@ export default function ArtisansPage() {
             </div>
           </div>
 
-          <div className="flex-1 min-w-[140px]">
+          <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Note min.</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
@@ -207,7 +207,7 @@ export default function ArtisansPage() {
               <select
                 value={filters.note_moyenne}
                 onChange={e => handleFilter('note_moyenne', e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
+                className="w-full pl-10 pr-9 py-2.5 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 appearance-none"
               >
                 <option value="">Toutes les notes</option>
                 <option value="1">1 étoile et plus</option>
@@ -256,10 +256,10 @@ export default function ArtisansPage() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6"
           >
             {artisans.map((artisan, idx) => (
-              <motion.div key={artisan.id} variants={itemVariants}>
+              <motion.div key={artisan.id} variants={itemVariants} className="min-w-0">
                 <ArtisanCard artisan={artisan} />
               </motion.div>
             ))}
