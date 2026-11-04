@@ -54,14 +54,12 @@ export default function Navbar() {
           >
             Trouver un artisan
           </Link>
-          {!isArtisan && (
-            <Link
-              to="/devenir-partenaire"
-              className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
-            >
-              Devenir partenaire
-            </Link>
-          )}
+          <Link
+            to="/devenir-partenaire"
+            className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
+          >
+            Devenir partenaire
+          </Link>
           <Link
             to="/contact"
             className="text-gray-600 hover:text-indigo-600 font-medium transition-colors duration-200"
@@ -184,15 +182,13 @@ export default function Navbar() {
                 <Wrench className="w-4 h-4 text-gray-400" />
                 Trouver un artisan
               </Link>
-              {!isArtisan && (
-                <Link
-                  to="/devenir-partenaire"
-                  onClick={() => setBurgerOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
-                >
-                  Devenir partenaire
-                </Link>
-              )}
+              <Link
+                to="/devenir-partenaire"
+                onClick={() => setBurgerOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-200"
+              >
+                Devenir partenaire
+              </Link>
               <Link
                 to="/contact"
                 onClick={() => setBurgerOpen(false)}

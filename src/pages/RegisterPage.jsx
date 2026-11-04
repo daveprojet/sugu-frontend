@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
 import PhoneField from "@/components/common/PhoneField";
-import { User, Wrench, Lock, Check, Eye, EyeOff, Tag, MapPin, Info } from "lucide-react";
+import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info } from "lucide-react";
 import MapPicker from "@/components/common/MapPicker";
 import ChampsZone from "@/components/common/ChampsZone";
 import { chercherZoneProche } from "@/hooks/useZones";
@@ -28,6 +28,7 @@ export default function RegisterPage() {
     password: "",
     role: isArtisanFlow ? "artisan" : "client",
     categories: [],
+    autres_metiers: "",
     quartier: "",
     ville: "Dakar",
     zone_ville: null,
@@ -39,6 +40,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  // Option « Autres » : métiers absents de la liste, validés ensuite par l'assistance.
+  const [autresCoche, setAutresCoche] = useState(false);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -67,9 +70,22 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const autresMetiers = autresCoche
+      ? form.autres_metiers.split(",").map((nom) => nom.trim()).filter(Boolean)
+      : [];
+    if (form.role === "artisan") {
+      if (!form.categories.length && !autresMetiers.length) {
+        toast.error("Choisissez au moins une catégorie ou indiquez votre métier dans « Autres ».");
+        return;
+      }
+      if (autresMetiers.length > 3) {
+        toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
+        return;
+      }
+    }
     setLoading(true);
     try {
-      await register(form);
+      await register({ ...form, autres_metiers: autresMetiers });
       toast.success("Compte créé avec succès !");
       navigate(form.role === "artisan" ? "/dashboard-artisan" : "/");
     } catch (err) {
@@ -234,12 +250,41 @@ export default function RegisterPage() {
                               onChange={() => handleCategoryChange(cat.uid)}
                               className="w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
                             />
-                            <Tag className="w-4 h-4 flex-shrink-0" />
                             <span className="text-sm font-medium">{cat.nom}</span>
                           </label>
                         );
                       })}
+                      <label
+                        className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
+                          autresCoche
+                            ? "bg-white/40 border-white/50 shadow-sm text-indigo-900"
+                            : "bg-transparent border-transparent hover:border-white/40 hover:bg-white/20 text-indigo-200"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={autresCoche}
+                          onChange={() => setAutresCoche((v) => !v)}
+                          className="w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
+                        />
+                        <span className="text-sm font-medium">Autres</span>
+                      </label>
                     </div>
+                    {autresCoche && (
+                      <div className="mt-3">
+                        <input
+                          value={form.autres_metiers}
+                          onChange={(e) => set("autres_metiers", e.target.value)}
+                          maxLength={190}
+                          placeholder="Ex. : Tapissier, Ferronnier"
+                          className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50"
+                        />
+                        <p className="text-xs text-indigo-200 mt-1.5 ml-1">
+                          Votre métier n'est pas dans la liste ? Indiquez-le (3 au maximum, séparés par des virgules).
+                          Il apparaîtra sur Bricolibe après validation par notre équipe.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
