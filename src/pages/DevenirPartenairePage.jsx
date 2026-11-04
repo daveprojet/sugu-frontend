@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { Building2, Wrench, Check, CheckCircle2 } from "lucide-react";
+import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useArtisan } from "@/hooks/useArtisans";
 import { partenaireService } from "@/services/api";
 import { useCategories } from "@/hooks/useCategories";
 import { VILLES } from "@/utils/constants";
@@ -59,12 +61,41 @@ const initialForm = {
 
 export default function DevenirPartenairePage() {
   const { data: categories = [] } = useCategories();
+  const { user, isArtisan } = useAuth();
   const [type, setType] = useState("ENTREPRISE");
   const [form, setForm] = useState(initialForm);
+  // Artisan connecté : « compte » (candidature avec son compte actuel) ou
+  // « nouveau » (futur compte distinct, donc avec un autre numéro).
+  const [modeCompte, setModeCompte] = useState(null);
+  // Profil de l'artisan connecté : ses métiers et sa zone sont pré-remplis.
+  const { data: profil_artisan } = useArtisan(isArtisan ? user?.artisan_uid : null);
   const [loading, setLoading] = useState(false);
   const [envoye, setEnvoye] = useState(false);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+
+  const choisirMode = (mode) => {
+    setModeCompte(mode);
+    setForm(
+      mode === "compte"
+        ? { ...initialForm, prenom: user.prenom || "", nom: user.nom || "", telephone: user.telephone || "" }
+        : initialForm,
+    );
+  };
+  const avecMonCompte = isArtisan && modeCompte === "compte";
+
+  useEffect(() => {
+    if (!avecMonCompte || !profil_artisan) return;
+    setType("ARTISAN");
+    setForm((f) => ({
+      ...f,
+      categories: f.categories.length
+        ? f.categories
+        : (profil_artisan.categories || []).map((cat) => cat.uid).filter(Boolean),
+      ville: VILLES.includes(profil_artisan.ville) ? profil_artisan.ville : f.ville,
+      quartier: f.quartier || profil_artisan.quartier || "",
+    }));
+  }, [avecMonCompte, profil_artisan]);
   const isEntreprise = type === "ENTREPRISE";
   const profil = PROFILS.find((p) => p.key === type);
 
@@ -86,6 +117,7 @@ export default function DevenirPartenairePage() {
     try {
       await partenaireService.candidater({
         ...form,
+        avec_mon_compte: avecMonCompte,
         type_partenaire: type,
         annees_experience: form.annees_experience === "" ? null : Number(form.annees_experience),
       });
@@ -135,8 +167,50 @@ export default function DevenirPartenairePage() {
                 Retour à l'accueil
               </Link>
             </div>
+          ) : isArtisan && !modeCompte ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-indigo-100 text-sm px-1">
+                Vous êtes connecté avec votre compte artisan ({user.telephone}). Comment souhaitez-vous continuer ?
+              </p>
+              <button
+                type="button"
+                onClick={() => choisirMode("compte")}
+                className="flex items-start gap-3 text-left p-4 rounded-2xl bg-white/30 border border-white/40 hover:bg-white/40 transition"
+              >
+                <UserCheck className="w-5 h-5 text-white mt-0.5 shrink-0" />
+                <span>
+                  <span className="block font-semibold text-white">Continuer avec ce compte</span>
+                  <span className="block text-sm text-indigo-100">
+                    Votre candidature est liée à votre compte actuel et à votre numéro.
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => choisirMode("nouveau")}
+                className="flex items-start gap-3 text-left p-4 rounded-2xl bg-white/10 border border-white/30 hover:bg-white/20 transition"
+              >
+                <UserPlus className="w-5 h-5 text-white mt-0.5 shrink-0" />
+                <span>
+                  <span className="block font-semibold text-white">Créer un autre compte</span>
+                  <span className="block text-sm text-indigo-100">
+                    Un numéro ne peut être lié qu'à un seul compte : il vous faudra un autre numéro de téléphone.
+                  </span>
+                </span>
+              </button>
+            </div>
           ) : (
             <>
+              {isArtisan && (
+                <p className="text-indigo-100 text-xs mb-4 px-1">
+                  {avecMonCompte
+                    ? "Candidature avec votre compte actuel."
+                    : "Nouveau compte : indiquez un autre numéro que celui de votre compte actuel."}{" "}
+                  <button type="button" onClick={() => setModeCompte(null)} className="underline text-white">
+                    Changer
+                  </button>
+                </p>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white/20 backdrop-blur-sm p-1.5 rounded-2xl mb-4">
                 {PROFILS.map(({ key, label, Icon }) => (
                   <button
@@ -212,12 +286,16 @@ export default function DevenirPartenairePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Téléphone</label>
-                    <PhoneField
-                      variant="glass"
-                      value={form.telephone}
-                      onChange={(telephone) => set("telephone", telephone)}
-                      required
-                    />
+                    {avecMonCompte ? (
+                      <input value={form.telephone} readOnly className={`${inputClass} opacity-80`} />
+                    ) : (
+                      <PhoneField
+                        variant="glass"
+                        value={form.telephone}
+                        onChange={(telephone) => set("telephone", telephone)}
+                        required
+                      />
+                    )}
                   </div>
                   <div>
                     <label className={labelClass}>E-mail {isEntreprise ? "" : "(optionnel)"}</label>
@@ -334,7 +412,7 @@ export default function DevenirPartenairePage() {
                 </motion.button>
               </form>
 
-              {!isEntreprise && (
+              {!isEntreprise && !isArtisan && (
                 <p className="text-center text-indigo-200 text-xs mt-6">
                   Vous préférez travailler en indépendant ?{" "}
                   <Link to="/inscription-artisan" className="underline text-white hover:text-indigo-100">
