@@ -49,6 +49,9 @@ export default function IdentitePiecePage() {
   const statutConfig = STATUTS_IDENTITE[statut] || STATUTS_IDENTITE.EN_ATTENTE
   const isVerified = statut === 'VERIFIEE'
   const hasIdentity = !!identite
+  // Un nouvel envoi n'est possible que sans pièce ou après un refus : en
+  // attente ou vérifiée, la pièce ne peut plus être remplacée (le serveur refuse aussi).
+  const peutEnvoyer = !hasIdentity || !identite.recto || statut === 'REJETEE'
   const versoRequis = typePiece !== 'passeport'
 
   const handleRectoChange = (e) => {
@@ -269,15 +272,15 @@ export default function IdentitePiecePage() {
             </motion.div>
           )}
 
-          {/* Upload Form — hidden when verified */}
-          {!isVerified && (
+          {/* Formulaire : seulement sans pièce envoyée ou après un refus */}
+          {peutEnvoyer && (
             <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6 md:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-700">
                   <Upload className="w-4 h-4" />
                 </div>
                 <h2 className="text-lg font-bold text-ink">
-                  {hasIdentity ? 'Mettre à jour' : 'Ajouter'} ma pièce d'identité
+                  {statut === 'REJETEE' ? 'Envoyer une nouvelle' : 'Ajouter ma'} pièce d'identité
                 </h2>
               </div>
 

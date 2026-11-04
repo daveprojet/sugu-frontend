@@ -57,7 +57,7 @@ export function useUploadIdentite() {
       onSuccess: (_, { uid }) => {
         qc.invalidateQueries(['artisan-identite', uid])
         qc.invalidateQueries(['artisan', uid])
-        toast.success('Pièce d\'identité mise à jour !')
+        toast.success('Pièce d\'identité envoyée : elle va être vérifiée.')
       },
       onError: (error) => {
         const msg = getServerErrorMessage(error)

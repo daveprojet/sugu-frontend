@@ -1,6 +1,22 @@
 // Firebase Messaging Service Worker
 // Ce fichier utilise les CDN Firebase (pas de Vite/env vars dans un SW)
 
+// Accusé de réception des push importantes : sans lui, le serveur envoie un SMS
+// de secours. Écouteur déclaré avant Firebase pour passer sur chaque push,
+// que l'onglet soit ouvert, en arrière-plan ou fermé.
+self.addEventListener('push', (event) => {
+  let payload = null;
+  try {
+    payload = event.data ? event.data.json() : null;
+  } catch (e) {
+    return;
+  }
+  const ackUrl = payload && payload.data && payload.data.ack_url;
+  if (!ackUrl) return;
+  // Requête POST sans corps : pas de pré-vérification CORS.
+  event.waitUntil(fetch(ackUrl, { method: 'POST' }).catch(() => {}));
+});
+
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
