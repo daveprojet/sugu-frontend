@@ -5,7 +5,8 @@ import { ArrowUpRight, BadgeCheck, ChevronLeft, Gift, Rocket, ShieldCheck } from
 import BackLink from '@/components/common/BackLink'
 import { useAuth } from '@/context/AuthContext'
 import { useAbonnements, useBoostOffert } from '@/hooks/useAbonnements'
-import { useDossierPro } from '@/hooks/useArtisans'
+import { useDossierPro, useIdentite } from '@/hooks/useArtisans'
+import IdentiteRequiseModal from '@/components/common/IdentiteRequiseModal'
 import { usePaytechInit } from '@/hooks/usePaiements'
 import Spinner from '@/components/common/Spinner'
 import { METHODES_PAYTECH } from '@/utils/constants'
@@ -38,7 +39,7 @@ function OffreBloc({ offre, actif, onChoisir }) {
           <span className="text-xs text-muted">{duree}</span>
         </p>
       </div>
-      {offre.raison_indisponible ? (
+      {offre.raison_indisponible && !offre.bloque_par_identite ? (
         <p className="text-xs text-muted">{offre.raison_indisponible}</p>
       ) : (
         <button
@@ -81,12 +82,19 @@ export default function AbonnementsPage() {
   const { user } = useAuth()
   const { data, isLoading, isError } = useAbonnements()
   const { data: dossier } = useDossierPro(user?.artisan_uid)
+  const { data: identite } = useIdentite(user?.artisan_uid)
   const boostOffert = useBoostOffert()
   const paytechInit = usePaytechInit()
   const [offreChoisie, setOffreChoisie] = useState(null)
   const [methode, setMethode] = useState('Orange Money')
+  // Badge et Boost exigent une pièce validée : au clic, on rappelle pourquoi.
+  const [rappelIdentite, setRappelIdentite] = useState(null)
 
   const choisirOffre = (offre) => {
+    if (offre.bloque_par_identite) {
+      setRappelIdentite(offre.type === 'badge' ? 'le badge « Vérifié »' : 'le Boost')
+      return
+    }
     setOffreChoisie(offre)
     setMethode('Orange Money')
   }
@@ -106,6 +114,7 @@ export default function AbonnementsPage() {
   const offresBoost = data.offres.filter((o) => o.type === 'boost')
   const offreBadge = data.offres.find((o) => o.type === 'badge')
   const boostPossible = !offresBoost[0]?.raison_indisponible
+  const boostBloqueParIdentite = Boolean(offresBoost[0]?.bloque_par_identite)
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
@@ -131,13 +140,13 @@ export default function AbonnementsPage() {
               <p className="text-sm font-bold text-ink">Votre premier mois de Boost est offert</p>
               <p className="text-xs text-muted mt-0.5">
                 Offre de lancement réservée aux 50 premiers artisans, sans carte ni paiement.
-                {!boostPossible && ` ${offresBoost[0].raison_indisponible}`}
+                {!boostPossible && !boostBloqueParIdentite && ` ${offresBoost[0].raison_indisponible}`}
               </p>
             </div>
             <button
               type="button"
-              onClick={() => boostOffert.mutate()}
-              disabled={!boostPossible || boostOffert.isLoading}
+              onClick={() => (boostBloqueParIdentite ? setRappelIdentite('le Boost') : boostOffert.mutate())}
+              disabled={(!boostPossible && !boostBloqueParIdentite) || boostOffert.isLoading}
               className="flex-shrink-0 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-5 py-2.5 transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {boostOffert.isLoading ? 'Activation…' : 'Activer mon mois offert'}
@@ -182,13 +191,17 @@ export default function AbonnementsPage() {
           <p className="text-sm text-muted mb-4">
             <MessageDossier dossier={dossier} />
           </p>
-          {offreBadge && !offreBadge.raison_indisponible && (
+          {offreBadge && (!offreBadge.raison_indisponible || offreBadge.bloque_par_identite) && (
             <div className="sm:max-w-sm">
               <OffreBloc offre={offreBadge} actif={data.badge.actif} onChoisir={choisirOffre} />
             </div>
           )}
         </section>
       </div>
+
+      {rappelIdentite && (
+        <IdentiteRequiseModal identite={identite} objet={rappelIdentite} onClose={() => setRappelIdentite(null)} />
+      )}
 
       {offreChoisie && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
