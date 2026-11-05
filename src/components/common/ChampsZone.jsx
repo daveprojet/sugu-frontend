@@ -2,14 +2,12 @@ import { useZones } from "@/hooks/useZones";
 
 /**
  * Choix de la ville puis du quartier dans le référentiel. Si le quartier n'est pas dans la
- * liste, l'artisan le saisit librement : l'équipe l'ajoutera et le rattachera ensuite.
+ * liste, la position placée sur la carte suffit : l'équipe rattache ensuite l'artisan.
  */
 export default function ChampsZone({
   zoneVille,
   zoneQuartier,
-  quartierSaisi,
   onChange,
-  onQuartierSaisi,
   labelClass,
   champClass,
 }) {
@@ -43,17 +41,6 @@ export default function ChampsZone({
           ))}
         </select>
       </div>
-      {ville && !zoneQuartier && (
-        <div className="col-span-full">
-          <label className={labelClass}>Nom de votre quartier</label>
-          <input
-            value={quartierSaisi}
-            onChange={(e) => onQuartierSaisi(e.target.value)}
-            placeholder="Notre équipe l'ajoutera à la liste"
-            className={champClass}
-          />
-        </div>
-      )}
     </>
   );
 }

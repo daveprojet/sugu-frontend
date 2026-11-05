@@ -10,9 +10,10 @@ export function useZones() {
 }
 
 /** Ville et quartier d'un point de la carte ; une panne laisse simplement le choix à l'utilisateur. */
-export async function chercherZoneProche(latitude, longitude, nom) {
+// `noms` : lieu choisi ou quartier précis ; `communes` : zone plus large, essayée en repli.
+export async function chercherZoneProche(latitude, longitude, noms = [], communes = []) {
   try {
-    const { data } = await zoneService.proche(latitude, longitude, nom)
+    const { data } = await zoneService.proche(latitude, longitude, noms, communes)
     return data
   } catch {
     return { ville: null, quartier: null }

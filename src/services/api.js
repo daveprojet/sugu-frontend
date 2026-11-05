@@ -225,7 +225,13 @@ export const paytechService = {
 
 export const zoneService = {
   list:   () => api.get('/artisans/zones/'),
-  proche: (lat, lng, nom) => api.get('/artisans/zones/proche/', { params: { lat, lng, nom } }),
+  proche: (lat, lng, noms = [], communes = []) => {
+    // Paramètres répétés (?nom=…&nom=…) : le backend les lit avec getlist.
+    const params = new URLSearchParams({ lat, lng })
+    for (const nom of [].concat(noms).filter(Boolean)) params.append('nom', nom)
+    for (const commune of [].concat(communes).filter(Boolean)) params.append('commune', commune)
+    return api.get('/artisans/zones/proche/', { params })
+  },
 }
 
 export const signalementService = {

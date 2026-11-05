@@ -30,6 +30,7 @@ export function formaterResultats(reponse) {
     resultats.push({
       cle,
       nom: p.name,
+      zone: zone || null,
       details: [zone, ville].filter((v) => v && v !== p.name).join(', '),
       latitude,
       longitude,

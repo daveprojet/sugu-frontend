@@ -67,7 +67,7 @@ export default function RechercheAdresse({ onSelect }) {
     setTexte(resultat.nom);
     setOuvert(false);
     setResultats([]);
-    onSelect(resultat.latitude, resultat.longitude);
+    onSelect(resultat.latitude, resultat.longitude, resultat);
   };
 
   const gererClavier = (e) => {

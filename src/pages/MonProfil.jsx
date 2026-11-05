@@ -111,7 +111,7 @@ export default function MonProfil() {
     }
   };
 
-  const handlePositionChange = async ({ latitude, longitude, quartier, commune }) => {
+  const handlePositionChange = async ({ latitude, longitude, quartier, commune, noms, communes }) => {
     setArtisanForm((f) => ({
       ...f,
       latitude,
@@ -119,7 +119,7 @@ export default function MonProfil() {
       quartier: quartier || f.quartier,
       ville: commune || f.ville,
     }));
-    const zone = await chercherZoneProche(latitude, longitude, quartier);
+    const zone = await chercherZoneProche(latitude, longitude, noms ?? [quartier], communes);
     if (zone.ville) {
       setArtisanForm((f) => ({ ...f, zone_ville: zone.ville.id, zone_quartier: zone.quartier?.id ?? null }));
     }
@@ -509,9 +509,7 @@ export default function MonProfil() {
                   <ChampsZone
                     zoneVille={artisanForm.zone_ville}
                     zoneQuartier={artisanForm.zone_quartier}
-                    quartierSaisi={artisanForm.quartier}
                     onChange={(zone) => setArtisanForm((f) => ({ ...f, ...zone }))}
-                    onQuartierSaisi={(valeur) => setArtisan("quartier", valeur)}
                     labelClass="block text-sm font-semibold text-ink mb-2"
                     champClass="w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none"
                   />

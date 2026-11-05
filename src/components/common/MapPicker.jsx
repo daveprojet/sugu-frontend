@@ -73,6 +73,10 @@ export default function MapPicker({ value, onChange }) {
         display: data.display_name || null,
         rue: [a.house_number, a.road].filter(Boolean).join(" ") || null,
         quartier: a.quartier || a.neighbourhood || a.suburb || null,
+        // « suburb » est souvent la commune entière (« Commune de Sicap-Liberté ») :
+        // on le garde à part pour ne l'utiliser qu'en repli.
+        quartierPrecis: a.quartier || a.neighbourhood || null,
+        communeQuartier: a.suburb || null,
         commune: a.city || a.town || a.village || a.municipality || null,
         region: a.state || a.region || null,
         pays: a.country || null,
@@ -82,7 +86,8 @@ export default function MapPicker({ value, onChange }) {
     }
   }, []);
 
-  const handlePositionSelect = useCallback(async (lat, lng) => {
+  // `choix` : la suggestion choisie dans la recherche d'adresse (absente pour un clic sur la carte).
+  const handlePositionSelect = useCallback(async (lat, lng, choix = null) => {
     lat = normalizeCoord(lat);
     lng = normalizeCoord(lng);
     const newPos = { latitude: lat, longitude: lng };
@@ -90,11 +95,15 @@ export default function MapPicker({ value, onChange }) {
     setAddress(null);
     const addr = await reverseGeocode(lat, lng);
     setAddress(addr);
+    // Le nom choisi (« Liberté 5 ») prime sur celui que la carte déduit du point.
+    const nomChoisi = choix?.nom || null;
     onChange({
       latitude: lat,
       longitude: lng,
-      quartier: addr?.quartier || "",
+      quartier: (choix?.estLieu && nomChoisi) || addr?.quartierPrecis || choix?.zone || addr?.quartier || "",
       commune: addr?.commune || "",
+      noms: [nomChoisi, addr?.quartierPrecis].filter(Boolean),
+      communes: [choix?.zone, addr?.communeQuartier].filter(Boolean),
     });
   }, [reverseGeocode, onChange]);
 
