@@ -54,7 +54,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handlePositionChange = async ({ latitude, longitude, quartier, commune }) => {
+  const handlePositionChange = async ({ latitude, longitude, quartier, commune, noms, communes }) => {
     setForm((f) => ({
       ...f,
       latitude,
@@ -62,7 +62,7 @@ export default function RegisterPage() {
       quartier: quartier || f.quartier,
       ville: commune || f.ville,
     }));
-    const zone = await chercherZoneProche(latitude, longitude, quartier);
+    const zone = await chercherZoneProche(latitude, longitude, noms ?? [quartier], communes);
     if (zone.ville) {
       setForm((f) => ({ ...f, zone_ville: zone.ville.id, zone_quartier: zone.quartier?.id ?? null }));
     }
@@ -321,9 +321,7 @@ export default function RegisterPage() {
                     <ChampsZone
                       zoneVille={form.zone_ville}
                       zoneQuartier={form.zone_quartier}
-                      quartierSaisi={form.quartier}
                       onChange={(zone) => setForm((f) => ({ ...f, ...zone }))}
-                      onQuartierSaisi={(valeur) => set("quartier", valeur)}
                       labelClass="block text-sm font-medium text-indigo-200 mb-2 ml-1"
                       champClass="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                     />
