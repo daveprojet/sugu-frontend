@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
 import { useDemandes, useUpdateDemande, useFixerPrix } from '@/hooks/useDemandes'
-import { useArtisanAvis, useUpdateArtisan, useIdentite, useDossierPro } from '@/hooks/useArtisans'
+import { useArtisan, useArtisanAvis, useUpdateArtisan, useIdentite, useDossierPro } from '@/hooks/useArtisans'
 import { useCommissions } from '@/hooks/usePaiements'
 import { useRepondreAvis } from '@/hooks/useAvis'
 import { extractApiError } from '@/utils/errors'
@@ -30,6 +30,7 @@ import {
   Wallet,
   Rocket,
   BadgeDollarSign,
+  MapPin,
   X
 } from 'lucide-react'
 
@@ -37,6 +38,7 @@ export default function DashboardArtisanPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { data: identite } = useIdentite(user?.artisan_uid)
+  const { data: profilArtisan } = useArtisan(user?.artisan_uid)
   const { data: dossierPro } = useDossierPro(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
@@ -263,6 +265,25 @@ export default function DashboardArtisanPage() {
               <Wallet className="w-3.5 h-3.5" /> Payer
             </Link>
           </motion.div>
+        )}
+
+        {/* Position exacte manquante : la carte des clients montre le centre du quartier */}
+        {profilArtisan && profilArtisan.position_renseignee === false && (
+          <Link
+            to="/mon-profil#position"
+            className="flex items-center gap-4 p-4 rounded-xl border bg-indigo-50 border-indigo-200 hover:border-indigo-300 transition-colors duration-150"
+          >
+            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-indigo-900">Placez votre position exacte sur la carte</p>
+              <p className="text-xs text-indigo-700 mt-0.5">
+                Les clients vous voient pour l&apos;instant au centre de votre quartier. Indiquez où vous travaillez pour apparaître au bon endroit et à la bonne distance.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-indigo-700 flex-shrink-0">Indiquer ma position →</span>
+          </Link>
         )}
 
         {/* Identity Status */}

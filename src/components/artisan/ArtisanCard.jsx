@@ -88,7 +88,7 @@ export default function ArtisanCard({ artisan }) {
             {artisan.distance_km != null && (
               <span className="inline-flex items-center gap-1 text-indigo-700 font-semibold whitespace-nowrap">
                 <Navigation className="w-3 h-3" />
-                {artisan.distance_km} km
+                {artisan.position_approximative ? '~' : ''}{artisan.distance_km} km
               </span>
             )}
           </div>

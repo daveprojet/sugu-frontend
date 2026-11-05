@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import BackLink from "@/components/common/BackLink";
@@ -33,6 +33,11 @@ import {
   LogIn,
   Briefcase,
 } from "lucide-react";
+
+// Sans position exacte, la carte montre le centre du quartier : le cercle signale
+// que l'artisan se trouve quelque part dans cette zone, pas à ce point précis.
+const RAYON_APPROXIMATIF_M = 600;
+const CERCLE_APPROXIMATIF = { color: "#4f46e5", fillColor: "#6366f1", fillOpacity: 0.12, weight: 1 };
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -288,7 +293,7 @@ export default function ArtisanDetailPage() {
               {artisan.distance_km != null && (
                 <div className="flex items-center justify-center gap-1.5 mt-2 text-sm text-indigo-700">
                   <Navigation className="w-4 h-4" />
-                  <span className="font-semibold">{artisan.distance_km} km</span>
+                  <span className="font-semibold">{artisan.position_approximative ? 'environ ' : ''}{artisan.distance_km} km</span>
                   <span className="text-muted">de vous</span>
                 </div>
               )}
@@ -315,8 +320,16 @@ export default function ArtisanDetailPage() {
                     <Marker position={[artisan.latitude, artisan.longitude]} icon={artisanIcon}>
                       <Popup>{artisan.prenom} {artisan.nom}</Popup>
                     </Marker>
+                    {artisan.position_approximative && (
+                      <Circle center={[artisan.latitude, artisan.longitude]} radius={RAYON_APPROXIMATIF_M} pathOptions={CERCLE_APPROXIMATIF} />
+                    )}
                   </MapContainer>
                 </div>
+              )}
+              {artisan.latitude && artisan.longitude && artisan.position_approximative && (
+                <p className="mt-2 text-xs text-muted text-center">
+                  Position approximative : quartier {artisan.quartier}
+                </p>
               )}
 
               <div className="mt-4">
@@ -652,8 +665,14 @@ export default function ArtisanDetailPage() {
             >
               <TileLayer attribution='&copy; <a href="https://osm.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Marker position={[artisan.latitude, artisan.longitude]} icon={artisanIcon}>
-                <Popup>{artisan.prenom} {artisan.nom}</Popup>
+                <Popup>
+                  {artisan.prenom} {artisan.nom}
+                  {artisan.position_approximative && <><br />Position approximative : quartier {artisan.quartier}</>}
+                </Popup>
               </Marker>
+              {artisan.position_approximative && (
+                <Circle center={[artisan.latitude, artisan.longitude]} radius={RAYON_APPROXIMATIF_M} pathOptions={CERCLE_APPROXIMATIF} />
+              )}
               {clientCoords && (
                 <Marker position={[clientCoords.latitude, clientCoords.longitude]} icon={clientIcon}>
                   <Popup>Ma position</Popup>

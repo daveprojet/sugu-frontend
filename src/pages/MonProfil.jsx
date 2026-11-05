@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info, Award } from "lucide-react";
@@ -52,6 +52,13 @@ export default function MonProfil() {
   const [phonePassword, setPhonePassword] = useState("");
   const [savingPhone, setSavingPhone] = useState(false);
   const [phoneError, setPhoneError] = useState("");
+
+  // Lien « Indiquer ma position » du tableau de bord : on descend jusqu'à la carte.
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash !== "#position" || artisanLoading) return;
+    document.getElementById("position")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [hash, artisanLoading]);
 
   useEffect(() => {
     if (!user) return;
@@ -476,7 +483,7 @@ export default function MonProfil() {
                       })}
                     </div>
                   </div>
-                  <div className="md:col-span-2">
+                  <div className="md:col-span-2 scroll-mt-24" id="position">
                     <label className="block text-sm font-semibold text-ink mb-2 flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       Votre position géographique
