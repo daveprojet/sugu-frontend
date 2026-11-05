@@ -82,6 +82,11 @@ export default function RegisterPage() {
         toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
         return;
       }
+      if (form.latitude == null || form.longitude == null) {
+        toast.error("Placez votre position sur la carte pour que les clients proches vous trouvent.");
+        document.getElementById("position-artisan")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -288,16 +293,17 @@ export default function RegisterPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-indigo-200 mb-2 flex items-center gap-2">
+                    <label id="position-artisan" className="block text-sm font-medium text-indigo-200 mb-2 flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
-                      Votre position géographique
+                      Votre position géographique <span className="text-red-300">*</span>
                     </label>
                     <div className="bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl p-3 mb-3">
                       <div className="flex items-start gap-2">
                         <Info className="w-4 h-4 text-indigo-300 mt-0.5 shrink-0" />
                         <p className="text-xs text-indigo-200 leading-relaxed">
-                          Indiquez votre position pour que les clients proches vous trouvent.
-                          Elle correspond à l&apos;endroit où vous travaillez ou habitez habituellement.
+                          Obligatoire : cliquez sur la carte, utilisez « Ma position » ou tapez votre
+                          adresse puis choisissez une suggestion. Elle correspond à l&apos;endroit où vous
+                          travaillez ou habitez habituellement.
                         </p>
                       </div>
                     </div>
