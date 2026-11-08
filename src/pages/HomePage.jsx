@@ -48,12 +48,12 @@ export default function HomePage() {
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-blob animation-delay-2000" />
 
         {/* Contenu */}
-        <div className="relative z-10 max-w-4xl mx-auto py-24 px-4 text-center">
+        <div className="relative z-10 max-w-6xl w-full mx-auto py-24 px-4 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="font-display text-4xl md:text-6xl font-bold leading-tight mb-6 drop-shadow-lg"
+            className="font-display text-4xl md:text-6xl font-bold leading-tight mb-6 drop-shadow-lg max-w-4xl mx-auto"
           >
             Trouvez l'artisan qu'il vous faut,
             <br />
@@ -76,7 +76,7 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="max-w-2xl mx-auto transform transition-transform duration-300 hover:scale-[1.02]"
+            className="max-w-4xl mx-auto transform transition-transform duration-300 hover:scale-[1.02]"
           >
             <SearchBar />
           </motion.div>
