@@ -1,32 +1,39 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Search, Briefcase } from "lucide-react";
+import { MapPin, Search, Briefcase, Building2 } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useZones } from "@/hooks/useZones";
 import SelectRecherche from "@/components/common/SelectRecherche";
 
 export default function SearchBar() {
+  const [ville, setVille] = useState("");
   const [quartier, setQuartier] = useState("");
   const [categorie, setCategorie] = useState("");
   const navigate = useNavigate();
   const { data: categories = [] } = useCategories();
   const { data: zones = [] } = useZones();
+  const villeChoisie = zones.find((v) => String(v.id) === ville);
+
+  // Changer de ville rend le quartier choisi caduc.
+  const handleVille = (valeur) => {
+    setVille(valeur);
+    setQuartier("");
+  };
 
 const handleSearch = (e) => {
   e.preventDefault();
   const params = new URLSearchParams();
-  
+
   if (categorie) {
     params.set("categorie", categorie);
   }
-  
-  if (quartier) {
-    const [villeId, quartierId] = quartier.split(":");
-    params.set("ville", villeId);
-    if (quartierId) params.set("quartier", quartierId);
+
+  if (ville) {
+    params.set("ville", ville);
+    if (quartier) params.set("quartier", quartier);
   }
-  
+
   navigate(`/artisans?${params.toString()}`);
 };
 
@@ -34,9 +41,9 @@ const handleSearch = (e) => {
   return (
     <form
       onSubmit={handleSearch}
-      className="bg-white/80 backdrop-blur-sm rounded-xl border border-line shadow-2xl shadow-gray-200/60 p-3 flex flex-col md:flex-row gap-3"
+      className="bg-white/80 backdrop-blur-sm rounded-xl border border-line shadow-2xl shadow-gray-200/60 p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] gap-3"
     >
-      <div className="flex-1 relative">
+      <div className="relative min-w-0">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#F97316]-500">
           <Briefcase className="w-5 h-5" />
         </div>
@@ -52,23 +59,38 @@ const handleSearch = (e) => {
         </select>
       </div>
 
-      <div className="flex-1 relative">
+      <div className="relative min-w-0">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#F97316]-500">
+          <Building2 className="w-5 h-5" />
+        </div>
+        <select
+          value={ville}
+          onChange={(e) => handleVille(e.target.value)}
+          aria-label="Ville"
+          className="w-full pl-12 pr-4 py-3.5 bg-gray-50/80 border border-line rounded-lg text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm appearance-none cursor-pointer"
+        >
+          <option value="">Quelle ville ?</option>
+          {zones.map((v) => (
+            <option key={v.id} value={v.id}>{v.nom}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="relative min-w-0">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#F97316]-500">
           <MapPin className="w-5 h-5" />
         </div>
         <SelectRecherche
           value={quartier}
           onChange={setQuartier}
+          disabled={!villeChoisie}
           ariaLabel="Quartier"
           placeholderRecherche="Rechercher un quartier…"
           options={[
-            { value: "", label: "Quel quartier ?" },
-            ...zones.flatMap((v) => [
-              { value: `${v.id}:`, label: `Tout ${v.nom}`, groupe: v.nom },
-              ...v.quartiers.map((q) => ({ value: `${v.id}:${q.id}`, label: q.nom, groupe: v.nom })),
-            ]),
+            { value: "", label: villeChoisie ? "Tous les quartiers" : "Choisissez d'abord une ville" },
+            ...(villeChoisie?.quartiers || []).map((q) => ({ value: String(q.id), label: q.nom })),
           ]}
-          className="w-full pl-12 pr-4 py-3.5 bg-gray-50/80 border border-line rounded-lg text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm cursor-pointer"
+          className="w-full pl-12 pr-4 py-3.5 bg-gray-50/80 border border-line rounded-lg text-gray-900 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         />
       </div>
 

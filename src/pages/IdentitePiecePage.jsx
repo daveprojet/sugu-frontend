@@ -112,7 +112,7 @@ export default function IdentitePiecePage() {
     formData.append('type_piece', typePiece)
     if (rectoFile) formData.append('recto', rectoFile)
     if (selfieFile) formData.append('selfie', selfieFile)
-    if (versoFile) formData.append('verso', versoFile)
+    if (versoRequis && versoFile) formData.append('verso', versoFile)
 
     try {
       await uploadIdentite.mutateAsync({ uid, formData })
@@ -306,7 +306,7 @@ export default function IdentitePiecePage() {
                 {/* Recto */}
                 <div>
                   <label className="block text-sm font-semibold text-ink mb-2">
-                    Recto <span className="text-red-500">*</span>
+                    {versoRequis ? 'Recto' : "Page d'identité (avec la photo)"} <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-start gap-4">
                     <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group">
@@ -379,12 +379,11 @@ export default function IdentitePiecePage() {
                   </div>
                 </div>
 
-                {/* Verso */}
+                {/* Verso : un passeport n'en a pas */}
+                {versoRequis && (
                 <div>
                   <label className="block text-sm font-semibold text-ink mb-2">
-                    Verso {versoRequis
-                      ? <span className="text-red-500">*</span>
-                      : <span className="text-muted font-normal">(facultatif pour un passeport)</span>}
+                    Verso <span className="text-red-500">*</span>
                   </label>
                   <div className="flex items-start gap-4">
                     <label className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group">
@@ -418,6 +417,7 @@ export default function IdentitePiecePage() {
                     )}
                   </div>
                 </div>
+                )}
 
                 {/* Submit */}
                 <div className="flex justify-end pt-2">
