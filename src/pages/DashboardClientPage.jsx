@@ -10,6 +10,7 @@ import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import SignalementModal from '@/components/common/SignalementModal'
+import PhotosDemande, { peutModifierPhotos } from '@/components/demande/PhotosDemande'
 import { STATUTS_DEMANDE, STATUTS_DEMANDE_SIGNALABLE } from '@/utils/constants'
 import {
   Inbox,
@@ -31,6 +32,7 @@ import {
   Ban,
   Wallet,
   HandCoins,
+  Camera,
 } from 'lucide-react'
 
 const defaultAvis = { note: 5, commentaire: '' }
@@ -50,6 +52,9 @@ export default function DashboardClientPage() {
   const [montantEspeces, setMontantEspeces] = useState('')
   const [payingDemandeId, setPayingDemandeId] = useState(null)
   const [demandeSignalee, setDemandeSignalee] = useState(null)
+  // Id plutôt que l'objet : la fenêtre suit les données rafraîchies après un ajout.
+  const [photosDemandeId, setPhotosDemandeId] = useState(null)
+  const photosDemande = demandes.find((d) => d.id === photosDemandeId)
   const avisRef = useRef(null)
 
   useEffect(() => {
@@ -345,6 +350,18 @@ export default function DashboardClientPage() {
                               {demande.service_element_nom}
                             </p>
                           )}
+                          {(demande.photos?.length > 0 || peutModifierPhotos('PANNE', 'client', demande.statut)) && (
+                            <button
+                              type="button"
+                              onClick={() => setPhotosDemandeId(demande.id)}
+                              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-indigo-700 hover:text-indigo-800 hover:underline"
+                            >
+                              <Camera className="w-3.5 h-3.5" />
+                              {demande.photos?.length
+                                ? `Photos (${demande.photos.length})`
+                                : 'Ajouter des photos'}
+                            </button>
+                          )}
                         </td>
                         <td className="px-6 py-4 align-middle">
                           {demande.prix_affiche != null ? (
@@ -543,6 +560,42 @@ export default function DashboardClientPage() {
             onClose={() => setDemandeSignalee(null)}
           />
         )}
+
+        {/* Photos de la demande : panne (client), avant / après (artisan) */}
+        <AnimatePresence>
+          {photosDemande && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+              onClick={() => setPhotosDemandeId(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.25 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl border border-line w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex items-start justify-between mb-1">
+                  <h3 className="text-lg font-bold text-ink">Photos de la demande</h3>
+                  <button
+                    type="button"
+                    onClick={() => setPhotosDemandeId(null)}
+                    className="p-2 -mt-1 -mr-2 rounded-full hover:bg-canvas text-muted hover:text-ink transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-sm text-muted mb-5">
+                  {peutModifierPhotos('PANNE', 'client', photosDemande.statut)
+                    ? `Montrez la panne à ${photosDemande.artisan_nom} : les photos l'aident à estimer le travail et à fixer son prix.`
+                    : `Avec ${photosDemande.artisan_nom}. Les photos avant / après sont ajoutées par l'artisan pendant son intervention.`}
+                </p>
+                <PhotosDemande demande={photosDemande} role="client" className="flex-col" />
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* Confirmation d'annulation */}
         <AnimatePresence>

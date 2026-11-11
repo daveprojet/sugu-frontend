@@ -154,10 +154,27 @@ export const artisanService = {
 export const demandeService = {
   list:   (params) => api.get('/demandes/', { params }),
   detail: (id)     => api.get(`/demandes/${id}/`),
-  create: (data)   => api.post('/demandes/', data),
+  // Avec des photos de la panne, la demande part en multipart.
+  create: ({ photos = [], ...data }) => {
+    if (!photos.length) return api.post('/demandes/', data)
+    const fd = new FormData()
+    Object.entries(data).forEach(([k, v]) => {
+      if (v !== undefined && v !== null) fd.append(k, v)
+    })
+    photos.forEach((p) => fd.append('photos', p))
+    return api.post('/demandes/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
   update: (id, d)  => api.patch(`/demandes/${id}/`, d),
   fixerPrix: (id, prix) => api.patch(`/demandes/${id}/fixer-prix/`, { prix_total: prix }),
   confirmerPaiement: (id, montant) => api.post(`/demandes/${id}/confirmer-paiement/`, { montant_confirme: montant }),
+  // typePhoto : PANNE (client), AVANT ou APRES (artisan)
+  ajouterPhotos: (id, typePhoto, photos) => {
+    const fd = new FormData()
+    fd.append('type_photo', typePhoto)
+    photos.forEach((p) => fd.append('photos', p))
+    return api.post(`/demandes/${id}/photos/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
+  supprimerPhoto: (id, photoUid) => api.delete(`/demandes/${id}/photos/${photoUid}/`),
 }
 
 // ── Avis ──────────────────────────────────────────

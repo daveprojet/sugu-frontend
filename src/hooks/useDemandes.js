@@ -68,6 +68,35 @@ export function useFixerPrix() {
   )
 }
 
+export function useAjouterPhotos() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ id, typePhoto, photos }) => demandeService.ajouterPhotos(id, typePhoto, photos),
+    {
+      onSuccess: (_, { id }) => {
+        qc.invalidateQueries(['demande', id])
+        qc.invalidateQueries('demandes')
+        toast.success('Photo(s) ajoutée(s).')
+      },
+      onError: (e) => toast.error(extractApiError(e, "Erreur lors de l'envoi des photos")),
+    }
+  )
+}
+
+export function useSupprimerPhoto() {
+  const qc = useQueryClient()
+  return useMutation(
+    ({ id, photoUid }) => demandeService.supprimerPhoto(id, photoUid),
+    {
+      onSuccess: (_, { id }) => {
+        qc.invalidateQueries(['demande', id])
+        qc.invalidateQueries('demandes')
+      },
+      onError: (e) => toast.error(extractApiError(e, 'Impossible de retirer cette photo')),
+    }
+  )
+}
+
 export function useConfirmerPaiement() {
   const qc = useQueryClient()
   return useMutation(
