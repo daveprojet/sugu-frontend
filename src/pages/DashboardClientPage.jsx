@@ -11,6 +11,7 @@ import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande, { peutModifierPhotos } from '@/components/demande/PhotosDemande'
+import DescriptionDepliable from '@/components/demande/DescriptionDepliable'
 import { STATUTS_DEMANDE, STATUTS_DEMANDE_SIGNALABLE } from '@/utils/constants'
 import {
   Inbox,
@@ -155,6 +156,123 @@ export default function DashboardClientPage() {
     }
   }
 
+  // ── Morceaux d'une demande, partagés par le tableau (ordinateur) et les cartes (téléphone) ──
+  const categoriesArtisan = (d) => (Array.isArray(d.artisan_categories) ? d.artisan_categories.join(', ') : d.artisan_categories)
+
+  const badgeStatut = (d) => {
+    const config = STATUTS_DEMANDE[d.statut] || { color: 'bg-canvas text-muted', label: d.statut }
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${config.color}`}>
+        {config.label}
+      </span>
+    )
+  }
+
+  const badgePrix = (d) => (
+    d.prix_affiche != null ? (
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full whitespace-nowrap">
+        <BadgeDollarSign className="w-4 h-4" />
+        {d.prix_affiche.toLocaleString("fr-FR")} FCFA
+      </span>
+    ) : d.statut === 'ACCEPTEE' ? (
+      <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
+        <Clock className="w-3 h-3" />
+        Prix en attente de l'artisan
+      </span>
+    ) : null
+  )
+
+  const boutonPhotos = (d) => (
+    (d.photos?.length > 0 || peutModifierPhotos('PANNE', 'client', d.statut)) && (
+      <button
+        type="button"
+        onClick={() => setPhotosDemandeId(d.id)}
+        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 hover:text-indigo-800 hover:underline"
+      >
+        <Camera className="w-3.5 h-3.5" />
+        {d.photos?.length ? `Photos (${d.photos.length})` : 'Ajouter des photos'}
+      </button>
+    )
+  )
+
+  // Paiement une fois la prestation terminée. grand : bouton pleine largeur (téléphone).
+  const actionPaiement = (d, grand = false) => {
+    if (d.statut !== 'TERMINEE') return null
+    if (d.est_payee) {
+      return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
+          <CheckCircle className="w-3.5 h-3.5" /> Payée
+        </span>
+      )
+    }
+    const taille = grand ? 'w-full justify-center text-sm px-4 py-3' : 'text-[11px] px-3 py-1.5 whitespace-nowrap'
+    return d.mode_paiement === 'en_ligne' ? (
+      <button
+        onClick={() => payerEnLigne(d)}
+        disabled={payingDemandeId === d.id}
+        className={`inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150 disabled:opacity-60 ${taille}`}
+      >
+        <Wallet className="w-4 h-4" />
+        {payingDemandeId === d.id ? 'Paiement...' : 'Payer en ligne'}
+      </button>
+    ) : (
+      <button
+        onClick={() => ouvrirEspeces(d)}
+        disabled={confirmerPaiement.isLoading}
+        className={`inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-100 hover:border-emerald-300 transition-colors duration-150 ${taille}`}
+      >
+        <HandCoins className="w-4 h-4" />
+        Confirmer le paiement
+      </button>
+    )
+  }
+
+  const boutonAnnuler = (d) => (
+    d.statut === 'EN_ATTENTE' && (
+      <button
+        onClick={() => openCancel(d)}
+        disabled={updateDemande.isLoading}
+        className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-800 hover:underline transition-colors whitespace-nowrap"
+      >
+        <Ban className="w-3.5 h-3.5" />
+        Annuler la demande
+      </button>
+    )
+  )
+
+  const boutonSignaler = (d) => (
+    STATUTS_DEMANDE_SIGNALABLE.includes(d.statut) && (
+      <button
+        type="button"
+        onClick={() => setDemandeSignalee(d)}
+        className="text-xs font-medium text-muted hover:text-red-600 hover:underline transition-colors"
+      >
+        Signaler
+      </button>
+    )
+  )
+
+  // grand : bouton pleine largeur (téléphone).
+  const actionAvis = (d, grand = false) => (
+    d.statut !== 'TERMINEE' ? (
+      grand ? null : <span className="text-xs text-muted font-medium">Après fin de prestation</span>
+    ) : d.avis_id ? (
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
+        <CheckCircle className="w-3 h-3" /> Avis envoyé
+      </span>
+    ) : (
+      <button
+        type="button"
+        onClick={() => openAvis(d)}
+        className={`inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150 ${grand ? 'w-full justify-center text-sm px-4 py-3' : 'text-xs px-3 py-1.5 whitespace-nowrap'}`}
+      >
+        <MessageSquare className="w-4 h-4" /> Laisser un avis
+      </button>
+    )
+  )
+
+  const dateDemande = (d) => new Date(d.created_at).toLocaleDateString('fr-FR')
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -187,7 +305,7 @@ export default function DashboardClientPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-3 gap-4 md:gap-6 mb-8"
+          className="grid grid-cols-3 gap-2.5 md:gap-6 mb-6 md:mb-8"
         >
           {[
             { label: 'Demandes envoyées', value: stats.total, icon: Inbox, color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -197,13 +315,13 @@ export default function DashboardClientPage() {
             <motion.div
               key={label}
               variants={itemVariants}
-              className="bg-white rounded-xl border border-line p-6 text-center hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150"
+              className="bg-white rounded-xl border border-line px-2 py-4 md:p-6 text-center hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150"
             >
-              <div className={`w-12 h-12 rounded-full ${bg} flex items-center justify-center mx-auto mb-3`}>
-                <Icon className={`w-6 h-6 ${color}`} />
+              <div className={`w-9 h-9 md:w-12 md:h-12 rounded-full ${bg} flex items-center justify-center mx-auto mb-2 md:mb-3`}>
+                <Icon className={`w-5 h-5 md:w-6 md:h-6 ${color}`} />
               </div>
-              <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
-              <p className="text-xs text-muted mt-1 font-medium">{label}</p>
+              <p className={`font-display text-2xl md:text-3xl font-bold ${color}`}>{value}</p>
+              <p className="text-[11px] md:text-xs text-muted mt-1 font-medium leading-tight">{label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -215,7 +333,7 @@ export default function DashboardClientPage() {
           animate="visible"
           className="bg-white rounded-xl border border-line overflow-hidden"
         >
-          <div className="px-6 py-5 border-b border-line-soft flex items-center justify-between gap-3">
+          <div className="px-4 md:px-6 py-4 md:py-5 border-b border-line-soft flex items-center justify-between gap-3">
             <h2 className="text-lg font-bold text-ink flex items-center gap-2">
               Mes demandes
               {demandes.length > 0 && (
@@ -234,7 +352,7 @@ export default function DashboardClientPage() {
           </div>
 
           {demandes.length > 0 && (
-            <div className="px-6 py-3 border-b border-line-soft flex items-center gap-2 flex-wrap">
+            <div className="px-4 md:px-6 py-3 border-b border-line-soft flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => setStatutFilter('all')}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors duration-150 ${
@@ -287,39 +405,114 @@ export default function DashboardClientPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[750px] text-sm text-left">
-                <thead className="bg-canvas-soft text-xs uppercase tracking-wider text-muted">
-                  <tr>
-                    <th className="px-6 py-3.5 font-semibold">Artisan</th>
-                    <th className="px-6 py-3.5 font-semibold">Contact</th>
-                    <th className="px-6 py-3.5 font-semibold">Demande</th>
-                    <th className="px-6 py-3.5 font-semibold">Prix</th>
-                    <th className="px-6 py-3.5 font-semibold">Statut</th>
-                    <th className="px-6 py-3.5 font-semibold">Date</th>
-                    <th className="px-6 py-3.5 font-semibold text-right">Avis</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line-soft">
-                  {demandesFiltrees.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-12 text-center">
-                        <p className="font-medium text-muted">Aucune demande avec ce statut</p>
-                      </td>
-                    </tr>
-                  ) : demandesFiltrees.map((demande) => {
-                    const statusConfig = STATUTS_DEMANDE[demande.statut] || { color: 'bg-canvas text-muted', label: demande.statut };
+            <>
+              {demandesFiltrees.length === 0 && (
+                <p className="px-6 py-12 text-center font-medium text-muted">Aucune demande avec ce statut</p>
+              )}
+
+              {/* Téléphone : une carte par demande, sans défilement horizontal */}
+              {demandesFiltrees.length > 0 && (
+                <ul className="md:hidden flex flex-col gap-3 p-3 bg-canvas-soft">
+                  {demandesFiltrees.map((demande) => {
+                    const prix = badgePrix(demande)
+                    const paiement = actionPaiement(demande, true)
+                    const avis = actionAvis(demande, true)
+                    const annuler = boutonAnnuler(demande)
+                    const signaler = boutonSignaler(demande)
+                    const photos = boutonPhotos(demande)
                     return (
-                      <tr key={demande.id} className="group hover:bg-canvas-soft transition-colors">
-                        <td className="px-6 py-4 align-middle">
-                          <Link to={`/artisans/${demande.artisan_uid}`} className="block group/link">
-                            <span className="font-bold text-ink group-hover/link:text-indigo-700 transition-colors">
-                              {demande.artisan_nom}
-                            </span>
-                            <p className="text-xs text-muted mt-0.5">{Array.isArray(demande.artisan_categories) ? demande.artisan_categories.join(', ') : demande.artisan_categories}</p>
+                      <li key={demande.id} className="bg-white rounded-xl border border-line shadow-[0_2px_10px_rgba(22,48,91,.06)] px-4 py-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <Link to={`/artisans/${demande.artisan_uid}`} className="min-w-0">
+                            <span className="block font-bold text-ink truncate">{demande.artisan_nom}</span>
+                            <span className="block text-xs text-muted truncate">{categoriesArtisan(demande)}</span>
                           </Link>
-                        </td>
-                        <td className="px-6 py-4 align-middle">
+                          {badgeStatut(demande)}
+                        </div>
+
+                        {demande.service_element_nom && (
+                          <p className="text-xs text-indigo-700 font-semibold mt-3">{demande.service_element_nom}</p>
+                        )}
+                        <DescriptionDepliable
+                          texte={demande.description}
+                          className={demande.service_element_nom ? 'mt-1' : 'mt-3'}
+                        />
+
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3">
+                          {prix}
+                          <span className="text-xs text-muted">Envoyée le {dateDemande(demande)}</span>
+                        </div>
+
+                        {(demande.artisan_telephone || demande.artisan_whatsapp) && (
+                          <div className="grid grid-cols-2 gap-2 mt-4">
+                            {demande.artisan_telephone && (
+                              <a
+                                href={`tel:${demande.artisan_telephone}`}
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white text-ink text-sm font-semibold px-3 py-2.5 hover:bg-canvas-soft transition-colors"
+                              >
+                                <Phone className="w-4 h-4" /> Appeler
+                              </a>
+                            )}
+                            {demande.artisan_whatsapp && (
+                              <a
+                                href={`https://wa.me/${demande.artisan_whatsapp.replace(/\D/g, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-2.5 hover:bg-emerald-100 transition-colors"
+                              >
+                                <MessageCircle className="w-4 h-4" /> WhatsApp
+                              </a>
+                            )}
+                          </div>
+                        )}
+
+                        {(paiement || avis) && (
+                          <div className="flex flex-col items-start gap-2 mt-3">
+                            {paiement}
+                            {avis}
+                          </div>
+                        )}
+
+                        {(photos || annuler || signaler) && (
+                          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+                            {photos}
+                            {annuler}
+                            {signaler}
+                          </div>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+
+              {/* Ordinateur : tableau */}
+              {demandesFiltrees.length > 0 && (
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full min-w-[750px] text-sm text-left">
+                    <thead className="bg-canvas-soft text-xs uppercase tracking-wider text-muted">
+                      <tr>
+                        <th className="px-6 py-3.5 font-semibold">Artisan</th>
+                        <th className="px-6 py-3.5 font-semibold">Contact</th>
+                        <th className="px-6 py-3.5 font-semibold">Demande</th>
+                        <th className="px-6 py-3.5 font-semibold">Prix</th>
+                        <th className="px-6 py-3.5 font-semibold">Statut</th>
+                        <th className="px-6 py-3.5 font-semibold">Date</th>
+                        <th className="px-6 py-3.5 font-semibold text-right">Avis</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line-soft">
+                      {demandesFiltrees.map((demande) => (
+                        <tr key={demande.id} className="group hover:bg-canvas-soft transition-colors">
+                          <td className="px-6 py-4 align-middle">
+                            <Link to={`/artisans/${demande.artisan_uid}`} className="block group/link">
+                              <span className="font-bold text-ink group-hover/link:text-indigo-700 transition-colors">
+                                {demande.artisan_nom}
+                              </span>
+                              <p className="text-xs text-muted mt-0.5">{categoriesArtisan(demande)}</p>
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 align-middle">
                             <div className="flex flex-col gap-1">
                               {demande.artisan_telephone && (
                                 <a
@@ -342,129 +535,38 @@ export default function DashboardClientPage() {
                                 </a>
                               )}
                             </div>
-                        </td>
-                        <td className="px-6 py-4 text-muted max-w-xs align-middle">
-                          <p className="line-clamp-2 leading-relaxed">{demande.description}</p>
-                          {demande.service_element_nom && (
-                            <p className="text-xs text-indigo-700 font-semibold mt-1">
-                              {demande.service_element_nom}
-                            </p>
-                          )}
-                          {(demande.photos?.length > 0 || peutModifierPhotos('PANNE', 'client', demande.statut)) && (
-                            <button
-                              type="button"
-                              onClick={() => setPhotosDemandeId(demande.id)}
-                              className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-indigo-700 hover:text-indigo-800 hover:underline"
-                            >
-                              <Camera className="w-3.5 h-3.5" />
-                              {demande.photos?.length
-                                ? `Photos (${demande.photos.length})`
-                                : 'Ajouter des photos'}
-                            </button>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 align-middle">
-                          {demande.prix_affiche != null ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
-                              <BadgeDollarSign className="w-4 h-4" />
-                              {demande.prix_affiche.toLocaleString("fr-FR")} FCFA
-                            </span>
-                          ) : demande.statut === 'ACCEPTEE' ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full">
-                              <Clock className="w-3 h-3" />
-                              Prix en attente de l'artisan
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted">—</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 align-middle">
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${statusConfig.color}`}>
-                            {statusConfig.label}
-                          </span>
-
-                          {/* Paiement du dépannage une fois terminé */}
-                          {demande.statut === 'TERMINEE' && !demande.est_payee && (
-                            <div className="mt-1.5">
-                              {demande.mode_paiement === 'en_ligne' ? (
-                                <button
-                                  onClick={() => payerEnLigne(demande)}
-                                  disabled={payingDemandeId === demande.id}
-                                  className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150 disabled:opacity-60"
-                                >
-                                  <Wallet className="w-3.5 h-3.5" />
-                                  {payingDemandeId === demande.id ? 'Paiement...' : 'Payer en ligne'}
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => ouvrirEspeces(demande)}
-                                  disabled={confirmerPaiement.isLoading}
-                                  className="inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-100 hover:border-emerald-300 transition-colors duration-150"
-                                >
-                                  <HandCoins className="w-3.5 h-3.5" />
-                                  Confirmer le paiement
-                                </button>
-                              )}
-                            </div>
-                          )}
-                          {demande.statut === 'TERMINEE' && demande.est_payee && (
-                            <div className="mt-1.5">
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
-                                <CheckCircle className="w-3.5 h-3.5" /> Payée
-                              </span>
-                            </div>
-                          )}
-
-                          {demande.statut === 'EN_ATTENTE' && (
-                            <div className="mt-1.5">
-                              <button
-                                onClick={() => openCancel(demande)}
-                                disabled={updateDemande.isLoading}
-                                className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600 hover:text-red-800 hover:underline transition-colors"
-                              >
-                                <Ban className="w-3 h-3" />
-                                Annuler la demande
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-muted text-xs align-middle">
-                          {new Date(demande.created_at).toLocaleDateString('fr-FR')}
-                          {STATUTS_DEMANDE_SIGNALABLE.includes(demande.statut) && (
-                            <button
-                              type="button"
-                              onClick={() => setDemandeSignalee(demande)}
-                              className="block mt-1 text-[11px] font-medium text-muted hover:text-red-600 hover:underline transition-colors"
-                            >
-                              Signaler
-                            </button>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-right align-middle">
-                          {demande.statut !== 'TERMINEE' ? (
-                            <span className="text-xs text-muted font-medium">
-                              Après fin de prestation
-                            </span>
-                          ) : demande.avis_id ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1f6b45] bg-[#dff3e8] px-2.5 py-1 rounded-full">
-                              <CheckCircle className="w-3 h-3" /> Avis envoyé
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => openAvis(demande)}
-                              className="inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150"
-                            >
-                              <MessageSquare className="w-3 h-3" /> Laisser un avis
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          </td>
+                          <td className="px-6 py-4 text-muted max-w-xs align-middle">
+                            <p className="line-clamp-2 leading-relaxed">{demande.description}</p>
+                            {demande.service_element_nom && (
+                              <p className="text-xs text-indigo-700 font-semibold mt-1">
+                                {demande.service_element_nom}
+                              </p>
+                            )}
+                            <div className="mt-1.5">{boutonPhotos(demande)}</div>
+                          </td>
+                          <td className="px-6 py-4 align-middle">
+                            {badgePrix(demande) || <span className="text-xs text-muted">—</span>}
+                          </td>
+                          <td className="px-6 py-4 align-middle">
+                            {badgeStatut(demande)}
+                            {actionPaiement(demande) && <div className="mt-1.5">{actionPaiement(demande)}</div>}
+                            {boutonAnnuler(demande) && <div className="mt-1.5">{boutonAnnuler(demande)}</div>}
+                          </td>
+                          <td className="px-6 py-4 text-muted text-xs align-middle">
+                            {dateDemande(demande)}
+                            {boutonSignaler(demande) && <div className="mt-1">{boutonSignaler(demande)}</div>}
+                          </td>
+                          <td className="px-6 py-4 text-right align-middle">
+                            {actionAvis(demande)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </motion.div>
 
