@@ -8,8 +8,10 @@ import { compresserImage, MAX_PHOTOS_PAR_ETAPE, TYPES_PHOTO_ACCEPTES } from '@/u
 // Mêmes règles que le serveur (apps/demandes/models.py, PhotoDemande.STATUTS_AUTORISES).
 export const ETAPES_PHOTO = {
   PANNE: { titre: 'Photos de la panne', auteur: 'client', statuts: ['EN_ATTENTE', 'ACCEPTEE'] },
-  AVANT: { titre: 'Avant intervention', auteur: 'artisan', statuts: ['ACCEPTEE', 'PRIX_FIXE', 'EN_COURS'] },
-  APRES: { titre: 'Après intervention', auteur: 'artisan', statuts: ['PRIX_FIXE', 'EN_COURS', 'TERMINEE'] },
+  // Avant : au démarrage des travaux (exigées pour passer « En cours »).
+  // Après : à la fin des travaux (exigées pour passer « Terminée »).
+  AVANT: { titre: 'Avant intervention', auteur: 'artisan', statuts: ['PRIX_FIXE', 'EN_COURS'] },
+  APRES: { titre: 'Après intervention', auteur: 'artisan', statuts: ['EN_COURS', 'TERMINEE'] },
 }
 
 export const peutModifierPhotos = (type, role, statut) =>

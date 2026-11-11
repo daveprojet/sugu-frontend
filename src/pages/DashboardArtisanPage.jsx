@@ -12,6 +12,7 @@ import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande from '@/components/demande/PhotosDemande'
+import EtapeTravauxModal from '@/components/demande/EtapeTravauxModal'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
 import {
   Inbox,
@@ -58,6 +59,20 @@ export default function DashboardArtisanPage() {
   const [blockedModal, setBlockedModal] = useState(null)
   const [refusDemande, setRefusDemande] = useState(null)
   const [demandeSignalee, setDemandeSignalee] = useState(null)
+  // { id, etape: 'AVANT' | 'APRES' } — id plutôt que l'objet : la fenêtre suit les photos ajoutées.
+  const [etapeTravaux, setEtapeTravaux] = useState(null)
+  const demandeEtape = etapeTravaux && demandes.find((x) => x.id === etapeTravaux.id)
+
+  const confirmerEtape = () => {
+    const statut = etapeTravaux.etape === 'AVANT' ? 'EN_COURS' : 'TERMINEE'
+    updateDemande.mutate({ id: etapeTravaux.id, data: { statut } }, {
+      onSuccess: () => {
+        setEtapeTravaux(null)
+        toast.success(statut === 'EN_COURS' ? 'Travaux démarrés.' : 'Mission terminée.')
+      },
+      onError: (e) => toast.error(extractApiError(e, 'Action impossible.')),
+    })
+  }
 
   const demandesFiltrees = statutFilter === 'all'
     ? demandes
@@ -598,7 +613,16 @@ export default function DashboardArtisanPage() {
                           </p>
                         )}
                         <p className="text-sm text-muted leading-relaxed">{d.description}</p>
-                        <PhotosDemande demande={d} role="artisan" className="mt-3" />
+                        {/* Avant / après : ajoutées dans la fenêtre de changement de statut ;
+                            ici, seulement celles déjà prises. */}
+                        <PhotosDemande
+                          demande={d}
+                          role="artisan"
+                          types={['PANNE', 'AVANT', 'APRES'].filter(
+                            (t) => t === 'PANNE' || d.photos?.some((p) => p.type_photo === t)
+                          )}
+                          className="mt-3"
+                        />
                         <div className="flex items-center gap-4 mt-3 text-xs text-muted font-medium">
                           <span className="flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5" />
@@ -666,25 +690,18 @@ export default function DashboardArtisanPage() {
                             </p>
                           </div>
                         )}
+                        {/* Photos obligatoires : « avant » pour démarrer, « après » pour terminer */}
                         {d.statut === 'PRIX_FIXE' && (
-                          <>
-                            <button
-                              onClick={() => majDemande({ id: d.id, data: { statut: 'EN_COURS' } })}
-                              className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                            >
-                              <Clock className="w-3.5 h-3.5" /> En cours
-                            </button>
-                            <button
-                              onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
-                              className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
-                            >
-                              <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
-                            </button>
-                          </>
+                          <button
+                            onClick={() => setEtapeTravaux({ id: d.id, etape: 'AVANT' })}
+                            className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                          >
+                            <Clock className="w-3.5 h-3.5" /> Démarrer les travaux
+                          </button>
                         )}
                         {d.statut === 'EN_COURS' && (
                           <button
-                            onClick={() => majDemande({ id: d.id, data: { statut: 'TERMINEE' } })}
+                            onClick={() => setEtapeTravaux({ id: d.id, etape: 'APRES' })}
                             className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
                           >
                             <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
@@ -834,6 +851,16 @@ export default function DashboardArtisanPage() {
       )}
 
       <AnimatePresence>
+        {demandeEtape && (
+          <EtapeTravauxModal
+            demande={demandeEtape}
+            etape={etapeTravaux.etape}
+            onConfirmer={confirmerEtape}
+            onClose={() => setEtapeTravaux(null)}
+            enCours={updateDemande.isLoading}
+          />
+        )}
+
         {blockedModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <motion.div
