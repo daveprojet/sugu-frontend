@@ -14,6 +14,7 @@ import { normalizeCoord } from "@/utils/geo";
 import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
+import PhotosPicker from "@/components/demande/PhotosPicker";
 import {
   MapPin,
   Phone,
@@ -85,6 +86,7 @@ export default function ArtisanDetailPage() {
   const [selectedCategorie, setSelectedCategorie] = useState(null);
   const [selectedServiceUid, setSelectedServiceUid] = useState(null);
   const [description, setDescription] = useState("");
+  const [photosPanne, setPhotosPanne] = useState([]);
   const [copied, setCopied] = useState(null);
   const [clientCoords, setClientCoords] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -177,6 +179,7 @@ export default function ArtisanDetailPage() {
       artisan: artisan.id,
       description,
       mode_paiement: modePaiement,
+      photos: photosPanne,
     };
     if (selectedServiceUid !== "autre") {
       payload.service_element = selectedServiceUid;
@@ -188,6 +191,7 @@ export default function ArtisanDetailPage() {
     await createDemande.mutateAsync(payload);
     setShowDemandeForm(false);
     setDescription("");
+    setPhotosPanne([]);
     setSelectedCategorie(null);
     setSelectedServiceUid(null);
   };
@@ -197,6 +201,7 @@ export default function ArtisanDetailPage() {
     setSelectedCategorie(null);
     setSelectedServiceUid(null);
     setDescription("");
+    setPhotosPanne([]);
   };
 
   const openDemandeOrAuth = () => {
@@ -468,6 +473,14 @@ export default function ArtisanDetailPage() {
                       className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 resize-none"
                     />
                   </div>
+
+                  {/* 4. Photos de la panne (facultatives) */}
+                  <PhotosPicker
+                    photos={photosPanne}
+                    onChange={setPhotosPanne}
+                    label="Photos de la panne (facultatif)"
+                    aide="Jusqu'à 5 photos : elles aident l'artisan à voir le travail à faire et à fixer un prix juste."
+                  />
 
                   {/* Geolocation status */}
                   <div className="flex items-center justify-between rounded-lg bg-canvas-soft border border-line-soft px-4 py-3">

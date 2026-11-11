@@ -11,6 +11,7 @@ import { extractApiError } from '@/utils/errors'
 import Spinner from '@/components/common/Spinner'
 import StarRating from '@/components/common/StarRating'
 import SignalementModal from '@/components/common/SignalementModal'
+import PhotosDemande from '@/components/demande/PhotosDemande'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
 import {
   Inbox,
@@ -597,6 +598,7 @@ export default function DashboardArtisanPage() {
                           </p>
                         )}
                         <p className="text-sm text-muted leading-relaxed">{d.description}</p>
+                        <PhotosDemande demande={d} role="artisan" className="mt-3" />
                         <div className="flex items-center gap-4 mt-3 text-xs text-muted font-medium">
                           <span className="flex items-center gap-1.5">
                             <Calendar className="w-3.5 h-3.5" />
