@@ -11,6 +11,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import PushPermissionBanner from '@/components/common/PushPermissionBanner'
 import Spinner from '@/components/common/Spinner'
+import ScrollToTop from '@/components/common/ScrollToTop'
 
 import HomePage           from '@/pages/HomePage'
 import AboutPage          from '@/pages/AboutPage'
@@ -66,6 +67,7 @@ function AppRoutes() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
       <Navbar />
       <div className="flex-1">
         <Routes>
