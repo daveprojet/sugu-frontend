@@ -37,16 +37,33 @@ export const STATUTS_IDENTITE = {
 // Un client ne signale qu'un artisan qui a pris en charge sa demande.
 export const STATUTS_DEMANDE_SIGNALABLE = ['ACCEPTEE', 'PRIX_FIXE', 'EN_COURS', 'TERMINEE']
 
-export const MOTIFS_SIGNALEMENT = [
-  { value: 'TRAVAIL_NON_EXECUTE', label: 'Travail non exécuté' },
-  { value: 'TRAVAIL_MAL_FAIT', label: 'Travail mal fait' },
-  { value: 'DOMMAGE', label: 'Dommage matériel' },
-  { value: 'ABSENCE_RETARD', label: 'Absence ou retard' },
+// Motifs selon la personne signalée — mêmes listes que le serveur
+// (Signalement.MOTIFS_CONTRE_ARTISAN / MOTIFS_CONTRE_CLIENT), qui refuse les autres.
+const MOTIFS_COMMUNS = [
   { value: 'PRIX', label: 'Désaccord sur le prix' },
   { value: 'COMPORTEMENT', label: 'Comportement inapproprié' },
   { value: 'FRAUDE', label: 'Fraude ou arnaque' },
   { value: 'AUTRE', label: 'Autre' },
 ]
+
+export const MOTIFS_SIGNALEMENT = {
+  // Un client signale l'artisan
+  artisan: [
+    { value: 'TRAVAIL_NON_EXECUTE', label: 'Travail non exécuté' },
+    { value: 'TRAVAIL_MAL_FAIT', label: 'Travail mal fait' },
+    { value: 'DOMMAGE', label: 'Dommage matériel' },
+    { value: 'ABSENCE_RETARD', label: 'Absence ou retard' },
+    ...MOTIFS_COMMUNS,
+  ],
+  // Un artisan signale le client
+  client: [
+    { value: 'CLIENT_ABSENT', label: 'Client absent au rendez-vous' },
+    { value: 'REFUS_PAIEMENT', label: 'Refus de payer' },
+    { value: 'ANNULATION_TARDIVE', label: 'Annulation de dernière minute' },
+    { value: 'DEMANDE_TROMPEUSE', label: 'Demande trompeuse ou fictive' },
+    ...MOTIFS_COMMUNS,
+  ],
+}
 
 export const METHODES_PAYTECH = [
   { value: 'Orange Money', label: 'Orange Money' },

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { demandeService } from '@/services/api'
 import { toast } from 'react-toastify'
-import { extractApiError, getServerErrorMessage } from '@/utils/errors'
+import { extractApiError } from '@/utils/errors'
 
 export function useDemandes(params = {}) {
   return useQuery(
@@ -107,9 +107,8 @@ export function useConfirmerPaiement() {
         qc.invalidateQueries('demandes')
         toast.success('Paiement confirmé avec succès !')
       },
-      onError: (e) => toast.error(
-        getServerErrorMessage(e) || e.response?.data?.montant?.[0] || 'Erreur lors de la confirmation du paiement'
-      ),
+      // Seul affichage de l'erreur (le serveur la renvoie dans non_field_errors ou montant).
+      onError: (e) => toast.error(extractApiError(e, 'Erreur lors de la confirmation du paiement')),
     }
   )
 }

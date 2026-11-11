@@ -248,22 +248,22 @@ export default function IdentitePiecePage() {
                     />
                   </div>
                 )}
-                {identite.selfie && (
-                  <div>
-                    <p className="text-xs font-semibold text-muted mb-2">Selfie</p>
-                    <img
-                      src={selfiePreview || resolveImageUrl(identite.selfie)}
-                      alt="Selfie avec pièce d'identité"
-                      className="w-full rounded-lg border border-line object-cover max-h-64"
-                    />
-                  </div>
-                )}
                 {identite.verso && (
                   <div>
                     <p className="text-xs font-semibold text-muted mb-2">Verso</p>
                     <img
                       src={versoPreview || resolveImageUrl(identite.verso)}
                       alt="Verso pièce d'identité"
+                      className="w-full rounded-lg border border-line object-cover max-h-64"
+                    />
+                  </div>
+                )}
+                {identite.selfie && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted mb-2">Selfie</p>
+                    <img
+                      src={selfiePreview || resolveImageUrl(identite.selfie)}
+                      alt="Selfie avec pièce d'identité"
                       className="w-full rounded-lg border border-line object-cover max-h-64"
                     />
                   </div>
@@ -341,44 +341,6 @@ export default function IdentitePiecePage() {
                   </div>
                 </div>
 
-                {/* Selfie */}
-                <div>
-                  <label className="block text-sm font-semibold text-ink mb-2">
-                    Selfie avec la pièce à côté du visage <span className="text-red-500">*</span>
-                  </label>
-                  <p className="text-xs text-muted mb-3 ml-1">
-                    Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage
-                  </p>
-                  <div className="flex items-start gap-4">
-                    <div
-                      onClick={() => setShowCamera(true)}
-                      className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group"
-                    >
-                      <Camera className="w-8 h-8 text-muted group-hover:text-indigo-700 transition-colors mb-2" />
-                      <span className="text-sm font-medium text-muted group-hover:text-indigo-700">
-                        {selfieFile ? selfieFile.name : 'Prendre une photo avec la caméra'}
-                      </span>
-                      <span className="text-xs text-muted mt-1">JPG, PNG — max 5 Mo</span>
-                    </div>
-                    {selfiePreview && (
-                      <div className="relative flex-shrink-0">
-                        <img
-                          src={selfiePreview}
-                          alt="Aperçu selfie"
-                          className="h-40 w-32 rounded-lg border border-line object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={removeSelfie}
-                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
                 {/* Verso : un passeport n'en a pas */}
                 {versoRequis && (
                 <div>
@@ -418,6 +380,44 @@ export default function IdentitePiecePage() {
                   </div>
                 </div>
                 )}
+
+                {/* Selfie */}
+                <div>
+                  <label className="block text-sm font-semibold text-ink mb-2">
+                    Selfie avec la pièce à côté du visage <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-muted mb-3 ml-1">
+                    Prenez une photo de vous avec votre pièce d'identité visible à côté de votre visage
+                  </p>
+                  <div className="flex items-start gap-4">
+                    <div
+                      onClick={() => setShowCamera(true)}
+                      className="flex-1 flex flex-col items-center justify-center h-40 rounded-lg border-2 border-dashed border-line bg-canvas-soft hover:bg-indigo-50 hover:border-indigo-300 cursor-pointer transition-colors duration-150 group"
+                    >
+                      <Camera className="w-8 h-8 text-muted group-hover:text-indigo-700 transition-colors mb-2" />
+                      <span className="text-sm font-medium text-muted group-hover:text-indigo-700">
+                        {selfieFile ? selfieFile.name : 'Prendre une photo avec la caméra'}
+                      </span>
+                      <span className="text-xs text-muted mt-1">JPG, PNG — max 5 Mo</span>
+                    </div>
+                    {selfiePreview && (
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={selfiePreview}
+                          alt="Aperçu selfie"
+                          className="h-40 w-32 rounded-lg border border-line object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeSelfie}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* Submit */}
                 <div className="flex justify-end pt-2">

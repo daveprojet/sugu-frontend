@@ -197,8 +197,8 @@ export default function MonProfil() {
         file: file,
       });
       await fetchMe();
-    } catch (error) {
-      toast.error("Erreur lors de l'envoi de la photo.");
+    } catch {
+      // Message déjà affiché par useUploadArtisanPhoto (onError) : pas de second toast.
     }
   };
 

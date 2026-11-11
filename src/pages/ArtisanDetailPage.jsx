@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
@@ -82,6 +82,7 @@ export default function ArtisanDetailPage() {
   const totalAvis = avisPage?.count || 0;
   const createDemande = useCreateDemande();
   const [showDemandeForm, setShowDemandeForm] = useState(false);
+  const demandeFormRef = useRef(null);
   const [authModal, setAuthModal] = useState(null);
   const [selectedCategorie, setSelectedCategorie] = useState(null);
   const [selectedServiceUid, setSelectedServiceUid] = useState(null);
@@ -110,6 +111,25 @@ export default function ArtisanDetailPage() {
       );
     }
   }, [artisan?.latitude, artisan?.longitude, clientCoords]);
+
+  // Sur téléphone, le formulaire s'ouvre sous la carte de profil, hors de l'écran :
+  // on descend jusqu'à lui. Sur grand écran il est souvent déjà visible : rien ne bouge.
+  useEffect(() => {
+    if (!showDemandeForm) return undefined;
+    // Deux frames d'attente : appelé au montage, le défilement était annulé par le
+    // démarrage de l'animation d'ouverture du formulaire (framer-motion).
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        const formulaire = demandeFormRef.current;
+        if (!formulaire) return;
+        const { top } = formulaire.getBoundingClientRect();
+        if (top >= 80 && top <= window.innerHeight * 0.4) return;
+        const sansAnimation = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        formulaire.scrollIntoView({ behavior: sansAnimation ? "auto" : "smooth", block: "start" });
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [showDemandeForm]);
 
   useEffect(() => {
     if (!photoAgrandie) return undefined;
@@ -381,9 +401,10 @@ export default function ArtisanDetailPage() {
             {/* Formulaire demande */}
             {showDemandeForm && (
               <motion.div
+                ref={demandeFormRef}
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="bg-white rounded-xl border border-indigo-300 p-6"
+                className="bg-white rounded-xl border border-indigo-300 p-6 scroll-mt-20"
               >
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-ink">

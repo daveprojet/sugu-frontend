@@ -828,6 +828,7 @@ export default function DashboardArtisanPage() {
         <SignalementModal
           demandeId={demandeSignalee.id}
           cibleNom={demandeSignalee.client_nom}
+          cible="client"
           onClose={() => setDemandeSignalee(null)}
         />
       )}
