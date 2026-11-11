@@ -3,10 +3,29 @@ import { artisanService, dossierProService, identiteService } from '@/services/a
 import { toast } from 'react-toastify'
 import { extractApiError, getServerErrorMessage } from '@/utils/errors'
 
+// Graine de l'ordre « mélangé » des artisans, tirée une fois par visite : le
+// serveur garde le même ordre d'une page à l'autre (ni doublon ni oubli), et
+// chaque visiteur voit un ordre différent (équité entre artisans).
+const CLE_GRAINE = 'bricolibe_graine_artisans'
+let graineMemoire = null
+
+function graineDeVisite() {
+  if (graineMemoire) return graineMemoire
+  try {
+    graineMemoire = sessionStorage.getItem(CLE_GRAINE)
+  } catch { /* stockage indisponible (navigation privée…) */ }
+  if (!graineMemoire) {
+    graineMemoire = Math.random().toString(36).slice(2, 12)
+    try { sessionStorage.setItem(CLE_GRAINE, graineMemoire) } catch { /* idem */ }
+  }
+  return graineMemoire
+}
+
 export function useArtisans(filters = {}) {
+  const params = { ...filters, graine: graineDeVisite() }
   return useQuery(
-    ['artisans', filters],
-    () => artisanService.list(filters).then(r => r.data),
+    ['artisans', params],
+    () => artisanService.list(params).then(r => r.data),
     { keepPreviousData: true, staleTime: 1000 * 60 * 2 }
   )
 }
