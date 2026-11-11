@@ -7,10 +7,14 @@ import { MOTIFS_SIGNALEMENT } from '@/utils/constants'
 /**
  * Signaler l'autre partie d'une demande. L'identité de l'auteur n'est jamais communiquée
  * à la personne signalée.
+ *
+ * cible : 'artisan' (un client signale l'artisan) ou 'client' (un artisan signale le
+ * client) — détermine les motifs proposés.
  */
-export default function SignalementModal({ demandeId, cibleNom, onClose }) {
+export default function SignalementModal({ demandeId, cibleNom, cible, onClose }) {
   const createSignalement = useCreateSignalement()
-  const [motif, setMotif] = useState(MOTIFS_SIGNALEMENT[0].value)
+  const motifs = MOTIFS_SIGNALEMENT[cible] || MOTIFS_SIGNALEMENT.artisan
+  const [motif, setMotif] = useState(motifs[0].value)
   const [description, setDescription] = useState('')
 
   const envoyer = async (e) => {
@@ -58,7 +62,7 @@ export default function SignalementModal({ demandeId, cibleNom, onClose }) {
               onChange={(e) => setMotif(e.target.value)}
               className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150"
             >
-              {MOTIFS_SIGNALEMENT.map((m) => (
+              {motifs.map((m) => (
                 <option key={m.value} value={m.value}>{m.label}</option>
               ))}
             </select>
