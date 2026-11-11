@@ -86,7 +86,11 @@ export default function DashboardArtisanPage() {
   const toggleDispo = async () => {
     const next = !disponible
     setDisponible(next)
-    await updateArtisan.mutateAsync({ uid: user.artisan_uid, data: { disponible: next } })
+    try {
+      await updateArtisan.mutateAsync({ uid: user.artisan_uid, data: { disponible: next } })
+    } catch {
+      setDisponible(!next) // échec : l'interrupteur revient à sa position
+    }
   }
 
   const stats = {
@@ -215,27 +219,30 @@ export default function DashboardArtisanPage() {
               <Rocket className="w-4 h-4" /> Abonnements
             </Link>
             <button
+              type="button"
+              role="switch"
+              aria-checked={disponible}
+              aria-label="Disponibilité"
+              title={disponible ? 'Cliquez pour passer indisponible' : 'Cliquez pour passer disponible'}
               onClick={toggleDispo}
-              className={`group relative flex items-center gap-3 px-6 py-2.5 rounded-lg border font-semibold text-sm transition-colors duration-150
-                ${disponible
-                  ? 'border-emerald-500 text-emerald-700 bg-white hover:bg-emerald-50'
-                  : 'border-line text-muted bg-white hover:bg-canvas-soft'
-                }`}
+              disabled={updateArtisan.isLoading}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg border border-line bg-white hover:bg-canvas-soft text-sm font-semibold transition-colors duration-150 disabled:opacity-70"
             >
-            <span className="relative flex h-3 w-3">
               <span
-                className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
-                  disponible ? 'bg-emerald-400' : 'bg-gray-400'
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors duration-200 ${
+                  disponible ? 'bg-emerald-500' : 'bg-gray-300'
                 }`}
-              />
-              <span
-                className={`relative inline-flex rounded-full h-3 w-3 ${
-                  disponible ? 'bg-emerald-500' : 'bg-gray-400'
-                }`}
-              />
-            </span>
-            {disponible ? 'Disponible' : 'Indisponible'}
-          </button>
+              >
+                <span
+                  className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                    disponible ? 'translate-x-[22px]' : 'translate-x-0.5'
+                  }`}
+                />
+              </span>
+              <span className={disponible ? 'text-emerald-700' : 'text-muted'}>
+                {disponible ? 'Disponible' : 'Indisponible'}
+              </span>
+            </button>
           </div>
         </motion.div>
 
