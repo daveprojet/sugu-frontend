@@ -127,8 +127,8 @@ export default function DashboardClientPage() {
         demande: demande.id,
         target_payment: 'Orange Money, Wave, Free Money, Carte Bancaire',
       })
-    } catch (err) {
-      toast.error(extractApiError(err, "Impossible de lancer le paiement"))
+    } catch {
+      // Message déjà affiché par usePaytechInit (onError) : pas de second toast.
     } finally {
       setPayingDemandeId(null)
     }
@@ -151,8 +151,8 @@ export default function DashboardClientPage() {
     try {
       await confirmerPaiement.mutateAsync({ id: especesModal.id, montant })
       setEspecesModal(null)
-    } catch (err) {
-      toast.error(extractApiError(err, "Impossible de confirmer le paiement"))
+    } catch {
+      // Message déjà affiché par useConfirmerPaiement (onError) : pas de second toast.
     }
   }
 
@@ -204,6 +204,10 @@ export default function DashboardClientPage() {
           <CheckCircle className="w-3.5 h-3.5" /> Payée
         </span>
       )
+    }
+    // Sans montant fixé, il n'y a rien à payer (le serveur répondrait « Aucun montant à payer »).
+    if (d.prix_total == null) {
+      return <span className="text-[11px] text-muted">Montant non fixé par l'artisan</span>
     }
     const taille = grand ? 'w-full justify-center text-sm px-4 py-3' : 'text-[11px] px-3 py-1.5 whitespace-nowrap'
     return d.mode_paiement === 'en_ligne' ? (
@@ -659,6 +663,7 @@ export default function DashboardClientPage() {
           <SignalementModal
             demandeId={demandeSignalee.id}
             cibleNom={demandeSignalee.artisan_nom}
+            cible="artisan"
             onClose={() => setDemandeSignalee(null)}
           />
         )}

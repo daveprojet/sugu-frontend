@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { commissionService, paiementService, paytechService, reversementService } from '@/services/api'
 import { toast } from 'react-toastify'
-import { getServerErrorMessage } from '@/utils/errors'
+import { extractApiError, getServerErrorMessage } from '@/utils/errors'
 
 export function useReversements() {
   return useQuery(
@@ -78,13 +78,8 @@ export function usePaytechInit() {
           toast.error('Aucune URL de paiement retournée.')
         }
       },
-      onError: (e) => {
-        const msg = getServerErrorMessage(e)
-          || e.response?.data?.detail
-          || e.response?.data?.commission?.[0]
-          || 'Erreur lors de la création du paiement'
-        toast.error(msg)
-      },
+      // Seul affichage de l'erreur : les pages qui appellent ce hook n'en ajoutent pas.
+      onError: (e) => toast.error(extractApiError(e, 'Erreur lors de la création du paiement')),
     }
   )
 }
