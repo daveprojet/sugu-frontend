@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarClock, CheckCircle2, Circle, MapPin, Phone, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarClock, CheckCircle2, Circle, FileDown, MapPin, Phone, UserRound } from 'lucide-react'
 import Spinner from '@/components/common/Spinner'
+import DevisEntreprise from '@/components/entreprise/DevisEntreprise'
 import Galerie from '@/components/entreprise/Galerie'
 import PhotosPicker from '@/components/demande/PhotosPicker'
+import { entrepriseService } from '@/services/api'
 import {
-  dateHeure, STATUTS_DEMANDE_ENTREPRISE, STATUTS_MISSION, useActionDemandeEntreprise, useDemandeEntreprise,
+  dateHeure, STATUTS_DEMANDE_ENTREPRISE, STATUTS_MISSION, telechargerPdf, useActionDemandeEntreprise,
+  useDemandeEntreprise,
 } from '@/hooks/useEntreprises'
 
 const ETAPES = [
@@ -18,7 +21,8 @@ const ETAPES = [
 
 function Avancement({ statut }) {
   if (statut === 'ANNULEE') return null
-  const courant = ETAPES.findIndex(([cle]) => cle === statut)
+  // Inspection refusée : la prestation reste à l'étape du contrôle qualité.
+  const courant = ETAPES.findIndex(([cle]) => cle === (statut === 'INSPECTION_REFUSEE' ? 'A_INSPECTER' : statut))
   return (
     <ol className="grid grid-cols-5 gap-1 mb-6">
       {ETAPES.map(([cle, libelle], index) => {
@@ -37,7 +41,7 @@ function Avancement({ statut }) {
 export default function DemandeEntreprisePage() {
   const { uid } = useParams()
   const { data: demande, isLoading } = useDemandeEntreprise(uid)
-  const { annuler, ajouterPhotos, supprimerPhoto } = useActionDemandeEntreprise(uid)
+  const { annuler, ajouterPhotos, supprimerPhoto, repondreDevis } = useActionDemandeEntreprise(uid)
   const [nouvellesPhotos, setNouvellesPhotos] = useState([])
 
   if (isLoading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>
@@ -106,6 +110,8 @@ export default function DemandeEntreprisePage() {
         )}
       </section>
 
+      <DevisEntreprise demande={demande} repondreDevis={repondreDevis} />
+
       <section className="bg-white border border-line rounded-2xl p-5 mb-4">
         <h2 className="font-semibold text-ink mb-3">Artisans</h2>
         {demande.affectations.length ? (
@@ -130,6 +136,7 @@ export default function DemandeEntreprisePage() {
                     <span>Prévu {dateHeure(a.heure_prevue)}</span>
                     {a.arrivee_at && <span>Arrivé {dateHeure(a.arrivee_at)}</span>}
                     {a.terminee_at && <span>Terminé {dateHeure(a.terminee_at)}</span>}
+                    {a.nb_reprises > 0 && <span>{a.nb_reprises} reprise(s) demandée(s)</span>}
                     {a.artisan.telephone && (
                       <a href={`tel:${a.artisan.telephone}`} className="inline-flex items-center gap-1 text-primary-600 font-medium">
                         <Phone className="w-3.5 h-3.5" />{a.artisan.telephone}
@@ -159,6 +166,25 @@ export default function DemandeEntreprisePage() {
         <p className="text-sm bg-violet-50 text-violet-800 rounded-xl p-4 mb-4">
           L’intervention est terminée. L’inspecteur Bricolibe contrôle le travail avant de clôturer la prestation.
         </p>
+      )}
+      {demande.statut === 'INSPECTION_REFUSEE' && (
+        <p className="text-sm bg-red-50 text-red-800 rounded-xl p-4 mb-4">
+          Le contrôle qualité a relevé un problème. L’équipe Bricolibe le règle et revient vers vous.
+        </p>
+      )}
+      {demande.rapport_disponible && (
+        <section className="bg-emerald-50 rounded-2xl p-5 mb-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-emerald-900">
+            Intervention validée par l’inspecteur{demande.cloturee_at ? ` le ${dateHeure(demande.cloturee_at)}` : ''}.
+          </p>
+          <button
+            type="button"
+            onClick={() => telechargerPdf(entrepriseService.rapportPdf(demande.uid), 'rapport-inspection-bricolibe.pdf')}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-emerald-800 text-sm font-medium border border-emerald-200"
+          >
+            <FileDown className="w-4 h-4" /> Rapport d’inspection (PDF)
+          </button>
+        </section>
       )}
       {demande.motif_annulation && <p className="text-sm text-muted mb-4">Motif d’annulation : {demande.motif_annulation}</p>}
       {demande.peut_annuler && (

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { ArrowLeft, CalendarClock, Check, Flag, MapPin, Navigation, Phone, X } from 'lucide-react'
+import { ArrowLeft, CalendarClock, Check, ClipboardList, Flag, MapPin, Navigation, Phone, RotateCcw, Wallet, X } from 'lucide-react'
 import Spinner from '@/components/common/Spinner'
+import DevisArtisan from '@/components/entreprise/DevisArtisan'
 import Galerie from '@/components/entreprise/Galerie'
 import PhotosPicker from '@/components/demande/PhotosPicker'
-import { dateHeure, STATUTS_MISSION, useActionMission, useMission } from '@/hooks/useEntreprises'
+import { dateHeure, fcfa, STATUTS_MISSION, useActionMission, useMission } from '@/hooks/useEntreprises'
 
 // Messages en haut d'écran : en bas, ils masqueraient la barre d'actions au téléphone.
 const EN_HAUT = { position: 'top-center' }
@@ -71,6 +72,12 @@ export default function MissionEntreprisePage() {
     ? `https://www.google.com/maps/dir/?api=1&destination=${demande.latitude},${demande.longitude}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${demande.adresse}, ${demande.ville}`)}`
   const enAttente = actions.action.isLoading
+  const visite = () => {
+    if (window.confirm('Signaler votre visite de diagnostic chez l’entreprise ?')) {
+      agir('visite', {}, 'Visite enregistrée. Proposez maintenant votre devis.')
+    }
+  }
+  const enReprise = mission.nb_reprises > 0 && ['ACCEPTEE', 'SUR_SITE'].includes(mission.statut)
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-8 pb-28">
@@ -105,6 +112,42 @@ export default function MissionEntreprisePage() {
         {demande.video_url && <video src={demande.video_url} controls playsInline preload="metadata" className="w-full max-w-md rounded-lg bg-black" />}
       </section>
 
+      {enReprise && (
+        <section className="bg-orange-50 text-orange-900 rounded-2xl p-5 mb-4 grid gap-1">
+          <p className="font-semibold flex items-center gap-2"><RotateCcw className="w-4 h-4" /> Reprise demandée par l’inspecteur</p>
+          {mission.derniere_reprise?.commentaire && <p className="text-sm">{mission.derniere_reprise.commentaire}</p>}
+          <p className="text-sm">Retour prévu {dateHeure(mission.heure_prevue)}. Ajoutez une nouvelle photo « après » une fois la correction faite.</p>
+        </section>
+      )}
+
+      {mission.statut !== 'PROPOSEE' && <DevisArtisan mission={mission} proposer={actions.proposerDevis} />}
+
+      {mission.statut === 'ACCEPTEE' && !mission.devis_accepte && (
+        <section className="bg-white border border-line rounded-2xl p-5 mb-4 grid gap-2">
+          <h2 className="font-semibold text-ink flex items-center gap-2"><ClipboardList className="w-4 h-4" /> Visite de diagnostic</h2>
+          {mission.visite_at ? (
+            <p className="text-sm text-muted">Visite signalée {dateHeure(mission.visite_at)}.</p>
+          ) : (
+            <>
+              <p className="text-sm text-muted">Passez évaluer le travail sur place avant de chiffrer votre devis (facultatif).</p>
+              <button type="button" onClick={visite} disabled={enAttente} className="justify-self-start px-4 py-2 rounded-lg border border-line text-ink text-sm font-medium">
+                Je suis sur place pour le diagnostic
+              </button>
+            </>
+          )}
+        </section>
+      )}
+
+      {mission.paiement && (
+        <section className="bg-emerald-50 text-emerald-900 rounded-2xl p-5 mb-4 flex items-start gap-2">
+          <Wallet className="w-4 h-4 mt-0.5" />
+          <p className="text-sm">
+            Payé {fcfa(mission.paiement.montant)} par {mission.paiement.operateur_libelle} le{' '}
+            {new Date(`${mission.paiement.date_paiement}T12:00:00`).toLocaleDateString('fr-FR')} (réf. {mission.paiement.reference}).
+          </p>
+        </section>
+      )}
+
       {['SUR_SITE', 'TERMINEE'].includes(mission.statut) && (
         <section className="bg-white border border-line rounded-2xl p-5 grid gap-5 mb-4">
           <p className="text-sm text-muted">Photos obligatoires : au moins une avant et une après l’intervention.</p>
@@ -127,11 +170,15 @@ export default function MissionEntreprisePage() {
                 </button>
               </>
             )}
-            {mission.statut === 'ACCEPTEE' && (
+            {mission.statut === 'ACCEPTEE' && (mission.devis_accepte ? (
               <button type="button" onClick={() => agir('arrivee', {}, 'Arrivée enregistrée.')} disabled={enAttente} className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-500 text-white font-semibold">
-                <MapPin className="w-4 h-4" /> Je suis arrivé sur site
+                <MapPin className="w-4 h-4" /> {mission.nb_reprises ? 'Je suis de retour sur site' : 'Je suis arrivé sur site'}
               </button>
-            )}
+            ) : (
+              <p className="flex-1 text-center text-sm text-muted py-2">
+                L’intervention commence quand l’entreprise a accepté le devis validé par l’inspecteur.
+              </p>
+            ))}
             {mission.statut === 'SUR_SITE' && (
               <button type="button" onClick={terminer} disabled={enAttente} className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-accent-500 text-white font-semibold">
                 <Flag className="w-4 h-4" /> Intervention terminée

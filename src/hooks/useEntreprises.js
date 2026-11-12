@@ -49,7 +49,47 @@ export function useActionDemandeEntreprise(uid) {
     }),
     ajouterPhotos: useMutation((photos) => entrepriseService.ajouterPhotos(uid, photos), { onSuccess: rafraichir, onError }),
     supprimerPhoto: useMutation((photoUid) => entrepriseService.supprimerPhoto(uid, photoUid), { onSuccess: rafraichir, onError }),
+    repondreDevis: useMutation(
+      ({ devisUid, action, motif }) => entrepriseService.repondreDevis(uid, devisUid, action, motif),
+      {
+        onSuccess: (_, { action }) => {
+          rafraichir()
+          toast.success(action === 'accepter'
+            ? 'Devis accepté : l’intervention peut commencer.'
+            : 'Devis refusé : l’inspecteur Bricolibe en est informé.')
+        },
+        onError,
+      },
+    ),
   }
+}
+
+/** Enregistre un PDF reçu de l'API (réponse axios en blob). */
+export async function telechargerPdf(promesse, nom) {
+  try {
+    const { data } = await promesse
+    const url = URL.createObjectURL(data)
+    const lien = document.createElement('a')
+    lien.href = url
+    lien.download = nom
+    document.body.appendChild(lien)
+    lien.click()
+    lien.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  } catch (e) {
+    toast.error(extractApiError(e, 'Téléchargement impossible'))
+  }
+}
+
+export const fcfa = (montant) => (montant == null ? '—' : `${new Intl.NumberFormat('fr-FR').format(montant)} FCFA`)
+
+export const STATUTS_DEVIS = {
+  PROPOSE:  { label: 'En cours de validation', classe: 'bg-amber-50 text-amber-700' },
+  VALIDE:   { label: 'À accepter', classe: 'bg-sky-50 text-sky-700' },
+  REFUSE:   { label: 'Refusé par l’inspecteur', classe: 'bg-red-50 text-red-700' },
+  ACCEPTE:  { label: 'Accepté', classe: 'bg-emerald-50 text-emerald-700' },
+  REJETE:   { label: 'Refusé par l’entreprise', classe: 'bg-red-50 text-red-700' },
+  REMPLACE: { label: 'Remplacé', classe: 'bg-gray-100 text-gray-600' },
 }
 
 // ── Artisan : missions entreprises ───────────────────────
@@ -85,6 +125,13 @@ export function useActionMission(uid) {
     supprimerPhoto: useMutation((photoUid) => missionService.supprimerPhoto(uid, photoUid), {
       onSuccess: () => rafraichir(), onError,
     }),
+    proposerDevis: useMutation((data) => missionService.proposerDevis(uid, data), {
+      onSuccess: (reponse) => {
+        rafraichir(reponse)
+        toast.success('Devis envoyé à l’inspecteur pour validation.', { position: 'top-center' })
+      },
+      onError,
+    }),
   }
 }
 
@@ -95,6 +142,7 @@ export const STATUTS_DEMANDE_ENTREPRISE = {
   A_INSPECTER:     { label: 'Terminée · contrôle qualité', classe: 'bg-violet-50 text-violet-700' },
   CLOTUREE:        { label: 'Clôturée', classe: 'bg-emerald-50 text-emerald-700' },
   ANNULEE:         { label: 'Annulée', classe: 'bg-gray-100 text-gray-600' },
+  INSPECTION_REFUSEE: { label: 'Contrôle qualité : en cours de règlement', classe: 'bg-red-50 text-red-700' },
 }
 
 export const STATUTS_MISSION = {

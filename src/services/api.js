@@ -200,6 +200,11 @@ export const entrepriseService = {
   annuler:      (uid, motif) => api.post(`/entreprises/demandes/${uid}/annuler/`, { motif }),
   ajouterPhotos: (uid, photos) => api.post(`/entreprises/demandes/${uid}/photos/`, enFormData({}, photos), multipart),
   supprimerPhoto: (uid, photoUid) => api.delete(`/entreprises/demandes/${uid}/photos/${photoUid}/`),
+  // Devis validé par l'inspecteur : action = 'accepter' | 'refuser' (motif obligatoire pour refuser).
+  repondreDevis: (uid, devisUid, action, motif = '') =>
+    api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/${action}/`, { motif }),
+  devisPdf:     (uid, devisUid) => api.get(`/entreprises/demandes/${uid}/devis/${devisUid}/pdf/`, { responseType: 'blob' }),
+  rapportPdf:   (uid)     => api.get(`/entreprises/demandes/${uid}/rapport/`, { responseType: 'blob' }),
 }
 
 // Missions entreprises de l'artisan (délégations de l'inspecteur).
@@ -211,6 +216,8 @@ export const missionService = {
   ajouterPhotos: (uid, typePhoto, photos) =>
     api.post(`/entreprises/missions/${uid}/photos/`, enFormData({ type_photo: typePhoto }, photos), multipart),
   supprimerPhoto: (uid, photoUid) => api.delete(`/entreprises/missions/${uid}/photos/${photoUid}/`),
+  // Lignes du devis pour son corps de métier : [{type_ligne, libelle, quantite, prix_unitaire}].
+  proposerDevis: (uid, data) => api.post(`/entreprises/missions/${uid}/devis/`, data),
 }
 
 // ── Avis ──────────────────────────────────────────
