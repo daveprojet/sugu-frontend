@@ -138,6 +138,23 @@ export default function MissionEntreprisePage() {
         </section>
       )}
 
+      {mission.statut === 'TERMINEE' && demande.statut === 'CLOTUREE' && (
+        <label className="flex items-start gap-3 bg-white border border-line rounded-2xl p-4 mb-4 text-sm cursor-pointer">
+          <input
+            type="checkbox" className="mt-1 accent-indigo-600" checked={Boolean(mission.portfolio_publie)}
+            disabled={actions.publierPortfolio.isLoading} onChange={(e) => actions.publierPortfolio.mutate(e.target.checked)}
+          />
+          <span>
+            Publier mes photos avant / après sur mon profil
+            <span className={`block text-xs mt-0.5 ${mission.accord_portfolio ? 'text-emerald-700' : 'text-muted'}`}>
+              {mission.accord_portfolio
+                ? 'L’entreprise a donné son accord.'
+                : 'Elles s’afficheront dès que l’entreprise aura donné son accord.'}
+            </span>
+          </span>
+        </label>
+      )}
+
       {mission.paiement && (
         <section className="bg-emerald-50 text-emerald-900 rounded-2xl p-5 mb-4 flex items-start gap-2">
           <Wallet className="w-4 h-4 mt-0.5" />

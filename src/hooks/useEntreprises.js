@@ -49,6 +49,9 @@ export function useActionDemandeEntreprise(uid) {
     }),
     ajouterPhotos: useMutation((photos) => entrepriseService.ajouterPhotos(uid, photos), { onSuccess: rafraichir, onError }),
     supprimerPhoto: useMutation((photoUid) => entrepriseService.supprimerPhoto(uid, photoUid), { onSuccess: rafraichir, onError }),
+    accordPortfolio: useMutation((accord) => entrepriseService.accordPortfolio(uid, accord), {
+      onSuccess: rafraichir, onError,
+    }),
     repondreDevis: useMutation(
       ({ devisUid, action, motif }) => entrepriseService.repondreDevis(uid, devisUid, action, motif),
       {
@@ -124,6 +127,9 @@ export function useActionMission(uid) {
     }),
     supprimerPhoto: useMutation((photoUid) => missionService.supprimerPhoto(uid, photoUid), {
       onSuccess: () => rafraichir(), onError,
+    }),
+    publierPortfolio: useMutation((publier) => missionService.publierPortfolio(uid, publier), {
+      onSuccess: (reponse) => rafraichir(reponse), onError,
     }),
     proposerDevis: useMutation((data) => missionService.proposerDevis(uid, data), {
       onSuccess: (reponse) => {

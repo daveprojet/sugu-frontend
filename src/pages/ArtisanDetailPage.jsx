@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
 import PhotosPicker from "@/components/demande/PhotosPicker";
+import PortfolioArtisan from "@/components/artisan/PortfolioArtisan";
 import VideoPicker from "@/components/demande/VideoPicker";
 import {
   MapPin,
@@ -583,6 +584,9 @@ export default function ArtisanDetailPage() {
                 </form>
               </motion.div>
             )}
+
+            {/* Réalisations : avant / après (accord du client) et travaux réalisés (badge) */}
+            <PortfolioArtisan uid={uid} />
 
             {/* Avis */}
             <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6">

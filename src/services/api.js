@@ -148,6 +148,8 @@ export const artisanService = {
     return api.patch(`/artisans/${id}/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
+  // Profil public : avant / après (avec l'accord du client) et travaux réalisés (badge).
+  portfolio:   (id)     => api.get(`/artisans/${id}/portfolio/`),
 }
 
 // Formulaire multipart : champs simples, photos (répétées) et vidéo facultative.
@@ -166,6 +168,8 @@ const multipart = { headers: { 'Content-Type': 'multipart/form-data' } }
 
 // ── Demandes ──────────────────────────────────────
 export const demandeService = {
+  // Mission terminée : le client donne son accord ({accord}), l'artisan publie ({publier}).
+  portfolio: (id, data) => api.post(`/demandes/${id}/portfolio/`, data),
   list:   (params) => api.get('/demandes/', { params }),
   detail: (id)     => api.get(`/demandes/${id}/`),
   // Avec des photos ou une vidéo de la panne, la demande part en multipart.
@@ -205,6 +209,7 @@ export const entrepriseService = {
     api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/${action}/`, { motif }),
   devisPdf:     (uid, devisUid) => api.get(`/entreprises/demandes/${uid}/devis/${devisUid}/pdf/`, { responseType: 'blob' }),
   rapportPdf:   (uid)     => api.get(`/entreprises/demandes/${uid}/rapport/`, { responseType: 'blob' }),
+  accordPortfolio: (uid, accord) => api.post(`/entreprises/demandes/${uid}/accord-portfolio/`, { accord }),
 }
 
 // Missions entreprises de l'artisan (délégations de l'inspecteur).
@@ -218,6 +223,7 @@ export const missionService = {
   supprimerPhoto: (uid, photoUid) => api.delete(`/entreprises/missions/${uid}/photos/${photoUid}/`),
   // Lignes du devis pour son corps de métier : [{type_ligne, libelle, quantite, prix_unitaire}].
   proposerDevis: (uid, data) => api.post(`/entreprises/missions/${uid}/devis/`, data),
+  publierPortfolio: (uid, publier) => api.post(`/entreprises/missions/${uid}/portfolio/`, { publier }),
 }
 
 // ── Avis ──────────────────────────────────────────

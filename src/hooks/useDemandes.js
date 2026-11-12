@@ -68,6 +68,18 @@ export function useFixerPrix() {
   )
 }
 
+/** Portfolio : accord du client ({accord}) ou choix de l'artisan ({publier}), mission terminée. */
+export function useChoixPortfolio() {
+  const qc = useQueryClient()
+  return useMutation(({ id, ...data }) => demandeService.portfolio(id, data), {
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries(['demande', id])
+      qc.invalidateQueries('demandes')
+    },
+    onError: (e) => toast.error(extractApiError(e, 'Action impossible')),
+  })
+}
+
 export function useAjouterPhotos() {
   const qc = useQueryClient()
   return useMutation(

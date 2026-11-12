@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { toast } from 'react-toastify'
 import { Camera, X, Loader2, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
-import { useAjouterPhotos, useSupprimerPhoto } from '@/hooks/useDemandes'
+import { useAjouterPhotos, useChoixPortfolio, useSupprimerPhoto } from '@/hooks/useDemandes'
 import { compresserImage, MAX_PHOTOS_PAR_ETAPE, TYPES_PHOTO_ACCEPTES } from '@/utils/images'
 
 // Mêmes règles que le serveur (apps/demandes/models.py, PhotoDemande.STATUTS_AUTORISES).
@@ -150,6 +150,52 @@ function EtapePhotos({ demande, type, photos, modifiable, onOuvrir }) {
   )
 }
 
+/** Mission terminée avec photos avant et après : le client accepte (ou non) leur publication
+ * sur le profil de l'artisan ; l'artisan choisit de les publier. Visibles seulement avec les deux. */
+function ChoixPortfolio({ demande, role }) {
+  const choix = useChoixPortfolio()
+  const [accord, setAccord] = useState(Boolean(demande.accord_portfolio))
+  const [publie, setPublie] = useState(Boolean(demande.portfolio_publie))
+  useEffect(() => { setAccord(Boolean(demande.accord_portfolio)) }, [demande.accord_portfolio])
+  useEffect(() => { setPublie(Boolean(demande.portfolio_publie)) }, [demande.portfolio_publie])
+
+  const changer = (champ, valeur, setter) => {
+    setter(valeur)
+    choix.mutate({ id: demande.id, [champ]: valeur }, { onError: () => setter(!valeur) })
+  }
+
+  if (role === 'client') {
+    return (
+      <label className="flex items-start gap-2 text-xs text-ink bg-canvas-soft rounded-lg p-2.5 w-full cursor-pointer">
+        <input
+          type="checkbox" className="mt-0.5 accent-indigo-600" checked={accord} disabled={choix.isLoading}
+          onChange={(e) => changer('accord', e.target.checked, setAccord)}
+        />
+        <span>
+          J’accepte que les photos avant / après soient publiées sur le profil de l’artisan
+          <span className="block text-muted">Votre nom et votre adresse n’apparaissent jamais. Vous pouvez retirer votre accord à tout moment.</span>
+        </span>
+      </label>
+    )
+  }
+  return (
+    <label className="flex items-start gap-2 text-xs text-ink bg-canvas-soft rounded-lg p-2.5 w-full cursor-pointer">
+      <input
+        type="checkbox" className="mt-0.5 accent-indigo-600" checked={publie} disabled={choix.isLoading}
+        onChange={(e) => changer('publier', e.target.checked, setPublie)}
+      />
+      <span>
+        Publier ces photos avant / après sur mon profil
+        <span className={`block ${demande.accord_portfolio ? 'text-emerald-700' : 'text-muted'}`}>
+          {demande.accord_portfolio
+            ? 'Le client a donné son accord.'
+            : 'Elles s’afficheront dès que le client aura donné son accord.'}
+        </span>
+      </span>
+    </label>
+  )
+}
+
 /**
  * Photos d'une demande, regroupées par étape.
  * role : 'client' | 'artisan' — détermine ce que l'utilisateur peut ajouter / retirer.
@@ -185,6 +231,10 @@ export default function PhotosDemande({ demande, role, types = ['PANNE', 'AVANT'
           <p className="text-xs font-semibold text-muted mb-1.5">Vidéo de la panne</p>
           <video src={demande.video} controls playsInline preload="metadata" className="w-full max-w-xs rounded-lg bg-black" />
         </div>
+      )}
+      {demande.statut === 'TERMINEE' && types.includes('APRES')
+        && toutes.some((p) => p.type_photo === 'AVANT') && toutes.some((p) => p.type_photo === 'APRES') && (
+        <ChoixPortfolio demande={demande} role={role} />
       )}
       {indexOuverte >= 0 && (
         <Visionneuse

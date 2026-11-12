@@ -41,7 +41,7 @@ function Avancement({ statut }) {
 export default function DemandeEntreprisePage() {
   const { uid } = useParams()
   const { data: demande, isLoading } = useDemandeEntreprise(uid)
-  const { annuler, ajouterPhotos, supprimerPhoto, repondreDevis } = useActionDemandeEntreprise(uid)
+  const { annuler, ajouterPhotos, supprimerPhoto, repondreDevis, accordPortfolio } = useActionDemandeEntreprise(uid)
   const [nouvellesPhotos, setNouvellesPhotos] = useState([])
 
   if (isLoading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>
@@ -185,6 +185,20 @@ export default function DemandeEntreprisePage() {
             <FileDown className="w-4 h-4" /> Rapport d’inspection (PDF)
           </button>
         </section>
+      )}
+      {demande.statut === 'CLOTUREE' && demande.photos.some((p) => p.type_photo === 'APRES') && (
+        <label className="flex items-start gap-3 bg-white border border-line rounded-2xl p-4 mb-4 text-sm cursor-pointer">
+          <input
+            type="checkbox" className="mt-1 accent-indigo-600" checked={Boolean(demande.accord_portfolio)}
+            disabled={accordPortfolio.isLoading} onChange={(e) => accordPortfolio.mutate(e.target.checked)}
+          />
+          <span>
+            J’accepte que les artisans publient les photos avant / après de cette intervention sur leur profil Bricolibe
+            <span className="block text-xs text-muted mt-0.5">
+              Le nom de votre entreprise et l’adresse n’apparaissent jamais. Vous pouvez retirer votre accord à tout moment.
+            </span>
+          </span>
+        </label>
       )}
       {demande.motif_annulation && <p className="text-sm text-muted mb-4">Motif d’annulation : {demande.motif_annulation}</p>}
       {demande.peut_annuler && (
