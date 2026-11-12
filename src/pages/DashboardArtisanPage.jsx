@@ -13,7 +13,7 @@ import StarRating from '@/components/common/StarRating'
 import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande from '@/components/demande/PhotosDemande'
 import EtapeTravauxModal from '@/components/demande/EtapeTravauxModal'
-import MissionsEntreprises from '@/components/entreprise/MissionsEntreprises'
+import { useMissions } from '@/hooks/useEntreprises'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
 import {
   Inbox,
@@ -32,6 +32,7 @@ import {
   AlertTriangle,
   Wallet,
   Rocket,
+  Building2,
   BadgeDollarSign,
   MapPin,
   X
@@ -40,6 +41,9 @@ import {
 export default function DashboardArtisanPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  // Missions entreprises : page à part, le tableau de bord n'en garde qu'un raccourci.
+  const { data: missionsEntreprises = [] } = useMissions('en_cours')
+  const missionsARepondre = missionsEntreprises.filter((m) => m.statut === 'PROPOSEE').length
   const { data: identite } = useIdentite(user?.artisan_uid)
   const { data: profilArtisan } = useArtisan(user?.artisan_uid)
   const { data: dossierPro } = useDossierPro(user?.artisan_uid)
@@ -213,6 +217,23 @@ export default function DashboardArtisanPage() {
               )}
               <Wallet className="w-4 h-4" /> Commissions
             </Link>
+            {(user?.partenaire || missionsEntreprises.length > 0) && (
+              <Link
+                to="/dashboard-artisan/missions-entreprises"
+                className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+              >
+                {missionsARepondre > 0 && (
+                  <span className="relative flex h-3 w-3" aria-label={`${missionsARepondre} mission(s) à accepter`}>
+                    <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-amber-400" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+                  </span>
+                )}
+                <Building2 className="w-4 h-4" /> Missions entreprises
+                {missionsEntreprises.length > 0 && (
+                  <span className="text-xs font-bold bg-indigo-50 text-indigo-700 rounded-full px-2 py-0.5">{missionsEntreprises.length}</span>
+                )}
+              </Link>
+            )}
             <Link
               to="/dashboard-artisan/abonnements"
               className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
@@ -247,8 +268,19 @@ export default function DashboardArtisanPage() {
           </div>
         </motion.div>
 
-        {/* Missions entreprises : en haut, l'artisan a 5 minutes pour répondre */}
-        <MissionsEntreprises />
+        {/* Mission entreprise à accepter : l'artisan a 5 minutes pour répondre, on le signale ici. */}
+        {missionsARepondre > 0 && (
+          <Link
+            to="/dashboard-artisan/missions-entreprises"
+            className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-amber-900 hover:bg-amber-100 transition-colors"
+          >
+            <Building2 className="w-5 h-5 shrink-0" />
+            <span className="flex-1 text-sm font-semibold">
+              {missionsARepondre} mission(s) entreprise à accepter : répondez vite, l’inspecteur est alerté au bout de 5 minutes.
+            </span>
+            <span className="text-sm font-semibold underline">Voir</span>
+          </Link>
+        )}
 
         {/* Sanction suite à des signalements avérés */}
         {user?.sanction && user.sanction !== 'AUCUNE' && (

@@ -100,7 +100,10 @@ export default function Navbar() {
                   >
                     <Link
                       to={
-                        isArtisan ? "/dashboard-artisan" : isEntreprise ? "/espace-entreprise" : "/dashboard-client"
+                        isArtisan
+                          // Artisan uniquement partenaire : son espace, ce sont ses missions entreprises.
+                          ? (user?.independant === false ? "/dashboard-artisan/missions-entreprises" : "/dashboard-artisan")
+                          : isEntreprise ? "/espace-entreprise" : "/dashboard-client"
                       }
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                       onClick={() => setMenuOpen(false)}

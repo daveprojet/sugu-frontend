@@ -2,14 +2,18 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus } from "lucide-react";
+import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus, MapPin, ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useArtisan } from "@/hooks/useArtisans";
+import { useArtisan, useIdentite } from "@/hooks/useArtisans";
 import { partenaireService } from "@/services/api";
 import { useCategories } from "@/hooks/useCategories";
+import { chercherZoneProche } from "@/hooks/useZones";
 import { VILLES } from "@/utils/constants";
 import { extractApiError } from "@/utils/errors";
 import PhoneField from "@/components/common/PhoneField";
+import MapPicker from "@/components/common/MapPicker";
+import ChampsZone from "@/components/common/ChampsZone";
+import EtapePieceIdentite from "@/components/partenaire/EtapePieceIdentite";
 
 import bgImage from "/images/metiers/register-bg.jpg";
 
@@ -55,9 +59,44 @@ const initialForm = {
   raison_sociale: "",
   secteur: "",
   categories: [],
+  autres_metiers: "",
   annees_experience: "",
   message: "",
+  latitude: null,
+  longitude: null,
+  zone_ville: null,
+  zone_quartier: null,
+  password: "",
+  confirmation: "",
 };
+
+const pieceVide = { type_piece: "cni", piece_recto: null, piece_verso: null, piece_selfie: null };
+
+function Etapes({ etape }) {
+  return (
+    <ol className="grid grid-cols-2 gap-2 mb-6 text-sm">
+      {["Vos informations", "Pièce d’identité"].map((libelle, index) => {
+        const courante = etape === index + 1;
+        const faite = etape > index + 1;
+        return (
+          <li
+            key={libelle}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${
+              courante ? "bg-white text-indigo-800 border-white" : "border-white/30 text-indigo-100"
+            }`}
+          >
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+              courante ? "bg-indigo-600 text-white" : faite ? "bg-emerald-400 text-white" : "bg-white/20"
+            }`}>
+              {faite ? <Check className="w-3.5 h-3.5" /> : index + 1}
+            </span>
+            {libelle}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 export default function DevenirPartenairePage() {
   const { data: categories = [] } = useCategories();
@@ -71,6 +110,12 @@ export default function DevenirPartenairePage() {
   const { data: profil_artisan } = useArtisan(isArtisan ? user?.artisan_uid : null);
   const [loading, setLoading] = useState(false);
   const [envoye, setEnvoye] = useState(false);
+  // Candidature artisan en deux étapes : informations, puis pièce d'identité.
+  const [etape, setEtape] = useState(1);
+  const [piece, setPiece] = useState(pieceVide);
+  // Option « Autres » : métiers absents de la liste, validés ensuite par l'équipe.
+  const [autresCoche, setAutresCoche] = useState(false);
+  const [voirMotDePasse, setVoirMotDePasse] = useState(false);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -83,6 +128,9 @@ export default function DevenirPartenairePage() {
     );
   };
   const avecMonCompte = isArtisan && modeCompte === "compte";
+  // Artisan connecté qui a déjà envoyé sa pièce d'identité : pas de 2e étape.
+  const { data: identiteExistante } = useIdentite(avecMonCompte ? user?.artisan_uid : null);
+  const pieceDejaFournie = avecMonCompte && Boolean(identiteExistante?.recto);
 
   useEffect(() => {
     if (!avecMonCompte || !profil_artisan) return;
@@ -98,6 +146,29 @@ export default function DevenirPartenairePage() {
   }, [avecMonCompte, profil_artisan]);
   const isEntreprise = type === "ENTREPRISE";
   const profil = PROFILS.find((p) => p.key === type);
+  const avecEtapePiece = !isEntreprise && !pieceDejaFournie;
+  // Artisan sans compte : il choisit son mot de passe pour se connecter dès l'acceptation.
+  const avecMotDePasse = !isEntreprise && !avecMonCompte;
+
+  const changerType = (nouveau) => {
+    setType(nouveau);
+    setEtape(1);
+  };
+
+  const handlePositionChange = async ({ latitude, longitude, quartier, commune, noms, communes }) => {
+    setForm((f) => ({
+      ...f, latitude, longitude, quartier: quartier || f.quartier,
+      ville: VILLES.includes(commune) ? commune : f.ville,
+    }));
+    const zone = await chercherZoneProche(latitude, longitude, noms ?? [quartier], communes);
+    if (zone.ville) {
+      setForm((f) => ({ ...f, zone_ville: zone.ville.id, zone_quartier: zone.quartier?.id ?? null }));
+    }
+  };
+
+  const autresMetiers = () => (autresCoche
+    ? form.autres_metiers.split(",").map((nom) => nom.trim()).filter(Boolean)
+    : []);
 
   const toggleCategorie = (uid) =>
     set(
@@ -107,20 +178,76 @@ export default function DevenirPartenairePage() {
         : [...form.categories, uid],
     );
 
+  const informationsValides = () => {
+    if (isEntreprise) return true;
+    const autres = autresMetiers();
+    if (form.categories.length === 0 && autres.length === 0) {
+      toast.error("Choisissez au moins un métier ou indiquez-le dans « Autres ».");
+      return false;
+    }
+    if (autres.length > 3) {
+      toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
+      return false;
+    }
+    if (avecMotDePasse) {
+      if (form.password.length < 6) {
+        toast.error("Le mot de passe doit contenir au moins 6 caractères.");
+        return false;
+      }
+      if (form.password !== form.confirmation) {
+        toast.error("Les deux mots de passe ne correspondent pas.");
+        return false;
+      }
+    }
+    if (!avecMonCompte && (form.latitude == null || form.longitude == null)) {
+      toast.error("Placez votre position sur la carte.");
+      document.getElementById("position-partenaire")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return false;
+    }
+    return true;
+  };
+
+  const pieceValide = () => {
+    const manquantes = [
+      !piece.piece_recto && "le recto",
+      piece.type_piece !== "passeport" && !piece.piece_verso && "le verso",
+      !piece.piece_selfie && "le selfie avec la pièce",
+    ].filter(Boolean);
+    if (manquantes.length) {
+      toast.error(`Photo manquante : ${manquantes.join(", ")}.`);
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isEntreprise && form.categories.length === 0) {
-      toast.error("Choisissez au moins un métier.");
+    if (etape === 1) {
+      if (!informationsValides()) return;
+      if (avecEtapePiece) {
+        setEtape(2);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    } else if (!pieceValide()) {
       return;
     }
     setLoading(true);
     try {
-      await partenaireService.candidater({
-        ...form,
+      const { confirmation, password, ...champs } = form;
+      const donnees = {
+        ...champs,
+        password: avecMotDePasse ? password : "",
         avec_mon_compte: avecMonCompte,
         type_partenaire: type,
         annees_experience: form.annees_experience === "" ? null : Number(form.annees_experience),
-      });
+        autres_metiers: isEntreprise ? [] : autresMetiers(),
+      };
+      if (avecEtapePiece) {
+        Object.assign(donnees, piece);
+        if (piece.type_piece === "passeport") donnees.piece_verso = null;
+      }
+      await partenaireService.candidater(donnees);
       setEnvoye(true);
     } catch (err) {
       toast.error(extractApiError(err, "Impossible d'envoyer votre candidature"));
@@ -159,6 +286,9 @@ export default function DevenirPartenairePage() {
               <p className="text-indigo-100 mb-6">
                 Merci {form.prenom} ! Notre équipe étudie votre demande et vous recontacte au{" "}
                 <span className="font-semibold text-white">{form.telephone}</span>.
+                {type === "ARTISAN" && !avecMonCompte && (
+                  <> Dès qu’elle est acceptée, vous recevez un SMS et vous vous connectez avec ce numéro et votre mot de passe.</>
+                )}
               </p>
               <Link
                 to="/"
@@ -216,7 +346,7 @@ export default function DevenirPartenairePage() {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setType(key)}
+                    onClick={() => changerType(key)}
                     aria-pressed={type === key}
                     className={`py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                       type === key
@@ -230,6 +360,7 @@ export default function DevenirPartenairePage() {
                 ))}
               </div>
               <p className="text-indigo-100 text-sm mb-6 px-1">{profil.intro}</p>
+              {avecEtapePiece && <Etapes etape={etape} />}
               {isEntreprise && (
                 <p className="text-sm mb-6 px-4 py-3 rounded-xl bg-white/15 text-white">
                   Dès que votre candidature est acceptée, votre espace entreprise est créé et vous recevez un SMS.
@@ -240,6 +371,10 @@ export default function DevenirPartenairePage() {
               )}
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                {etape === 2 ? (
+                  <EtapePieceIdentite piece={piece} onChange={setPiece} />
+                ) : (
+                <>
                 {isEntreprise && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -318,6 +453,53 @@ export default function DevenirPartenairePage() {
                   </div>
                 </div>
 
+                {avecMotDePasse && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className={labelClass}>Mot de passe <span className="text-red-300">*</span></label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={voirMotDePasse ? "text" : "password"}
+                          autoComplete="new-password"
+                          value={form.password}
+                          onChange={(e) => set("password", e.target.value)}
+                          minLength={6}
+                          required
+                          className={`${inputClass} pl-10 pr-11`}
+                          placeholder="6 caractères minimum"
+                        />
+                        <button
+                          type="button" onClick={() => setVoirMotDePasse((v) => !v)}
+                          aria-label={voirMotDePasse ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900"
+                        >
+                          {voirMotDePasse ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelClass}>Confirmez le mot de passe <span className="text-red-300">*</span></label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={voirMotDePasse ? "text" : "password"}
+                          autoComplete="new-password"
+                          value={form.confirmation}
+                          onChange={(e) => set("confirmation", e.target.value)}
+                          required
+                          className={`${inputClass} pl-10`}
+                          placeholder="Le même mot de passe"
+                        />
+                      </div>
+                    </div>
+                    <p className="sm:col-span-2 text-xs text-indigo-200 -mt-2 ml-1">
+                      Vous vous connecterez avec votre numéro et ce mot de passe dès que votre candidature sera acceptée.
+                    </p>
+                  </div>
+                )}
+
+                {(isEntreprise || avecMonCompte) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Ville</label>
@@ -341,6 +523,32 @@ export default function DevenirPartenairePage() {
                     />
                   </div>
                 </div>
+                )}
+
+                {!isEntreprise && !avecMonCompte && (
+                  <div>
+                    <label id="position-partenaire" className={`${labelClass} flex items-center gap-2`}>
+                      <MapPin className="w-4 h-4" /> Votre position <span className="text-red-300">*</span>
+                    </label>
+                    <p className="text-xs text-indigo-200 mb-2 ml-1">
+                      Cliquez sur la carte, utilisez « Ma position » ou tapez votre adresse : l’endroit où vous
+                      travaillez ou habitez habituellement. L’inspecteur s’en sert pour vous confier des missions proches.
+                    </p>
+                    <MapPicker
+                      value={form.latitude && form.longitude ? { latitude: form.latitude, longitude: form.longitude } : null}
+                      onChange={handlePositionChange}
+                    />
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <ChampsZone
+                        zoneVille={form.zone_ville}
+                        zoneQuartier={form.zone_quartier}
+                        onChange={(zone) => setForm((f) => ({ ...f, ...zone }))}
+                        labelClass={labelClass}
+                        champClass={inputClass}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {!isEntreprise && (
                   <>
@@ -375,7 +583,35 @@ export default function DevenirPartenairePage() {
                             </label>
                           );
                         })}
+                        <label
+                          className={`flex items-center gap-2 p-2.5 rounded-xl cursor-pointer text-sm transition-all duration-200 border ${
+                            autresCoche ? "bg-white/40 border-white/50 text-indigo-900" : "border-transparent text-indigo-100 hover:bg-white/20"
+                          }`}
+                        >
+                          <input type="checkbox" className="sr-only" checked={autresCoche} onChange={() => setAutresCoche((v) => !v)} />
+                          <span className={`w-4 h-4 rounded flex items-center justify-center border ${
+                            autresCoche ? "bg-indigo-600 border-indigo-600" : "border-white/60"
+                          }`}>
+                            {autresCoche && <Check className="w-3 h-3 text-white" />}
+                          </span>
+                          Autres
+                        </label>
                       </div>
+                      {autresCoche && (
+                        <div className="mt-3">
+                          <input
+                            value={form.autres_metiers}
+                            onChange={(e) => set("autres_metiers", e.target.value)}
+                            maxLength={190}
+                            placeholder="Ex. : Tapissier, Ferronnier"
+                            className={inputClass}
+                          />
+                          <p className="text-xs text-indigo-200 mt-1.5 ml-1">
+                            Votre métier n’est pas dans la liste ? Indiquez-le (3 au maximum, séparés par des virgules).
+                            Il sera ajouté après validation par notre équipe.
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div className="sm:w-1/2">
                       <label className={labelClass}>Années d'expérience (optionnel)</label>
@@ -409,15 +645,28 @@ export default function DevenirPartenairePage() {
                   />
                 </div>
 
-                <motion.button
-                  type="submit"
-                  disabled={loading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-3.5 rounded-xl bg-white text-indigo-800 font-semibold shadow-lg hover:bg-indigo-50 transition disabled:opacity-60"
-                >
-                  {loading ? "Envoi…" : "Envoyer ma candidature"}
-                </motion.button>
+                </>
+                )}
+
+                <div className="flex gap-3">
+                  {etape === 2 && (
+                    <button
+                      type="button" onClick={() => setEtape(1)}
+                      className="inline-flex items-center gap-1.5 px-4 py-3.5 rounded-xl border border-white/50 text-white font-semibold hover:bg-white/10 transition"
+                    >
+                      <ArrowLeft className="w-4 h-4" /> Retour
+                    </button>
+                  )}
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 py-3.5 rounded-xl bg-white text-indigo-800 font-semibold shadow-lg hover:bg-indigo-50 transition disabled:opacity-60"
+                  >
+                    {loading ? "Envoi…" : etape === 1 && avecEtapePiece ? "Continuer : pièce d’identité" : "Envoyer ma candidature"}
+                  </motion.button>
+                </div>
               </form>
 
               {!isEntreprise && !isArtisan && (

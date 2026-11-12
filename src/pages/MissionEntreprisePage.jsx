@@ -51,7 +51,7 @@ export default function MissionEntreprisePage() {
     return (
       <main className="max-w-2xl mx-auto px-4 py-12 text-center">
         <p className="text-muted">Cette mission n’est plus disponible (elle a peut-être été annulée).</p>
-        <Link to="/dashboard-artisan" className="text-primary-600 font-medium mt-3 inline-block">Retour au tableau de bord</Link>
+        <Link to="/dashboard-artisan/missions-entreprises" className="text-primary-600 font-medium mt-3 inline-block">Retour aux missions entreprises</Link>
       </main>
     )
   }
@@ -81,8 +81,8 @@ export default function MissionEntreprisePage() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-8 pb-28">
-      <Link to="/dashboard-artisan" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink mb-4">
-        <ArrowLeft className="w-4 h-4" /> Tableau de bord
+      <Link to="/dashboard-artisan/missions-entreprises" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink mb-4">
+        <ArrowLeft className="w-4 h-4" /> Missions entreprises
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>

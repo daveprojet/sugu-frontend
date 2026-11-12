@@ -246,7 +246,8 @@ export const dossierProService = {
 
 // ── Partenaires ───────────────────────────────────────
 export const partenaireService = {
-  candidater: (data) => api.post('/partenaires/candidatures/', data),
+  // Multipart : la candidature artisan joint sa pièce d'identité (2e étape).
+  candidater: (data) => api.post('/partenaires/candidatures/', enFormData(data), multipart),
 }
 
 // ── Contacts ──────────────────────────────────────────

@@ -40,6 +40,7 @@ import EspaceEntreprisePage from '@/pages/EspaceEntreprisePage'
 import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
 import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
+import MissionsEntreprisesPage from '@/pages/MissionsEntreprisesPage'
 import EquipeEntreprisePage from '@/pages/EquipeEntreprisePage'
 
 const queryClient = new QueryClient({
@@ -57,11 +58,16 @@ const queryClient = new QueryClient({
 })
 
 // Route protégée
-function PrivateRoute({ children, role }) {
+const ACCUEIL_PARTENAIRE = '/dashboard-artisan/missions-entreprises'
+
+function PrivateRoute({ children, role, independant = false }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>
   if (!user) return <Navigate to="/connexion" replace />
   if (role && user.role !== role) return <Navigate to="/" replace />
+  // Espace des artisans indépendants (demandes des clients, commissions, abonnements) :
+  // un artisan uniquement partenaire ne travaille que pour les entreprises.
+  if (independant && user.independant === false) return <Navigate to={ACCUEIL_PARTENAIRE} replace />
   return children
 }
 
@@ -101,13 +107,16 @@ function AppRoutes() {
             <PrivateRoute role="artisan"><DossierProPage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan" element={
-            <PrivateRoute role="artisan"><DashboardArtisanPage /></PrivateRoute>
+            <PrivateRoute role="artisan" independant><DashboardArtisanPage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan/abonnements" element={
-            <PrivateRoute role="artisan"><AbonnementsPage /></PrivateRoute>
+            <PrivateRoute role="artisan" independant><AbonnementsPage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan/commissions" element={
-            <PrivateRoute role="artisan"><CommissionDashboardPage /></PrivateRoute>
+            <PrivateRoute role="artisan" independant><CommissionDashboardPage /></PrivateRoute>
+          } />
+          <Route path="/dashboard-artisan/missions-entreprises" element={
+            <PrivateRoute role="artisan"><MissionsEntreprisesPage /></PrivateRoute>
           } />
           <Route path="/dashboard-artisan/missions-entreprises/:uid" element={
             <PrivateRoute role="artisan"><MissionEntreprisePage /></PrivateRoute>
