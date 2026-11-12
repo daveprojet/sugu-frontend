@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -36,6 +36,10 @@ import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
 import PaymentCancelPage from '@/pages/PaymentCancelPage'
 import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
+import EspaceEntreprisePage from '@/pages/EspaceEntreprisePage'
+import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
+import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
+import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
 
 const queryClient = new QueryClient({
   // Sans cela, une liste qui ne se charge pas à cause du serveur s'affiche comme vide.
@@ -64,6 +68,9 @@ function AppRoutes() {
   useGeoLocation()
   const { user } = useAuth()
   const { requestPermissionAndRegister, hasRegisteredToken } = usePushNotifications(user)
+  // Page mission : sa barre d'actions est fixée en bas, la bannière la masquerait.
+  const { pathname } = useLocation()
+  const barreActions = pathname.startsWith('/dashboard-artisan/missions-entreprises/')
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -80,6 +87,7 @@ function AppRoutes() {
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />
+          <Route path="/inscription-entreprise" element={<RegisterPage />} />
           <Route path="/devenir-partenaire" element={<DevenirPartenairePage />} />
           <Route path="/mon-profil" element={
             <PrivateRoute><MonProfil /></PrivateRoute>
@@ -99,6 +107,18 @@ function AppRoutes() {
           <Route path="/dashboard-artisan/commissions" element={
             <PrivateRoute role="artisan"><CommissionDashboardPage /></PrivateRoute>
           } />
+          <Route path="/dashboard-artisan/missions-entreprises/:uid" element={
+            <PrivateRoute role="artisan"><MissionEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise" element={
+            <PrivateRoute role="entreprise"><EspaceEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/nouvelle-demande" element={
+            <PrivateRoute role="entreprise"><NouvelleDemandeEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/demandes/:uid" element={
+            <PrivateRoute role="entreprise"><DemandeEntreprisePage /></PrivateRoute>
+          } />
           <Route path="/dashboard-client" element={
             <PrivateRoute role="client"><DashboardClientPage /></PrivateRoute>
           } />
@@ -113,7 +133,7 @@ function AppRoutes() {
       </div>
       <Footer />
       {user?.role === 'artisan' && <RappelIdentiteModal artisanUid={user.artisan_uid} />}
-      {user && (
+      {user && !barreActions && (
         <PushPermissionBanner
           onAllow={requestPermissionAndRegister}
           hasRegisteredToken={hasRegisteredToken}

@@ -230,6 +230,13 @@ export default function DevenirPartenairePage() {
                 ))}
               </div>
               <p className="text-indigo-100 text-sm mb-6 px-1">{profil.intro}</p>
+              {isEntreprise && (
+                <p className="text-sm mb-6 px-4 py-3 rounded-xl bg-white/15 text-white">
+                  Besoin d'un dépannage maintenant ?{" "}
+                  <Link to="/inscription-entreprise" className="font-semibold underline">Créez votre compte entreprise</Link>{" "}
+                  et décrivez votre panne en ligne : un inspecteur Bricolibe envoie les artisans et contrôle leur travail.
+                </p>
+              )}
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 {isEntreprise && (

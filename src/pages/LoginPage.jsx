@@ -35,7 +35,9 @@ export default function LoginPage() {
       } else {
         toast.success("Bienvenue !");
       }
-      navigate(redirectTo(), { replace: true });
+      // Une entreprise arrive directement sur son espace (sauf redirection demandée).
+      const cible = redirectTo();
+      navigate(cible === "/" && user?.role === "entreprise" ? "/espace-entreprise" : cible, { replace: true });
     } catch (err) {
       toast.error(extractApiError(err, "Téléphone ou mot de passe incorrect"));
     } finally {

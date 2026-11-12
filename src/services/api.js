@@ -150,19 +150,27 @@ export const artisanService = {
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
 }
 
+// Formulaire multipart : champs simples, photos (répétées) et vidéo facultative.
+const enFormData = (data, photos = [], video = null) => {
+  const fd = new FormData()
+  Object.entries(data).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') fd.append(k, v)
+  })
+  photos.forEach((p) => fd.append('photos', p))
+  if (video) fd.append('video', video)
+  return fd
+}
+
+const multipart = { headers: { 'Content-Type': 'multipart/form-data' } }
+
 // ── Demandes ──────────────────────────────────────
 export const demandeService = {
   list:   (params) => api.get('/demandes/', { params }),
   detail: (id)     => api.get(`/demandes/${id}/`),
-  // Avec des photos de la panne, la demande part en multipart.
-  create: ({ photos = [], ...data }) => {
-    if (!photos.length) return api.post('/demandes/', data)
-    const fd = new FormData()
-    Object.entries(data).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) fd.append(k, v)
-    })
-    photos.forEach((p) => fd.append('photos', p))
-    return api.post('/demandes/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  // Avec des photos ou une vidéo de la panne, la demande part en multipart.
+  create: ({ photos = [], video = null, ...data }) => {
+    if (!photos.length && !video) return api.post('/demandes/', data)
+    return api.post('/demandes/', enFormData(data, photos, video), { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   update: (id, d)  => api.patch(`/demandes/${id}/`, d),
   fixerPrix: (id, prix) => api.patch(`/demandes/${id}/fixer-prix/`, { prix_total: prix }),
@@ -175,6 +183,30 @@ export const demandeService = {
     return api.post(`/demandes/${id}/photos/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   supprimerPhoto: (id, photoUid) => api.delete(`/demandes/${id}/photos/${photoUid}/`),
+}
+
+// ── Volet entreprises ─────────────────────────────
+export const entrepriseService = {
+  moi:          ()        => api.get('/entreprises/moi/'),
+  majMoi:       (data)    => api.patch('/entreprises/moi/', data),
+  demandes:     (params)  => api.get('/entreprises/demandes/', { params }),
+  demande:      (uid)     => api.get(`/entreprises/demandes/${uid}/`),
+  creer: ({ photos = [], video = null, ...data }) =>
+    api.post('/entreprises/demandes/', enFormData(data, photos, video), multipart),
+  annuler:      (uid, motif) => api.post(`/entreprises/demandes/${uid}/annuler/`, { motif }),
+  ajouterPhotos: (uid, photos) => api.post(`/entreprises/demandes/${uid}/photos/`, enFormData({}, photos), multipart),
+  supprimerPhoto: (uid, photoUid) => api.delete(`/entreprises/demandes/${uid}/photos/${photoUid}/`),
+}
+
+// Missions entreprises de l'artisan (délégations de l'inspecteur).
+export const missionService = {
+  list:   (etat)       => api.get('/entreprises/missions/', { params: { etat } }),
+  detail: (uid)        => api.get(`/entreprises/missions/${uid}/`),
+  // action : accepter | refuser | arrivee | terminer
+  action: (uid, action, data = {}) => api.post(`/entreprises/missions/${uid}/${action}/`, data),
+  ajouterPhotos: (uid, typePhoto, photos) =>
+    api.post(`/entreprises/missions/${uid}/photos/`, enFormData({ type_photo: typePhoto }, photos), multipart),
+  supprimerPhoto: (uid, photoUid) => api.delete(`/entreprises/missions/${uid}/photos/${photoUid}/`),
 }
 
 // ── Avis ──────────────────────────────────────────

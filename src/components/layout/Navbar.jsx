@@ -15,7 +15,7 @@ import {
 import logo from "/images/logo.png";
 
 export default function Navbar() {
-  const { user, logout, isArtisan } = useAuth();
+  const { user, logout, isArtisan, isEntreprise } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ export default function Navbar() {
                   >
                     <Link
                       to={
-                        isArtisan ? "/dashboard-artisan" : "/dashboard-client"
+                        isArtisan ? "/dashboard-artisan" : isEntreprise ? "/espace-entreprise" : "/dashboard-client"
                       }
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                       onClick={() => setMenuOpen(false)}

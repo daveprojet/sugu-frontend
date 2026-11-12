@@ -13,6 +13,7 @@ import StarRating from '@/components/common/StarRating'
 import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande from '@/components/demande/PhotosDemande'
 import EtapeTravauxModal from '@/components/demande/EtapeTravauxModal'
+import MissionsEntreprises from '@/components/entreprise/MissionsEntreprises'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
 import {
   Inbox,
@@ -245,6 +246,9 @@ export default function DashboardArtisanPage() {
             </button>
           </div>
         </motion.div>
+
+        {/* Missions entreprises : en haut, l'artisan a 5 minutes pour répondre */}
+        <MissionsEntreprises />
 
         {/* Sanction suite à des signalements avérés */}
         {user?.sanction && user.sanction !== 'AUCUNE' && (

@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { motion, AnimatePresence } from "framer-motion";
 import PhoneField from "@/components/common/PhoneField";
-import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info } from "lucide-react";
+import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info, Building2 } from "lucide-react";
 import MapPicker from "@/components/common/MapPicker";
 import ChampsZone from "@/components/common/ChampsZone";
 import { chercherZoneProche } from "@/hooks/useZones";
@@ -19,6 +19,7 @@ export default function RegisterPage() {
   const [params] = useSearchParams();
   const { pathname } = useLocation();
   const isArtisanFlow = params.get("role") === "artisan" || pathname === "/inscription-artisan";
+  const isEntrepriseFlow = params.get("role") === "entreprise" || pathname === "/inscription-entreprise";
   const { data: categories = [] } = useCategories();
 
   const [form, setForm] = useState({
@@ -26,7 +27,9 @@ export default function RegisterPage() {
     nom: "",
     telephone: "",
     password: "",
-    role: isArtisanFlow ? "artisan" : "client",
+    role: isArtisanFlow ? "artisan" : isEntrepriseFlow ? "entreprise" : "client",
+    raison_sociale: "",
+    secteur: "",
     categories: [],
     autres_metiers: "",
     quartier: "",
@@ -92,7 +95,7 @@ export default function RegisterPage() {
     try {
       await register({ ...form, autres_metiers: autresMetiers });
       toast.success("Compte créé avec succès !");
-      navigate(form.role === "artisan" ? "/dashboard-artisan" : "/");
+      navigate(form.role === "artisan" ? "/dashboard-artisan" : form.role === "entreprise" ? "/espace-entreprise" : "/");
     } catch (err) {
       toast.error(extractApiError(err, "Erreur lors de l'inscription"));
     } finally {
@@ -147,6 +150,7 @@ export default function RegisterPage() {
             {[
               { key: "client", label: "Client", Icon: User },
               { key: "artisan", label: "Artisan", Icon: Wrench },
+              { key: "entreprise", label: "Entreprise", Icon: Building2 },
             ].map(({ key, label, Icon }) => (
               <button
                 key={key}
@@ -222,6 +226,34 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
+
+            {/* Entreprise : un inspecteur Bricolibe supervise ses demandes */}
+            {form.role === "entreprise" && (
+              <div className="space-y-4 pt-2 border-t border-white/30">
+                <div>
+                  <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Nom de l'entreprise</label>
+                  <input
+                    value={form.raison_sociale}
+                    onChange={(e) => set("raison_sociale", e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                    placeholder="Ex. : Hôtel Teranga"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Secteur d'activité (facultatif)</label>
+                  <input
+                    value={form.secteur}
+                    onChange={(e) => set("secteur", e.target.value)}
+                    className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                    placeholder="Hôtellerie, restauration, bureaux…"
+                  />
+                </div>
+                <p className="text-xs text-indigo-100 ml-1">
+                  Vous décrivez vos pannes en ligne ; un inspecteur Bricolibe choisit les artisans, suit l'intervention et contrôle le travail.
+                </p>
+              </div>
+            )}
 
             {/* Champs artisan avec animation */}
             <AnimatePresence>

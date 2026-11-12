@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
 import PhotosPicker from "@/components/demande/PhotosPicker";
+import VideoPicker from "@/components/demande/VideoPicker";
 import {
   MapPin,
   Phone,
@@ -88,6 +89,7 @@ export default function ArtisanDetailPage() {
   const [selectedServiceUid, setSelectedServiceUid] = useState(null);
   const [description, setDescription] = useState("");
   const [photosPanne, setPhotosPanne] = useState([]);
+  const [videoPanne, setVideoPanne] = useState(null);
   const [copied, setCopied] = useState(null);
   const [clientCoords, setClientCoords] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -200,6 +202,7 @@ export default function ArtisanDetailPage() {
       description,
       mode_paiement: modePaiement,
       photos: photosPanne,
+      video: videoPanne,
     };
     if (selectedServiceUid !== "autre") {
       payload.service_element = selectedServiceUid;
@@ -212,6 +215,7 @@ export default function ArtisanDetailPage() {
     setShowDemandeForm(false);
     setDescription("");
     setPhotosPanne([]);
+    setVideoPanne(null);
     setSelectedCategorie(null);
     setSelectedServiceUid(null);
   };
@@ -222,6 +226,7 @@ export default function ArtisanDetailPage() {
     setSelectedServiceUid(null);
     setDescription("");
     setPhotosPanne([]);
+    setVideoPanne(null);
   };
 
   const openDemandeOrAuth = () => {
@@ -502,6 +507,7 @@ export default function ArtisanDetailPage() {
                     label="Photos de la panne (facultatif)"
                     aide="Jusqu'à 5 photos : elles aident l'artisan à voir le travail à faire et à fixer un prix juste."
                   />
+                  <VideoPicker video={videoPanne} onChange={setVideoPanne} />
 
                   {/* Geolocation status */}
                   <div className="flex items-center justify-between rounded-lg bg-canvas-soft border border-line-soft px-4 py-3">

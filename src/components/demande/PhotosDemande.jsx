@@ -167,7 +167,7 @@ export default function PhotosDemande({ demande, role, types = ['PANNE', 'AVANT'
     }))
     .filter((e) => e.photos.length > 0 || e.modifiable)
 
-  if (!etapes.length) return null
+  if (!etapes.length && !demande.video) return null
 
   // Ordre de la visionneuse : panne, avant, après — on peut comparer en défilant.
   const galerie = etapes.flatMap((e) =>
@@ -180,6 +180,12 @@ export default function PhotosDemande({ demande, role, types = ['PANNE', 'AVANT'
       {etapes.map((e) => (
         <EtapePhotos key={e.type} demande={demande} onOuvrir={setOuverte} {...e} />
       ))}
+      {demande.video && types.includes('PANNE') && (
+        <div>
+          <p className="text-xs font-semibold text-muted mb-1.5">Vidéo de la panne</p>
+          <video src={demande.video} controls playsInline preload="metadata" className="w-full max-w-xs rounded-lg bg-black" />
+        </div>
+      )}
       {indexOuverte >= 0 && (
         <Visionneuse
           photos={galerie}
