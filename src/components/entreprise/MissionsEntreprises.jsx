@@ -35,7 +35,7 @@ export default function MissionsEntreprises() {
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statut.classe}`}>{statut.label}</span>
                   </div>
                   <p className="text-sm text-muted mt-1">
-                    {mission.demande.categorie_nom} · {mission.demande.ville} · {dateHeure(mission.heure_prevue)}
+                    {mission.metier} · {mission.demande.ville} · {dateHeure(mission.heure_prevue)}
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted shrink-0" />

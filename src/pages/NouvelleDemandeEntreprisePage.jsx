@@ -30,7 +30,7 @@ export default function NouvelleDemandeEntreprisePage() {
   const [photos, setPhotos] = useState([])
   const [video, setVideo] = useState(null)
   const [form, setForm] = useState({
-    categorie: '',
+    categories: [],
     description: '',
     adresse: '',
     zone_ville: null,
@@ -51,7 +51,7 @@ export default function NouvelleDemandeEntreprisePage() {
 
   const envoyer = async (e) => {
     e.preventDefault()
-    if (!form.categorie) return toast.error('Choisissez le corps de métier concerné.')
+    if (!form.categories.length) return toast.error('Choisissez au moins un corps de métier.')
     if (!form.zone_ville) return toast.error('Choisissez la ville du lieu d’intervention.')
     const payload = {
       ...form,
@@ -78,11 +78,26 @@ export default function NouvelleDemandeEntreprisePage() {
 
       <form onSubmit={envoyer} className="bg-white border border-line rounded-2xl p-5 md:p-7 grid gap-5">
         <div>
-          <label className={label}>Corps de métier</label>
-          <select value={form.categorie} onChange={(e) => set('categorie', e.target.value)} className={champ} required>
-            <option value="">Choisir…</option>
-            {categories.map((c) => <option key={c.uid} value={c.uid}>{c.nom}</option>)}
-          </select>
+          <label className={label}>Corps de métier concernés (un ou plusieurs)</label>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => {
+              const choisi = form.categories.includes(c.uid)
+              return (
+                <button
+                  key={c.uid}
+                  type="button"
+                  aria-pressed={choisi}
+                  onClick={() => set('categories', choisi ? form.categories.filter((u) => u !== c.uid) : [...form.categories, c.uid])}
+                  className={`px-3.5 py-2 rounded-full text-sm border transition-colors ${
+                    choisi ? 'bg-primary-500 border-primary-500 text-white' : 'bg-white border-line text-ink hover:border-primary-300'
+                  }`}
+                >
+                  {c.nom}
+                </button>
+              )
+            })}
+          </div>
+          <p className="text-xs text-muted mt-1.5">L’inspecteur Bricolibe décide du nombre d’artisans pour chaque métier.</p>
         </div>
 
         <div>

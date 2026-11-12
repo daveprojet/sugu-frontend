@@ -232,9 +232,10 @@ export default function DevenirPartenairePage() {
               <p className="text-indigo-100 text-sm mb-6 px-1">{profil.intro}</p>
               {isEntreprise && (
                 <p className="text-sm mb-6 px-4 py-3 rounded-xl bg-white/15 text-white">
-                  Besoin d'un dépannage maintenant ?{" "}
-                  <Link to="/inscription-entreprise" className="font-semibold underline">Créez votre compte entreprise</Link>{" "}
-                  et décrivez votre panne en ligne : un inspecteur Bricolibe envoie les artisans et contrôle leur travail.
+                  Dès que votre candidature est acceptée, votre espace entreprise est créé et vous recevez un SMS.
+                  Vous y décrivez vos besoins en ligne (jusqu'à 5 comptes pour votre équipe) : un inspecteur Bricolibe
+                  envoie les artisans et contrôle leur travail. Déjà un compte ?{" "}
+                  <Link to="/connexion" className="font-semibold underline">Connectez-vous</Link>.
                 </p>
               )}
 

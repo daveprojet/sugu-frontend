@@ -154,7 +154,8 @@ export const artisanService = {
 const enFormData = (data, photos = [], video = null) => {
   const fd = new FormData()
   Object.entries(data).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== '') fd.append(k, v)
+    if (Array.isArray(v)) v.forEach((item) => fd.append(k, item))
+    else if (v !== undefined && v !== null && v !== '') fd.append(k, v)
   })
   photos.forEach((p) => fd.append('photos', p))
   if (video) fd.append('video', video)
@@ -188,6 +189,9 @@ export const demandeService = {
 // ── Volet entreprises ─────────────────────────────
 export const entrepriseService = {
   moi:          ()        => api.get('/entreprises/moi/'),
+  membres:      ()        => api.get('/entreprises/membres/'),
+  ajouterMembre: (data)   => api.post('/entreprises/membres/', data),
+  retirerMembre: (uid)    => api.delete(`/entreprises/membres/${uid}/`),
   majMoi:       (data)    => api.patch('/entreprises/moi/', data),
   demandes:     (params)  => api.get('/entreprises/demandes/', { params }),
   demande:      (uid)     => api.get(`/entreprises/demandes/${uid}/`),

@@ -61,8 +61,10 @@ export default function DemandeEntreprisePage() {
 
       <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink">{demande.categorie_nom}</h1>
-          <p className="text-sm text-muted">Envoyée {dateHeure(demande.created_at)}</p>
+          <h1 className="font-display text-2xl font-bold text-ink">{demande.metiers}</h1>
+          <p className="text-sm text-muted">
+            Envoyée {dateHeure(demande.created_at)}{demande.cree_par_nom ? ` par ${demande.cree_par_nom}` : ''}
+          </p>
         </div>
         <span className={`text-sm font-medium px-3 py-1 rounded-full ${statut.classe}`}>{statut.label}</span>
       </div>
@@ -120,7 +122,7 @@ export default function DemandeEntreprisePage() {
                       : <span className="w-11 h-11 rounded-full bg-canvas-soft flex items-center justify-center"><UserRound className="w-5 h-5 text-muted" /></span>}
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-ink">{a.artisan.nom}</p>
-                      <p className="text-xs text-muted">{a.artisan.metiers.join(', ')}</p>
+                      <p className="text-xs text-muted">{a.metier}</p>
                     </div>
                     <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${s.classe}`}>{s.label}</span>
                   </div>

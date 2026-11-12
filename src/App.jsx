@@ -40,6 +40,7 @@ import EspaceEntreprisePage from '@/pages/EspaceEntreprisePage'
 import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
 import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
+import EquipeEntreprisePage from '@/pages/EquipeEntreprisePage'
 
 const queryClient = new QueryClient({
   // Sans cela, une liste qui ne se charge pas à cause du serveur s'affiche comme vide.
@@ -87,7 +88,8 @@ function AppRoutes() {
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />
-          <Route path="/inscription-entreprise" element={<RegisterPage />} />
+          {/* Les comptes entreprise naissent de l'acceptation de la candidature. */}
+          <Route path="/inscription-entreprise" element={<Navigate to="/devenir-partenaire" replace />} />
           <Route path="/devenir-partenaire" element={<DevenirPartenairePage />} />
           <Route path="/mon-profil" element={
             <PrivateRoute><MonProfil /></PrivateRoute>
@@ -115,6 +117,9 @@ function AppRoutes() {
           } />
           <Route path="/espace-entreprise/nouvelle-demande" element={
             <PrivateRoute role="entreprise"><NouvelleDemandeEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/equipe" element={
+            <PrivateRoute role="entreprise"><EquipeEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise/demandes/:uid" element={
             <PrivateRoute role="entreprise"><DemandeEntreprisePage /></PrivateRoute>

@@ -79,7 +79,7 @@ export default function MissionEntreprisePage() {
       </Link>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">Mission entreprise · {demande.categorie_nom}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary-600">Mission entreprise · {mission.metier}</p>
           <h1 className="font-display text-2xl font-bold text-ink">{demande.entreprise}</h1>
         </div>
         <span className={`text-sm font-medium px-3 py-1 rounded-full ${statut.classe}`}>{statut.label}</span>
