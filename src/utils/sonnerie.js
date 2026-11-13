@@ -72,8 +72,9 @@ export function jouerSonnerie() {
   }, 300)
 }
 
-/** À appeler une fois au démarrage : écoute le service worker. Retourne le nettoyage. */
-export function ecouterSonnerie() {
+/** À appeler une fois au démarrage : écoute le service worker. Retourne le nettoyage.
+ * pourMoi(destinataire) : faux si la push vise un autre compte que celui connecté. */
+export function ecouterSonnerie(pourMoi = () => true) {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return () => {}
 
   // Safari n'autorise un son qu'après un premier son joué lors d'un geste :
@@ -90,7 +91,7 @@ export function ecouterSonnerie() {
   window.addEventListener('pointerdown', debloquer, { once: true, capture: true })
 
   const surMessage = (event) => {
-    if (event.data?.type === 'bricolibe-sonnerie') jouerSonnerie()
+    if (event.data?.type === 'bricolibe-sonnerie' && pourMoi(event.data.destinataire)) jouerSonnerie()
   }
   navigator.serviceWorker.addEventListener('message', surMessage)
   navigator.serviceWorker.startMessages?.()

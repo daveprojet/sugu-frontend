@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { toast } from 'react-toastify'
-import { authService, setAuthToken, clearAuthToken, setSessionExpiredHandler } from '@/services/api'
+import { authService, fcmTokenService, setAuthToken, clearAuthToken, setSessionExpiredHandler } from '@/services/api'
+import { oublierJetonPush } from '@/utils/jetonPush'
 import { extractApiError, isTransientError } from '@/utils/errors'
 import { reinitialiserRappelIdentite } from '@/utils/rappelIdentite'
 
@@ -74,6 +75,10 @@ export function AuthProvider({ children }) {
   }
 
   const logout = async () => {
+    // D'abord détacher ce navigateur du compte (il faut encore être connecté),
+    // sinon les push du compte continuent d'arriver ici après la déconnexion.
+    const jeton = oublierJetonPush()
+    if (jeton) await fcmTokenService.retirer(jeton).catch(() => {})
     try {
       // Blacklist du refresh token côté serveur (cookie httpOnly) — best effort.
       await authService.logout()

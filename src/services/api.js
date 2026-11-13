@@ -321,6 +321,8 @@ export const fcmTokenService = {
   check:     () => api.get('/fcm-tokens/'),
   register:  (data) => api.post('/fcm-tokens/', data),
   unregister: (id) => api.delete(`/fcm-tokens/${id}/`),
+  // Déconnexion : ce navigateur ne doit plus recevoir les push du compte.
+  retirer: (token) => api.delete('/fcm-tokens/', { data: { token } }),
 }
 
 export default api
