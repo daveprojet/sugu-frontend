@@ -149,7 +149,7 @@ export const artisanService = {
   },
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
   // Profil public : avant / après (avec l'accord du client) et travaux réalisés (badge).
-  portfolio:   (id)     => api.get(`/artisans/${id}/portfolio/`),
+  portfolio:   (id, params) => api.get(`/artisans/${id}/portfolio/`, { params }),
 }
 
 // Formulaire multipart : champs simples, photos (répétées) et vidéo facultative.
