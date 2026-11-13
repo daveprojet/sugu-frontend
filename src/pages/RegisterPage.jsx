@@ -10,6 +10,7 @@ import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info } from "lucide-rea
 import MapPicker from "@/components/common/MapPicker";
 import ChampsZone from "@/components/common/ChampsZone";
 import { chercherZoneProche } from "@/hooks/useZones";
+import { avecRedirection, redirectionDemandee } from "@/utils/redirection";
 
 import bgImage from '/images/metiers/register-bg.jpg';
 
@@ -92,7 +93,9 @@ export default function RegisterPage() {
     try {
       await register({ ...form, autres_metiers: autresMetiers });
       toast.success("Compte créé avec succès !");
-      navigate(form.role === "artisan" ? "/dashboard-artisan" : "/");
+      // Un client venu d'une fiche artisan y retourne, formulaire de demande ouvert.
+      const redirect = redirectionDemandee(params);
+      navigate(form.role === "artisan" ? "/dashboard-artisan" : redirect || "/", { replace: !!redirect });
     } catch (err) {
       toast.error(extractApiError(err, "Erreur lors de l'inscription"));
     } finally {
@@ -388,7 +391,7 @@ export default function RegisterPage() {
           <p className="text-center text-sm text-indigo-200 mt-6 pt-6 border-t border-white/30">
             Déjà un compte ?{" "}
             <Link
-              to="/connexion"
+              to={avecRedirection("/connexion", params)}
               className="text-white font-semibold hover:text-purple-200  hover:underline transition-colors"
             >
               Se connecter

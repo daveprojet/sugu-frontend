@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import PhoneField from "@/components/common/PhoneField";
+import { avecRedirection, espaceParDefaut, redirectionDemandee } from "@/utils/redirection";
 
 import loginBg from "/images/metiers/register-bg.jpg";
 
@@ -17,14 +18,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const redirectTo = () => {
-    const redirect = searchParams.get("redirect");
-    if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
-      return redirect;
-    }
-    return "/";
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,9 +28,8 @@ export default function LoginPage() {
       } else {
         toast.success("Bienvenue !");
       }
-      // Une entreprise arrive directement sur son espace (sauf redirection demandée).
-      const cible = redirectTo();
-      navigate(cible === "/" && user?.role === "entreprise" ? "/espace-entreprise" : cible, { replace: true });
+      // Retour à la page d'où l'on venait (ex. fiche artisan), sinon l'espace de chacun.
+      navigate(redirectionDemandee(searchParams) || espaceParDefaut(user), { replace: true });
     } catch (err) {
       toast.error(extractApiError(err, "Téléphone ou mot de passe incorrect"));
     } finally {
@@ -205,7 +197,7 @@ export default function LoginPage() {
             <p className="text-sm text-indigo-200">
               Pas encore de compte ?{" "}
               <Link
-                to="/inscription"
+                to={avecRedirection("/inscription", searchParams)}
                 className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors"
               >
                 S'inscrire

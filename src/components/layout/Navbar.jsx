@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
+import { espaceParDefaut } from "@/utils/redirection";
 import {
   LayoutDashboard,
   User,
@@ -15,7 +16,7 @@ import {
 import logo from "/images/logo.png";
 
 export default function Navbar() {
-  const { user, logout, isArtisan, isEntreprise } = useAuth();
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
@@ -99,12 +100,7 @@ export default function Navbar() {
                     className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl shadow-gray-200/60 border border-gray-100/80 py-2 z-50 overflow-hidden"
                   >
                     <Link
-                      to={
-                        isArtisan
-                          // Artisan uniquement partenaire : son espace, ce sont ses missions entreprises.
-                          ? (user?.independant === false ? "/dashboard-artisan/missions-entreprises" : "/dashboard-artisan")
-                          : isEntreprise ? "/espace-entreprise" : "/dashboard-client"
-                      }
+                      to={espaceParDefaut(user)}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                       onClick={() => setMenuOpen(false)}
                     >
