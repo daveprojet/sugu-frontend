@@ -10,7 +10,7 @@ export const METIERS = [
   { id: 'jardinier',     label: 'Jardinier',         icon: '🌿', description: 'Entretien jardin, espaces verts' },
   { id: 'menage',        label: 'Ménage',            icon: '🧹', description: 'Nettoyage, entretien maison' },
   { id: 'chauffeur',     label: 'Chauffeur',         icon: '🚗', description: 'Transport, livraison' },
-  { id: 'informatique',  label: 'Technicien info',   icon: '💻', description: 'Réparation PC, réseau' },
+  { id: 'informatique',  label: 'Maintenance informatique', icon: '💻', description: 'Ordinateurs, imprimantes, réseau' },
 ]
 
 export const VILLES = [
@@ -97,7 +97,7 @@ export const METIER_TO_CATEGORIE_NOM = {
   jardinier: 'Jardinage',
   menage: 'Ménage',
   chauffeur: null,
-  informatique: 'Informatique',
+  informatique: 'Maintenance informatique',
 }
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL
