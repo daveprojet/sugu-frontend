@@ -42,6 +42,7 @@ import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
 import MissionsEntreprisesPage from '@/pages/MissionsEntreprisesPage'
 import EquipeEntreprisePage from '@/pages/EquipeEntreprisePage'
+import { BarreOnglets, avecBarreOnglets } from '@/components/layout/NavigationRole'
 
 const queryClient = new QueryClient({
   // Sans cela, une liste qui ne se charge pas à cause du serveur s'affiche comme vide.
@@ -78,9 +79,11 @@ function AppRoutes() {
   // Page mission : sa barre d'actions est fixée en bas, la bannière la masquerait.
   const { pathname } = useLocation()
   const barreActions = pathname.startsWith('/dashboard-artisan/missions-entreprises/')
+  // Téléphone : barre d'onglets en bas une fois connecté, le contenu ne doit pas passer dessous.
+  const onglets = avecBarreOnglets(user, pathname)
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col min-h-screen ${onglets ? 'pb-16 md:pb-0 avec-onglets' : ''}`}>
       <ScrollToTop />
       <Navbar />
       <div className="flex-1">
@@ -153,6 +156,7 @@ function AppRoutes() {
           hasRegisteredToken={hasRegisteredToken}
         />
       )}
+      <BarreOnglets />
       <ToastContainer position="bottom-right" theme="light" />
     </div>
   )

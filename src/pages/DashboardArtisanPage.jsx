@@ -31,7 +31,6 @@ import {
   Tag,
   AlertTriangle,
   Wallet,
-  Rocket,
   Building2,
   BadgeDollarSign,
   MapPin,
@@ -44,7 +43,7 @@ export default function DashboardArtisanPage() {
   // Missions entreprises : page à part, le tableau de bord n'en garde qu'un raccourci.
   const { data: missionsEntreprises = [] } = useMissions('en_cours')
   const missionsARepondre = missionsEntreprises.filter((m) => m.statut === 'PROPOSEE').length
-  const { data: identite } = useIdentite(user?.artisan_uid)
+  const { data: identite, isLoading: identiteChargement } = useIdentite(user?.artisan_uid)
   const { data: profilArtisan } = useArtisan(user?.artisan_uid)
   const { data: dossierPro } = useDossierPro(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
@@ -184,62 +183,27 @@ export default function DashboardArtisanPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-10">
+      <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          className="flex flex-wrap items-center justify-between gap-4"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-extrabold">
+            <div className="hidden sm:flex w-14 h-14 rounded-full bg-indigo-50 text-indigo-700 items-center justify-center text-2xl font-extrabold">
               {user?.prenom?.charAt(0) || 'A'}
             </div>
             <div>
               <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">
                 Bonjour, {user?.prenom}
               </h1>
-              <p className="text-muted text-sm font-medium mt-0.5">Voici un aperçu de votre activité</p>
+              <p className="text-muted text-sm font-medium mt-0.5">Vos demandes et votre disponibilité</p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Link
-              to="/dashboard-artisan/commissions"
-              className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-            >
-              {commissionsEnAttente.length > 0 && (
-                <span className="relative flex h-3 w-3">
-                  <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-red-400" />
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
-                </span>
-              )}
-              <Wallet className="w-4 h-4" /> Commissions
-            </Link>
-            {(user?.partenaire || missionsEntreprises.length > 0) && (
-              <Link
-                to="/dashboard-artisan/missions-entreprises"
-                className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-              >
-                {missionsARepondre > 0 && (
-                  <span className="relative flex h-3 w-3" aria-label={`${missionsARepondre} mission(s) à accepter`}>
-                    <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-amber-400" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
-                  </span>
-                )}
-                <Building2 className="w-4 h-4" /> Missions entreprises
-                {missionsEntreprises.length > 0 && (
-                  <span className="text-xs font-bold bg-indigo-50 text-indigo-700 rounded-full px-2 py-0.5">{missionsEntreprises.length}</span>
-                )}
-              </Link>
-            )}
-            <Link
-              to="/dashboard-artisan/abonnements"
-              className="inline-flex items-center gap-1.5 border border-line bg-white text-ink hover:bg-canvas-soft hover:border-indigo-300 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-            >
-              <Rocket className="w-4 h-4" /> Abonnements
-            </Link>
             <button
               type="button"
               role="switch"
@@ -345,8 +309,8 @@ export default function DashboardArtisanPage() {
           </Link>
         )}
 
-        {/* Identity Status */}
-        {user?.artisan_uid && (
+        {/* Pièce d'identité : affichée tant qu'elle n'est pas vérifiée */}
+        {user?.artisan_uid && !identiteChargement && identite?.statut !== 'VERIFIEE' && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -393,8 +357,8 @@ export default function DashboardArtisanPage() {
           </motion.div>
         )}
 
-        {/* Dossier professionnel — badge « Vérifié » */}
-        {user?.artisan_uid && (
+        {/* Dossier professionnel — badge « Vérifié » : masqué quand le badge est actif */}
+        {user?.artisan_uid && !(dossierPro?.statut === 'VERIFIEE' && dossierPro.badge_actif) && (
           <Link
             to="/mon-profil/dossier"
             className={`flex items-center gap-4 p-4 rounded-xl border transition-colors duration-150 ${
@@ -511,33 +475,20 @@ export default function DashboardArtisanPage() {
           </motion.div>
         )}
 
-        {/* Stats Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
+        {/* Compteurs : une ligne compacte, les demandes juste en dessous */}
+        <div className="grid grid-cols-3 gap-2.5 md:gap-4">
           {statCards.map(({ label, value, icon: Icon, color, bg }) => (
-            <motion.div
-              key={label}
-              variants={itemVariants}
-              className="bg-white rounded-xl border border-line p-6 hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-full ${bg} flex items-center justify-center`}>
-                    <Icon className={`w-6 h-6 ${color}`} />
-                  </div>
-                  <div>
-                    <p className={`font-display text-3xl font-bold ${color}`}>{value}</p>
-                    <p className="text-xs text-muted font-medium">{label}</p>
-                  </div>
-                </div>
+            <div key={label} className="bg-white rounded-xl border border-line px-2 py-3 md:px-4 md:py-4 flex flex-col md:flex-row items-center md:gap-3 text-center md:text-left">
+              <div className={`hidden md:flex w-10 h-10 rounded-full ${bg} items-center justify-center shrink-0`}>
+                <Icon className={`w-5 h-5 ${color}`} />
               </div>
-            </motion.div>
+              <div>
+                <p className={`font-display text-2xl font-bold ${color}`}>{value}</p>
+                <p className="text-[11px] md:text-xs text-muted font-medium leading-tight">{label}</p>
+              </div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Demandes */}
         <section>

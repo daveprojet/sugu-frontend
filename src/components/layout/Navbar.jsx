@@ -11,7 +11,10 @@ import {
   Wrench,
   Menu,
   X,
+  Rocket,
+  LifeBuoy,
 } from "lucide-react";
+import { LiensRoleBureau, useLiensRole } from "@/components/layout/NavigationRole";
 
 import logo from "/images/logo.png";
 
@@ -20,6 +23,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
+  const liensRole = useLiensRole();
+  const artisanIndependant = user?.role === "artisan" && user.independant !== false;
 
   const handleLogout = async () => {
     setMenuOpen(false);
@@ -41,7 +46,12 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Nav desktop - Liens Premium */}
+        {/* Nav desktop : pages de travail du rôle connecté, liens publics sinon */}
+        {user ? (
+          <div className="hidden md:flex items-center gap-6">
+            <LiensRoleBureau liens={liensRole} />
+          </div>
+        ) : (
         <div className="hidden md:flex items-center gap-6">
           <Link
             to="/a-propos"
@@ -68,6 +78,7 @@ export default function Navbar() {
             Contact
           </Link>
         </div>
+        )}
 
         {/* Actions / Profil Utilisateur */}
         <div className="flex items-center gap-3">
@@ -115,6 +126,24 @@ export default function Navbar() {
                       <User className="w-4 h-4" />
                       Mon profil
                     </Link>
+                    {artisanIndependant && (
+                      <Link
+                        to="/dashboard-artisan/abonnements"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Rocket className="w-4 h-4" />
+                        Abonnements
+                      </Link>
+                    )}
+                    <Link
+                      to="/contact"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <LifeBuoy className="w-4 h-4" />
+                      Aide et contact
+                    </Link>
                     <hr className="my-1.5 mx-3 border-gray-100" />
                     <button
                       onClick={handleLogout}
@@ -144,7 +173,8 @@ export default function Navbar() {
             </>
           )}
 
-          {/* Burger button — mobile only */}
+          {/* Burger (téléphone, visiteurs) : connecté, la barre d'onglets le remplace */}
+          {!user && (
           <button
             onClick={() => setBurgerOpen(!burgerOpen)}
             className="md:hidden relative w-10 h-10 flex items-center justify-center rounded-full text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200"
@@ -152,12 +182,13 @@ export default function Navbar() {
           >
             {burgerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
+          )}
         </div>
       </div>
 
       {/* Mobile menu panel */}
       <AnimatePresence>
-        {burgerOpen && (
+        {burgerOpen && !user && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
