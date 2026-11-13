@@ -1,9 +1,21 @@
 // Firebase Messaging Service Worker
 // Ce fichier utilise les CDN Firebase (pas de Vite/env vars dans un SW)
 
-// Accusé de réception des push importantes : sans lui, le serveur envoie un SMS
-// de secours. Écouteur déclaré avant Firebase pour passer sur chaque push,
-// que l'onglet soit ouvert, en arrière-plan ou fermé.
+// Sonnerie (nouvelle demande, mission, devis : data.sonnerie = '1') : prévient
+// UNE fenêtre ouverte — celle au premier plan de préférence — qui joue le son.
+function prevenirFenetre(payload) {
+  if (!payload || !payload.data || payload.data.sonnerie !== '1') return Promise.resolve();
+  return clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenetres) => {
+    const cible = fenetres.find((f) => f.focused)
+      || fenetres.find((f) => f.visibilityState === 'visible')
+      || fenetres[0];
+    if (cible) cible.postMessage({ type: 'bricolibe-sonnerie' });
+  });
+}
+
+// Accusé de réception des push importantes (sans lui, le serveur envoie un SMS
+// de secours) et sonnerie. Écouteur déclaré avant Firebase pour passer sur
+// chaque push, que l'onglet soit ouvert, en arrière-plan ou fermé.
 self.addEventListener('push', (event) => {
   let payload = null;
   try {
@@ -11,10 +23,11 @@ self.addEventListener('push', (event) => {
   } catch (e) {
     return;
   }
+  const taches = [prevenirFenetre(payload)];
   const ackUrl = payload && payload.data && payload.data.ack_url;
-  if (!ackUrl) return;
   // Requête POST sans corps : pas de pré-vérification CORS.
-  event.waitUntil(fetch(ackUrl, { method: 'POST' }).catch(() => {}));
+  if (ackUrl) taches.push(fetch(ackUrl, { method: 'POST' }).catch(() => {}));
+  event.waitUntil(Promise.all(taches));
 });
 
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');

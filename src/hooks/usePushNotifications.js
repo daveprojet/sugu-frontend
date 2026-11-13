@@ -3,6 +3,7 @@ import { getToken, onMessage } from 'firebase/messaging'
 import { messaging } from '@/firebase'
 import { fcmTokenService } from '@/services/api'
 import { toast } from 'react-toastify'
+import { ecouterSonnerie } from '@/utils/sonnerie'
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY
 
@@ -92,6 +93,9 @@ export function usePushNotifications(user) {
     }
   }, [user, registerSilentlyIfGranted])
 
+  // Sonnerie des nouvelles demandes, missions et devis (prévenue par le service worker).
+  useEffect(() => ecouterSonnerie(), [])
+
   // Notifications reçues en premier plan (app ouverte et active)
   useEffect(() => {
     if (!messaging) return
@@ -101,9 +105,12 @@ export function usePushNotifications(user) {
       const title = payload.data?.title || payload.notification?.title || 'Bricolibe'
       const body = payload.data?.body || payload.notification?.body || ''
 
+      const sonne = payload.data?.sonnerie === '1'
       toast.info(`${title}\n${body}`, {
         position: 'top-right',
-        autoClose: 8000,
+        // Nouvelle demande, mission, devis : reste affichée ; toucher la page
+        // (le toast compris) coupe la sonnerie.
+        autoClose: sonne ? false : 8000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
