@@ -13,6 +13,7 @@ import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande, { peutModifierPhotos } from '@/components/demande/PhotosDemande'
 import DescriptionDepliable from '@/components/demande/DescriptionDepliable'
 import { STATUTS_DEMANDE, STATUTS_DEMANDE_SIGNALABLE } from '@/utils/constants'
+import FriseEtapes from '@/components/demande/FriseEtapes'
 import {
   Inbox,
   Clock,
@@ -479,6 +480,8 @@ export default function DashboardClientPage() {
                           {badgeStatut(demande)}
                         </div>
 
+                        <FriseEtapes demande={demande} role="client" className="mt-4" />
+
                         {demande.service_element_nom && (
                           <p className="text-xs text-indigo-700 font-semibold mt-3">{demande.service_element_nom}</p>
                         )}
@@ -600,8 +603,9 @@ export default function DashboardClientPage() {
                           <td className="px-6 py-4 align-middle">
                             {badgePrix(demande) || <span className="text-xs text-muted">—</span>}
                           </td>
-                          <td className="px-6 py-4 align-middle">
+                          <td className="px-6 py-4 align-middle w-64">
                             {badgeStatut(demande)}
+                            <FriseEtapes demande={demande} role="client" compact className="mt-2.5" />
                             {actionPaiement(demande) && <div className="mt-1.5">{actionPaiement(demande)}</div>}
                             {boutonAnnuler(demande) && <div className="mt-1.5">{boutonAnnuler(demande)}</div>}
                           </td>

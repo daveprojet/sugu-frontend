@@ -15,6 +15,7 @@ import PhotosDemande from '@/components/demande/PhotosDemande'
 import EtapeTravauxModal from '@/components/demande/EtapeTravauxModal'
 import { useMissions } from '@/hooks/useEntreprises'
 import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
+import FriseEtapes from '@/components/demande/FriseEtapes'
 import {
   Inbox,
   Clock,
@@ -592,6 +593,7 @@ export default function DashboardArtisanPage() {
                             </span>
                           )}
                         </div>
+                        <FriseEtapes demande={d} role="artisan" className="max-w-md mb-3" />
                         {d.client_telephone && d.statut !== 'EN_ATTENTE' && (
                           <a
                             href={`tel:${d.client_telephone}`}
@@ -655,6 +657,14 @@ export default function DashboardArtisanPage() {
                         )}
                         {d.statut === 'ACCEPTEE' && d.prix_total == null && (
                           <div className="flex flex-col gap-1.5 w-full md:w-auto">
+                            {d.client_telephone && (
+                              <a
+                                href={`tel:${d.client_telephone}`}
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white text-ink hover:bg-canvas-soft px-4 py-2 text-sm font-semibold transition-colors"
+                              >
+                                <Phone className="w-4 h-4" /> Appeler le client
+                              </a>
+                            )}
                             <div className="flex items-center gap-2">
                               <input
                                 type="number"
