@@ -9,7 +9,7 @@ function prevenirFenetre(payload) {
     const cible = fenetres.find((f) => f.focused)
       || fenetres.find((f) => f.visibilityState === 'visible')
       || fenetres[0];
-    if (cible) cible.postMessage({ type: 'bricolibe-sonnerie' });
+    if (cible) cible.postMessage({ type: 'bricolibe-sonnerie', destinataire: payload.data.destinataire });
   });
 }
 

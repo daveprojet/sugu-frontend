@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -78,6 +78,7 @@ export default function ArtisanDetailPage() {
   const { uid } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: artisan, isLoading, error: artisanError } = useArtisan(uid);
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 });
   const avis = avisPage?.results || [];
@@ -97,6 +98,24 @@ export default function ArtisanDetailPage() {
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [photoAgrandie, setPhotoAgrandie] = useState(false);
   const [modePaiement, setModePaiement] = useState("en_ligne");
+
+  // Retour de connexion ou d'inscription (?demande=1) : le formulaire se rouvre tout seul.
+  useEffect(() => {
+    if (searchParams.get("demande") !== "1" || !user || !artisan) return;
+    setSearchParams((params) => {
+      params.delete("demande");
+      return params;
+    }, { replace: true });
+    if (user.role === "artisan") setAuthModal("artisan");
+    else setShowDemandeForm(true);
+  }, [searchParams, setSearchParams, user, artisan]);
+
+  // Un seul métier : il est déjà choisi.
+  useEffect(() => {
+    if (showDemandeForm && !selectedCategorie && artisan?.categories?.length === 1) {
+      setSelectedCategorie(artisan.categories[0].uid);
+    }
+  }, [showDemandeForm, selectedCategorie, artisan]);
 
   const { data: categorieDetail } = useCategorie(selectedCategorie);
   const servicesList = categorieDetail?.services || [];
@@ -212,13 +231,9 @@ export default function ArtisanDetailPage() {
       payload.latitude_client = clientCoords.latitude;
       payload.longitude_client = clientCoords.longitude;
     }
-    await createDemande.mutateAsync(payload);
-    setShowDemandeForm(false);
-    setDescription("");
-    setPhotosPanne([]);
-    setVideoPanne(null);
-    setSelectedCategorie(null);
-    setSelectedServiceUid(null);
+    const { data: creee } = await createDemande.mutateAsync(payload);
+    // Suite du parcours : « Mes demandes », la nouvelle demande en évidence.
+    navigate(creee?.id ? `/dashboard-client?nouvelle=${creee.id}` : "/dashboard-client");
   };
 
   const resetForm = () => {
@@ -240,10 +255,11 @@ export default function ArtisanDetailPage() {
     }
   };
 
+  // Après connexion ou inscription, retour sur cette fiche, formulaire ouvert.
+  const retourFiche = encodeURIComponent(`/artisans/${uid}?demande=1`);
   const goToLogin = () => {
-    const redirect = encodeURIComponent(`/artisans/${uid}`);
     setAuthModal(null);
-    navigate(`/connexion?redirect=${redirect}`);
+    navigate(`/connexion?redirect=${retourFiche}`);
   };
 
   return (
@@ -793,7 +809,7 @@ export default function ArtisanDetailPage() {
               </button>
               {authModal === "login" && (
                 <Link
-                  to="/inscription"
+                  to={`/inscription?redirect=${retourFiche}`}
                   className="inline-flex items-center justify-center text-sm font-semibold text-indigo-700 hover:text-indigo-800 transition-colors"
                 >
                   Créer un compte

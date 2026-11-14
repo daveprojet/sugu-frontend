@@ -97,11 +97,11 @@ export const STATUTS_DEVIS = {
 
 // ── Artisan : missions entreprises ───────────────────────
 
-export function useMissions(etat = 'en_cours') {
+export function useMissions(etat = 'en_cours', options = {}) {
   return useQuery(
     ['missions-entreprises', etat],
     () => missionService.list(etat).then((r) => enListe(r.data)),
-    { refetchInterval: SUIVI_MS },
+    { refetchInterval: SUIVI_MS, ...options },
   )
 }
 

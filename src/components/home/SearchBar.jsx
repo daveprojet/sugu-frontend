@@ -5,6 +5,7 @@ import { MapPin, Search, Briefcase, Building2 } from "lucide-react";
 import { useCategories } from "@/hooks/useCategories";
 import { useZones } from "@/hooks/useZones";
 import SelectRecherche from "@/components/common/SelectRecherche";
+import BoutonAutour from "@/components/common/BoutonAutour";
 
 export default function SearchBar() {
   const [ville, setVille] = useState("");
@@ -104,6 +105,13 @@ const handleSearch = (e) => {
         Chercher
       </motion.button>
 
+      {/* Sans remplir ville ni quartier : les artisans les plus proches (métier facultatif) */}
+      <BoutonAutour
+        categorie={categorie}
+        className="sm:col-span-2 lg:col-span-4 w-full py-3 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-sm hover:bg-indigo-100 transition-colors"
+      >
+        Autour de moi
+      </BoutonAutour>
     </form>
   );
 }

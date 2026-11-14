@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/context/AuthContext'
@@ -13,6 +13,7 @@ import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande, { peutModifierPhotos } from '@/components/demande/PhotosDemande'
 import DescriptionDepliable from '@/components/demande/DescriptionDepliable'
 import { STATUTS_DEMANDE, STATUTS_DEMANDE_SIGNALABLE } from '@/utils/constants'
+import FriseEtapes from '@/components/demande/FriseEtapes'
 import {
   Inbox,
   Clock,
@@ -48,6 +49,14 @@ export default function DashboardClientPage() {
   const [avisOpen, setAvisOpen] = useState(null)
   const [avisForm, setAvisForm] = useState(defaultAvis)
   const [statutFilter, setStatutFilter] = useState('all')
+  // Arrivée juste après l'envoi d'une demande (?nouvelle=id) : bandeau « et maintenant ? »
+  // et demande mise en évidence.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const nouvelleId = Number(searchParams.get('nouvelle')) || null
+  const fermerBandeau = () => setSearchParams((params) => {
+    params.delete('nouvelle')
+    return params
+  }, { replace: true })
   const [cancelDemande, setCancelDemande] = useState(null)
   const [especesModal, setEspecesModal] = useState(null)
   const [montantEspeces, setMontantEspeces] = useState('')
@@ -57,6 +66,15 @@ export default function DashboardClientPage() {
   const [photosDemandeId, setPhotosDemandeId] = useState(null)
   const photosDemande = demandes.find((d) => d.id === photosDemandeId)
   const avisRef = useRef(null)
+
+  useEffect(() => {
+    if (!nouvelleId || isLoading) return undefined
+    // Le bandeau en haut de l'écran : la demande mise en évidence suit juste en dessous.
+    const frame = requestAnimationFrame(() => {
+      document.getElementById('bandeau-nouvelle-demande')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [nouvelleId, isLoading])
 
   useEffect(() => {
     if (avisOpen) {
@@ -304,6 +322,29 @@ export default function DashboardClientPage() {
           </p>
         </motion.div>
 
+        {nouvelleId && (() => {
+          const nouvelle = demandes.find((d) => d.id === nouvelleId)
+          return (
+            <div id="bandeau-nouvelle-demande" role="status" className="scroll-mt-20 mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 md:p-5 flex gap-3">
+              <CheckCircle className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-ink">
+                  Demande envoyée{nouvelle?.artisan_nom ? ` à ${nouvelle.artisan_nom}` : ''} !
+                </p>
+                <p className="text-sm font-semibold text-ink mt-2">Et maintenant ?</p>
+                <ol className="mt-1 text-sm text-muted list-decimal pl-5 space-y-0.5">
+                  <li>L’artisan accepte ou refuse votre demande : vous recevez une notification.</li>
+                  <li>Dès qu’il accepte, son numéro et son WhatsApp s’affichent ici pour vous organiser.</li>
+                  <li>Il fixe ensuite le prix, puis vient faire les travaux.</li>
+                </ol>
+              </div>
+              <button type="button" onClick={fermerBandeau} aria-label="Fermer" className="self-start p-1 rounded-full text-muted hover:text-ink hover:bg-white/70">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )
+        })()}
+
         {/* Stats Grid */}
         <motion.div
           variants={containerVariants}
@@ -425,7 +466,12 @@ export default function DashboardClientPage() {
                     const signaler = boutonSignaler(demande)
                     const photos = boutonPhotos(demande)
                     return (
-                      <li key={demande.id} className="bg-white rounded-xl border border-line shadow-[0_2px_10px_rgba(22,48,91,.06)] px-4 py-4">
+                      <li
+                        key={demande.id} data-demande={demande.id}
+                        className={`bg-white rounded-xl border shadow-[0_2px_10px_rgba(22,48,91,.06)] px-4 py-4 ${
+                          demande.id === nouvelleId ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-line'
+                        }`}
+                      >
                         <div className="flex items-start justify-between gap-3">
                           <Link to={`/artisans/${demande.artisan_uid}`} className="min-w-0">
                             <span className="block font-bold text-ink truncate">{demande.artisan_nom}</span>
@@ -433,6 +479,8 @@ export default function DashboardClientPage() {
                           </Link>
                           {badgeStatut(demande)}
                         </div>
+
+                        <FriseEtapes demande={demande} role="client" className="mt-4" />
 
                         {demande.service_element_nom && (
                           <p className="text-xs text-indigo-700 font-semibold mt-3">{demande.service_element_nom}</p>
@@ -507,7 +555,10 @@ export default function DashboardClientPage() {
                     </thead>
                     <tbody className="divide-y divide-line-soft">
                       {demandesFiltrees.map((demande) => (
-                        <tr key={demande.id} className="group hover:bg-canvas-soft transition-colors">
+                        <tr
+                          key={demande.id} data-demande={demande.id}
+                          className={`group transition-colors ${demande.id === nouvelleId ? 'bg-emerald-50' : 'hover:bg-canvas-soft'}`}
+                        >
                           <td className="px-6 py-4 align-middle">
                             <Link to={`/artisans/${demande.artisan_uid}`} className="block group/link">
                               <span className="font-bold text-ink group-hover/link:text-indigo-700 transition-colors">
@@ -552,8 +603,9 @@ export default function DashboardClientPage() {
                           <td className="px-6 py-4 align-middle">
                             {badgePrix(demande) || <span className="text-xs text-muted">—</span>}
                           </td>
-                          <td className="px-6 py-4 align-middle">
+                          <td className="px-6 py-4 align-middle w-64">
                             {badgeStatut(demande)}
+                            <FriseEtapes demande={demande} role="client" compact className="mt-2.5" />
                             {actionPaiement(demande) && <div className="mt-1.5">{actionPaiement(demande)}</div>}
                             {boutonAnnuler(demande) && <div className="mt-1.5">{boutonAnnuler(demande)}</div>}
                           </td>
