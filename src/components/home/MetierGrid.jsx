@@ -142,7 +142,28 @@ export default function MetierGrid() {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <>
+    {/* Téléphone : tuiles compactes, tous les métiers visibles d'un coup d'œil */}
+    <div className="grid grid-cols-3 gap-2.5 sm:hidden">
+      {METIERS.map((m) => {
+        const asset = metierAssets[m.id] || { icon: Wrench, iconColor: "text-gray-600", bgLight: "bg-gray-50" };
+        const Icon = asset.icon;
+        return (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => handleMetierClick(m.id)}
+            className="flex flex-col items-center gap-2 rounded-xl border border-line bg-white px-1.5 py-3.5 active:bg-canvas-soft"
+          >
+            <span className={`w-11 h-11 rounded-full ${asset.bgLight} flex items-center justify-center`}>
+              <Icon className={`w-6 h-6 ${asset.iconColor}`} />
+            </span>
+            <span className="text-[11px] font-semibold text-ink leading-tight text-center">{m.label}</span>
+          </button>
+        );
+      })}
+    </div>
+    <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {METIERS.map((m, idx) => {
         const asset = metierAssets[m.id] || {
           icon: Wrench,
@@ -203,5 +224,6 @@ export default function MetierGrid() {
         );
       })}
     </div>
+    </>
   );
 }
