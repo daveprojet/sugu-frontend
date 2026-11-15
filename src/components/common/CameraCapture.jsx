@@ -85,6 +85,7 @@ export default function CameraCapture({ onCapture, onClose }) {
             <span className="text-white font-semibold text-sm">Prendre un selfie</span>
           </div>
           <button
+            type="button"
             onClick={handleClose}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
           >
@@ -119,6 +120,7 @@ export default function CameraCapture({ onCapture, onClose }) {
         <div className="px-5 py-4 flex flex-col items-center gap-3">
           {!error && (
             <button
+              type="button"
               onClick={handleCapture}
               className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
             >
@@ -130,6 +132,7 @@ export default function CameraCapture({ onCapture, onClose }) {
             Assurez-vous que votre visage et votre pièce d'identité sont visibles
           </p>
           <button
+            type="button"
             onClick={handleClose}
             className="text-gray-500 hover:text-white text-sm font-medium transition-colors"
           >

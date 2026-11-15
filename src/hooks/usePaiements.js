@@ -19,11 +19,11 @@ export function useReversement(uid) {
   )
 }
 
-export function useCommissions() {
+export function useCommissions(options = {}) {
   return useQuery(
     'commissions',
     () => commissionService.list().then(r => r.data),
-    { staleTime: 1000 * 60 * 2 }
+    { staleTime: 1000 * 60 * 2, ...options }
   )
 }
 

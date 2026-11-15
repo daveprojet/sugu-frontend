@@ -3,7 +3,7 @@ import { demandeService } from '@/services/api'
 import { toast } from 'react-toastify'
 import { extractApiError } from '@/utils/errors'
 
-export function useDemandes(params = {}) {
+export function useDemandes(params = {}, options = {}) {
   return useQuery(
     ['demandes', params],
     () => demandeService.list(params).then(r => {
@@ -12,7 +12,7 @@ export function useDemandes(params = {}) {
       if (d && Array.isArray(d.results)) return d.results
       return []
     }),
-    { staleTime: 1000 * 30 }
+    { staleTime: 1000 * 30, ...options }
   )
 }
 
@@ -66,6 +66,18 @@ export function useFixerPrix() {
       ),
     }
   )
+}
+
+/** Portfolio : accord du client ({accord}) ou choix de l'artisan ({publier}), mission terminée. */
+export function useChoixPortfolio() {
+  const qc = useQueryClient()
+  return useMutation(({ id, ...data }) => demandeService.portfolio(id, data), {
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries(['demande', id])
+      qc.invalidateQueries('demandes')
+    },
+    onError: (e) => toast.error(extractApiError(e, 'Action impossible')),
+  })
 }
 
 export function useAjouterPhotos() {

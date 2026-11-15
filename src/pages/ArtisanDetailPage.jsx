@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -15,6 +15,8 @@ import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
 import PhotosPicker from "@/components/demande/PhotosPicker";
+import PortfolioArtisan from "@/components/artisan/PortfolioArtisan";
+import VideoPicker from "@/components/demande/VideoPicker";
 import {
   MapPin,
   Phone,
@@ -76,6 +78,7 @@ export default function ArtisanDetailPage() {
   const { uid } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: artisan, isLoading, error: artisanError } = useArtisan(uid);
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 });
   const avis = avisPage?.results || [];
@@ -88,12 +91,31 @@ export default function ArtisanDetailPage() {
   const [selectedServiceUid, setSelectedServiceUid] = useState(null);
   const [description, setDescription] = useState("");
   const [photosPanne, setPhotosPanne] = useState([]);
+  const [videoPanne, setVideoPanne] = useState(null);
   const [copied, setCopied] = useState(null);
   const [clientCoords, setClientCoords] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
   const [mapFullscreen, setMapFullscreen] = useState(false);
   const [photoAgrandie, setPhotoAgrandie] = useState(false);
   const [modePaiement, setModePaiement] = useState("en_ligne");
+
+  // Retour de connexion ou d'inscription (?demande=1) : le formulaire se rouvre tout seul.
+  useEffect(() => {
+    if (searchParams.get("demande") !== "1" || !user || !artisan) return;
+    setSearchParams((params) => {
+      params.delete("demande");
+      return params;
+    }, { replace: true });
+    if (user.role === "artisan") setAuthModal("artisan");
+    else setShowDemandeForm(true);
+  }, [searchParams, setSearchParams, user, artisan]);
+
+  // Un seul métier : il est déjà choisi.
+  useEffect(() => {
+    if (showDemandeForm && !selectedCategorie && artisan?.categories?.length === 1) {
+      setSelectedCategorie(artisan.categories[0].uid);
+    }
+  }, [showDemandeForm, selectedCategorie, artisan]);
 
   const { data: categorieDetail } = useCategorie(selectedCategorie);
   const servicesList = categorieDetail?.services || [];
@@ -200,6 +222,7 @@ export default function ArtisanDetailPage() {
       description,
       mode_paiement: modePaiement,
       photos: photosPanne,
+      video: videoPanne,
     };
     if (selectedServiceUid !== "autre") {
       payload.service_element = selectedServiceUid;
@@ -208,12 +231,9 @@ export default function ArtisanDetailPage() {
       payload.latitude_client = clientCoords.latitude;
       payload.longitude_client = clientCoords.longitude;
     }
-    await createDemande.mutateAsync(payload);
-    setShowDemandeForm(false);
-    setDescription("");
-    setPhotosPanne([]);
-    setSelectedCategorie(null);
-    setSelectedServiceUid(null);
+    const { data: creee } = await createDemande.mutateAsync(payload);
+    // Suite du parcours : « Mes demandes », la nouvelle demande en évidence.
+    navigate(creee?.id ? `/dashboard-client?nouvelle=${creee.id}` : "/dashboard-client");
   };
 
   const resetForm = () => {
@@ -222,6 +242,7 @@ export default function ArtisanDetailPage() {
     setSelectedServiceUid(null);
     setDescription("");
     setPhotosPanne([]);
+    setVideoPanne(null);
   };
 
   const openDemandeOrAuth = () => {
@@ -234,10 +255,11 @@ export default function ArtisanDetailPage() {
     }
   };
 
+  // Après connexion ou inscription, retour sur cette fiche, formulaire ouvert.
+  const retourFiche = encodeURIComponent(`/artisans/${uid}?demande=1`);
   const goToLogin = () => {
-    const redirect = encodeURIComponent(`/artisans/${uid}`);
     setAuthModal(null);
-    navigate(`/connexion?redirect=${redirect}`);
+    navigate(`/connexion?redirect=${retourFiche}`);
   };
 
   return (
@@ -502,6 +524,7 @@ export default function ArtisanDetailPage() {
                     label="Photos de la panne (facultatif)"
                     aide="Jusqu'à 5 photos : elles aident l'artisan à voir le travail à faire et à fixer un prix juste."
                   />
+                  <VideoPicker video={videoPanne} onChange={setVideoPanne} />
 
                   {/* Geolocation status */}
                   <div className="flex items-center justify-between rounded-lg bg-canvas-soft border border-line-soft px-4 py-3">
@@ -577,6 +600,9 @@ export default function ArtisanDetailPage() {
                 </form>
               </motion.div>
             )}
+
+            {/* Réalisations : avant / après (accord du client) et travaux réalisés (badge) */}
+            <PortfolioArtisan uid={uid} />
 
             {/* Avis */}
             <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6">
@@ -783,7 +809,7 @@ export default function ArtisanDetailPage() {
               </button>
               {authModal === "login" && (
                 <Link
-                  to="/inscription"
+                  to={`/inscription?redirect=${retourFiche}`}
                   className="inline-flex items-center justify-center text-sm font-semibold text-indigo-700 hover:text-indigo-800 transition-colors"
                 >
                   Créer un compte

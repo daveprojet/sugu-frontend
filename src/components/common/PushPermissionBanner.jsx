@@ -87,7 +87,7 @@ export default function PushPermissionBanner({ onAllow, hasRegisteredToken }) {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50"
+        className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-50"
       >
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4 flex items-start gap-3">
           <div className="flex-shrink-0 w-10 h-10 bg-primary-50 rounded-full flex items-center justify-center">

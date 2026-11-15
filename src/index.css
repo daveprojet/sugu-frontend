@@ -57,3 +57,12 @@
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #DFC8A0; border-radius: 10px; }
+
+/* Téléphone, connecté : les toasts s'affichent au-dessus de la barre d'onglets. */
+@media (max-width: 767px) {
+  .avec-onglets .Toastify__toast-container--bottom-right,
+  .avec-onglets .Toastify__toast-container--bottom-left,
+  .avec-onglets .Toastify__toast-container--bottom-center {
+    bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}

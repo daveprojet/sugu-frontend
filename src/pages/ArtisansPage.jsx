@@ -10,8 +10,8 @@ import EmptyState from '@/components/common/EmptyState'
 import Pagination from '@/components/common/Pagination'
 import SelectRecherche from '@/components/common/SelectRecherche'
 import { useZones } from '@/hooks/useZones'
-import { normalizeCoord } from '@/utils/geo'
-import { Building2, Filter, X, MapPin, Star, Briefcase } from 'lucide-react'
+import BoutonAutour from '@/components/common/BoutonAutour'
+import { Building2, Filter, X, MapPin, Star, Briefcase, LocateFixed } from 'lucide-react'
 
 // D'anciens liens contiennent le nom du quartier : on ignore ce qui n'est pas un identifiant.
 const idZone = (valeur) => (/^\d+$/.test(valeur || '') ? valeur : '')
@@ -33,34 +33,46 @@ export default function ArtisansPage() {
   const { data: zones = [] } = useZones()
   const villeChoisie = zones.find(v => String(v.id) === filters.ville)
 
-  const [anonPos, setAnonPos] = useState(null)
-  const anonRequested = useRef(false)
+  // « Autour de moi » (?autour=1&lat=&lng=) : position du moment, envoyée par le bouton.
+  const latAutour = parseFloat(searchParams.get('lat'))
+  const lngAutour = parseFloat(searchParams.get('lng'))
+  const autour = searchParams.get('autour') === '1' && Number.isFinite(latAutour) && Number.isFinite(lngAutour)
 
-  useEffect(() => {
-    if (user || anonPos || anonRequested.current) return
-    if (!navigator.geolocation) return
-    anonRequested.current = true
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setAnonPos({
-        latitude: normalizeCoord(pos.coords.latitude),
-        longitude: normalizeCoord(pos.coords.longitude),
-      }),
-      () => {},
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
-  }, [user, anonPos])
-
-  const position = user?.latitude && user?.longitude
-    ? { latitude: user.latitude, longitude: user.longitude }
-    : anonPos
+  // Sinon, client connecté : la position de son profil sert à trier par distance.
+  const position = autour
+    ? { latitude: latAutour, longitude: lngAutour }
+    : user?.latitude && user?.longitude ? { latitude: user.latitude, longitude: user.longitude } : null
   const hasPosition = !!position
   const isCategoryActive = !!filters.categorie
 
-  const { data, isLoading, isError } = useArtisans(
-    { ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v !== '').map(([k, v]) => [{ note_moyenne: 'note_min', ville: 'zone_ville', quartier: 'zone_quartier' }[k] || k, v])), ...(position ? { lat: position.latitude, lng: position.longitude } : {}), ...(isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}), page }
+  const criteres = Object.fromEntries(
+    Object.entries(filters)
+      .filter(([cle, v]) => v !== '' && !(autour && (cle === 'ville' || cle === 'quartier')))
+      .map(([k, v]) => [{ note_moyenne: 'note_min', ville: 'zone_ville', quartier: 'zone_quartier' }[k] || k, v]),
   )
+  const { data, isLoading, isError } = useArtisans({
+    ...criteres,
+    ...(position ? { lat: position.latitude, lng: position.longitude } : {}),
+    ...(autour ? { autour: 1, ...(searchParams.get('plus_loin') ? { plus_loin: searchParams.get('plus_loin') } : {}) }
+      : isCategoryActive && hasPosition ? { ordering: 'distance_calc' } : {}),
+    page,
+  })
+
+  const quitterAutour = () => {
+    const next = new URLSearchParams(searchParams)
+    ;['autour', 'lat', 'lng', 'plus_loin'].forEach((cle) => next.delete(cle))
+    setSearchParams(next, { replace: true })
+  }
+
+  // « Voir plus loin » : le serveur passe au rayon suivant qui ajoute des artisans.
+  const voirPlusLoin = () => {
+    const next = new URLSearchParams(searchParams)
+    next.set('plus_loin', String(data.rayon_km))
+    setSearchParams(next, { replace: true })
+  }
 
   const artisans = data?.results || data || []
+  const total = data?.count ?? artisans.length
   const totalPages = Math.ceil((data?.count || 0) / 12)
 
   useEffect(() => {
@@ -124,12 +136,33 @@ export default function ArtisansPage() {
             }
           </h1>
           <p className="text-gray-500 text-sm font-medium">Trouvez l'artisan qualifié près de chez vous.</p>
-          {isCategoryActive && !hasPosition && (
-            <p className="text-gray-400 text-xs italic mt-1">
-              Activez la géolocalisation pour voir les artisans les plus proches
-            </p>
-          )}
         </motion.div>
+
+        {/* « Autour de moi » : bandeau du mode, ou bouton pour l'activer */}
+        {autour ? (
+          <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <LocateFixed className="w-5 h-5 text-indigo-600 shrink-0" />
+            <p className="flex-1 min-w-[12rem] text-sm text-indigo-900">
+              <span className="font-semibold">Artisans autour de vous</span>
+              {data?.rayon_km ? ` · dans un rayon de ${data.rayon_km} km` : ''}
+            </p>
+            {data?.rayon_km && (
+              <button type="button" onClick={voirPlusLoin} className="text-sm font-semibold text-indigo-700 underline">
+                Voir plus loin
+              </button>
+            )}
+            <button type="button" onClick={quitterAutour} className="text-sm font-semibold text-indigo-700 underline">
+              Chercher par ville
+            </button>
+          </div>
+        ) : (
+          <BoutonAutour
+            categorie={filters.categorie}
+            className="mb-4 w-full sm:w-auto px-5 py-2.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-sm hover:bg-indigo-100 transition-colors"
+          >
+            Autour de moi
+          </BoutonAutour>
+        )}
 
         {/* Filtres - Design Premium Glassmorphism */}
         <motion.div 
@@ -160,6 +193,7 @@ export default function ArtisansPage() {
             </div>
           </div>
 
+          {!autour && (<>
           <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Ville</label>
             <div className="relative">
@@ -197,6 +231,7 @@ export default function ArtisansPage() {
               />
             </div>
           </div>
+          </>)}
 
           <div className="w-full sm:w-auto sm:flex-1 sm:min-w-[140px]">
             <label className="block text-xs font-semibold text-muted mb-1.5">Note min.</label>
@@ -236,7 +271,7 @@ export default function ArtisansPage() {
             animate={{ opacity: 1 }}
             className="text-sm text-gray-500 font-medium mb-4"
           >
-            {artisans.length} artisan{artisans.length > 1 ? 's' : ''} trouvé{artisans.length > 1 ? 's' : ''}
+            {total} artisan{total > 1 ? 's' : ''} trouvé{total > 1 ? 's' : ''}
           </motion.p>
         )}
 
