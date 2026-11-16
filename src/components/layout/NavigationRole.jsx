@@ -54,7 +54,7 @@ export function useLiensRole() {
     return [
       { to: "/espace-entreprise", label: "Nos demandes", court: "Demandes", Icon: Inbox, exact: true },
       { to: "/espace-entreprise/nouvelle-demande", label: "Nouvelle demande", court: "Nouvelle", Icon: Plus },
-      { to: "/espace-entreprise/equipe", label: "Équipe", court: "Équipe", Icon: Users },
+      { to: "/espace-entreprise/equipe", label: "Mon entreprise", court: "Entreprise", Icon: Users },
       profil,
     ];
   }

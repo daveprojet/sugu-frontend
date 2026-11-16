@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ArrowLeft, Send } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCategories } from '@/hooks/useCategories'
 import { chercherZoneProche } from '@/hooks/useZones'
-import { useCreerDemandeEntreprise } from '@/hooks/useEntreprises'
+import { useCreerDemandeEntreprise, useMonEntreprise } from '@/hooks/useEntreprises'
 import ChampsZone from '@/components/common/ChampsZone'
 import MapPicker from '@/components/common/MapPicker'
 import PhoneField from '@/components/common/PhoneField'
@@ -42,6 +42,20 @@ export default function NouvelleDemandeEntreprisePage() {
     telephone_contact: '',
   })
   const set = (cle, valeur) => setForm((f) => ({ ...f, [cle]: valeur }))
+
+  // Par défaut, l'intervention a lieu à l'adresse de l'entreprise (modifiable ci-dessous).
+  const { data: entreprise } = useMonEntreprise()
+  useEffect(() => {
+    if (!entreprise) return
+    setForm((f) => (f.zone_ville || f.latitude != null ? f : {
+      ...f,
+      adresse: f.adresse || entreprise.adresse || '',
+      zone_ville: entreprise.zone_ville ?? null,
+      zone_quartier: entreprise.zone_quartier ?? null,
+      latitude: entreprise.latitude != null ? Number(entreprise.latitude) : null,
+      longitude: entreprise.longitude != null ? Number(entreprise.longitude) : null,
+    }))
+  }, [entreprise])
 
   const surPosition = async ({ latitude, longitude, quartier, noms, communes }) => {
     setForm((f) => ({ ...f, latitude, longitude }))
