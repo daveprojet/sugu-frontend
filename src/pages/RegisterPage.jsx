@@ -9,8 +9,10 @@ import PhoneField from "@/components/common/PhoneField";
 import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info } from "lucide-react";
 import MapPicker from "@/components/common/MapPicker";
 import ChampsZone from "@/components/common/ChampsZone";
+import ChoixCategories from "@/components/common/ChoixCategories";
 import { chercherZoneProche } from "@/hooks/useZones";
 import { avecRedirection, redirectionDemandee } from "@/utils/redirection";
+import { marquerRappelIdentiteVu } from "@/utils/rappelIdentite";
 
 import bgImage from '/images/metiers/register-bg.jpg';
 
@@ -95,7 +97,15 @@ export default function RegisterPage() {
       toast.success("Compte créé avec succès !");
       // Un client venu d'une fiche artisan y retourne, formulaire de demande ouvert.
       const redirect = redirectionDemandee(params);
-      navigate(form.role === "artisan" ? "/dashboard-artisan" : redirect || "/", { replace: !!redirect });
+      if (form.role === "artisan") {
+        // L'artisan va directement déposer sa pièce d'identité : beaucoup ne lisaient pas
+        // le rappel. Celui-ci reste en place pour les connexions suivantes, mais on le
+        // masque pour cette session afin qu'il ne surgisse pas juste après.
+        marquerRappelIdentiteVu();
+        navigate("/mon-profil/identite");
+      } else {
+        navigate(redirect || "/", { replace: !!redirect });
+      }
     } catch (err) {
       toast.error(extractApiError(err, "Erreur lors de l'inscription"));
     } finally {
@@ -168,7 +178,7 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Prénom</label>
                 <input
@@ -240,44 +250,13 @@ export default function RegisterPage() {
                     <label className="block text-sm font-medium text-indigo-200 mb-2">
                       Catégories (choix multiples)
                     </label>
-                    <div className="grid grid-cols-2 gap-3 p-4 border border-white/30 rounded-2xl max-h-48 overflow-y-auto bg-white/10 backdrop-blur-sm">
-                      {categories.map((cat) => {
-                        const isChecked = form.categories?.includes(cat.uid);
-                        return (
-                          <label
-                            key={cat.uid}
-                            className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
-                              isChecked
-                                ? "bg-white/40 border-white/50 shadow-sm text-indigo-900"
-                                : "bg-transparent border-transparent hover:border-white/40 hover:bg-white/20 text-indigo-200"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => handleCategoryChange(cat.uid)}
-                              className="w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
-                            />
-                            <span className="text-sm font-medium">{cat.nom}</span>
-                          </label>
-                        );
-                      })}
-                      <label
-                        className={`flex items-center gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all duration-200 border ${
-                          autresCoche
-                            ? "bg-white/40 border-white/50 shadow-sm text-indigo-900"
-                            : "bg-transparent border-transparent hover:border-white/40 hover:bg-white/20 text-indigo-200"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={autresCoche}
-                          onChange={() => setAutresCoche((v) => !v)}
-                          className="w-4 h-4 rounded border-indigo-400 text-indigo-600 focus:ring-indigo-400 accent-indigo-500 bg-white/20"
-                        />
-                        <span className="text-sm font-medium">Autres</span>
-                      </label>
-                    </div>
+                    <ChoixCategories
+                      categories={categories}
+                      selection={form.categories || []}
+                      onToggle={handleCategoryChange}
+                      autresCoche={autresCoche}
+                      onToggleAutres={() => setAutresCoche((v) => !v)}
+                    />
                     {autresCoche && (
                       <div className="mt-3">
                         <input
