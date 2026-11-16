@@ -23,6 +23,7 @@ import {
 } from '@/utils/helpers'
 import Spinner from '@/components/common/Spinner'
 import CameraCapture from '@/components/common/CameraCapture'
+import TexteMisEnForme from '@/components/common/TexteMisEnForme'
 
 export default function IdentitePiecePage() {
   const { user } = useAuth()
@@ -201,9 +202,10 @@ export default function IdentitePiecePage() {
                 {statutConfig.label}
               </span>
               {statut === 'REJETEE' && identite?.motif_rejet && (
-                <p className="mt-2 text-sm text-red-700 font-medium">
-                  Motif : {identite.motif_rejet}
-                </p>
+                <div className="mt-2 text-sm text-red-700">
+                  <p className="font-semibold">Motif :</p>
+                  <TexteMisEnForme texte={identite.motif_rejet} />
+                </div>
               )}
               {statut === 'EN_ATTENTE' && (
                 <p className="mt-1 text-sm text-amber-700">

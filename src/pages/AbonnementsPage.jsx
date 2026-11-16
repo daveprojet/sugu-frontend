@@ -10,6 +10,7 @@ import IdentiteRequiseModal from '@/components/common/IdentiteRequiseModal'
 import { usePaytechInit } from '@/hooks/usePaiements'
 import Spinner from '@/components/common/Spinner'
 import { METHODES_PAYTECH } from '@/utils/constants'
+import { texteBrut } from '@/components/common/TexteMisEnForme'
 
 const formatDate = (date) =>
   new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -70,7 +71,7 @@ function MessageDossier({ dossier }) {
   if (dossier.statut === 'REJETEE') {
     return (
       <>
-        Votre dossier a été rejeté{dossier.motif_rejet ? ` : ${dossier.motif_rejet}` : ''}.{' '}
+        Votre dossier a été rejeté{dossier.motif_rejet ? ` : ${texteBrut(dossier.motif_rejet)}` : ''}.{' '}
         <Link to="/mon-profil/dossier" className="font-semibold text-indigo-700 underline">Modifier mon dossier</Link>
       </>
     )

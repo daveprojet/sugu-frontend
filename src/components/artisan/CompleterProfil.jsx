@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Award, Camera, Check, ChevronRight, IdCard, MapPin } from "lucide-react";
 import ChoisirPhotoProfil from "@/components/artisan/ChoisirPhotoProfil";
+import { texteBrut } from "@/components/common/TexteMisEnForme";
 
 const TONS = {
   afaire: "bg-canvas text-muted",
@@ -65,7 +66,7 @@ export default function CompleterProfil({ artisan, identite, dossierPro }) {
       ...(statutIdentite === "EN_ATTENTE"
         ? { statut: "En vérification", ton: "attente", detail: "Vous serez visible dans la recherche après validation." }
         : statutIdentite === "REJETEE"
-        ? { statut: "Refusée", ton: "refus", detail: `Envoyez une nouvelle pièce${identite.motif_rejet ? ` (motif : ${identite.motif_rejet})` : ""}.` }
+        ? { statut: "Refusée", ton: "refus", detail: `Envoyez une nouvelle pièce${identite.motif_rejet ? ` (motif : ${texteBrut(identite.motif_rejet)})` : ""}.` }
         : { statut: "À faire", detail: "Indispensable pour apparaître dans la recherche." }),
     },
     {
@@ -95,7 +96,7 @@ export default function CompleterProfil({ artisan, identite, dossierPro }) {
       ...(dossierPro?.statut === "EN_ATTENTE"
         ? { statut: "En vérification", ton: "attente", detail: "Votre dossier est en cours de vérification." }
         : dossierPro?.statut === "REJETEE"
-        ? { statut: "Refusé", ton: "refus", detail: `Dossier refusé${dossierPro.motif_rejet ? ` : ${dossierPro.motif_rejet}` : ""}.` }
+        ? { statut: "Refusé", ton: "refus", detail: `Dossier refusé${dossierPro.motif_rejet ? ` : ${texteBrut(dossierPro.motif_rejet)}` : ""}.` }
         : { statut: "À faire", detail: "Certificats et travaux réalisés, pour obtenir le badge « Vérifié »." }),
     },
   ];
