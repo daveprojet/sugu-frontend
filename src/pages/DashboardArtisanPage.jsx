@@ -14,7 +14,8 @@ import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande from '@/components/demande/PhotosDemande'
 import EtapeTravauxModal from '@/components/demande/EtapeTravauxModal'
 import { useMissions } from '@/hooks/useEntreprises'
-import { STATUTS_DEMANDE, STATUTS_IDENTITE } from '@/utils/constants'
+import { STATUTS_DEMANDE } from '@/utils/constants'
+import CompleterProfil from '@/components/artisan/CompleterProfil'
 import FriseEtapes from '@/components/demande/FriseEtapes'
 import {
   Inbox,
@@ -25,7 +26,6 @@ import {
   MessageSquare,
   Calendar,
   User,
-  IdCard,
   Award,
   Phone,
   Filter,
@@ -34,7 +34,6 @@ import {
   Wallet,
   Building2,
   BadgeDollarSign,
-  MapPin,
   X,
   Flag
 } from 'lucide-react'
@@ -47,7 +46,7 @@ export default function DashboardArtisanPage() {
   const missionsARepondre = missionsEntreprises.filter((m) => m.statut === 'PROPOSEE').length
   const { data: identite, isLoading: identiteChargement } = useIdentite(user?.artisan_uid)
   const { data: profilArtisan } = useArtisan(user?.artisan_uid)
-  const { data: dossierPro } = useDossierPro(user?.artisan_uid)
+  const { data: dossierPro, isLoading: dossierChargement } = useDossierPro(user?.artisan_uid)
   const { data: demandes = [], isLoading } = useDemandes({ artisan: user?.artisan_uid })
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(user?.artisan_uid)
   const avis = avisPage?.results || []
@@ -292,107 +291,25 @@ export default function DashboardArtisanPage() {
           </motion.div>
         )}
 
-        {/* Position exacte manquante : la carte des clients montre le centre du quartier */}
-        {profilArtisan && profilArtisan.position_renseignee === false && (
-          <Link
-            to="/mon-profil#position"
-            className="flex items-center gap-4 p-4 rounded-xl border bg-indigo-50 border-indigo-200 hover:border-indigo-300 transition-colors duration-150"
-          >
-            <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
-              <MapPin className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-indigo-900">Placez votre position exacte sur la carte</p>
-              <p className="text-xs text-indigo-700 mt-0.5">
-                Les clients vous voient pour l&apos;instant au centre de votre quartier. Indiquez où vous travaillez pour apparaître au bon endroit et à la bonne distance.
-              </p>
-            </div>
-            <span className="text-xs font-semibold text-indigo-700 flex-shrink-0">Indiquer ma position →</span>
-          </Link>
+        {/* Étapes d'un profil complet : identité, photo, position, dossier pro */}
+        {profilArtisan && !identiteChargement && !dossierChargement && (
+          <CompleterProfil artisan={profilArtisan} identite={identite} dossierPro={dossierPro} />
         )}
 
-        {/* Pièce d'identité : affichée tant qu'elle n'est pas vérifiée */}
-        {user?.artisan_uid && !identiteChargement && identite?.statut !== 'VERIFIEE' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Link
-              to="/mon-profil/identite"
-              className={`flex items-center gap-4 p-4 rounded-xl border transition-colors duration-150 ${
-                !identite?.statut || identite.statut === 'EN_ATTENTE'
-                  ? 'bg-amber-50 border-amber-200 hover:border-amber-300'
-                  : identite.statut === 'REJETEE'
-                  ? 'bg-red-50 border-red-200 hover:border-red-300'
-                  : 'bg-emerald-50 border-emerald-200 hover:border-emerald-300'
-              }`}
-            >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                !identite?.statut || identite.statut === 'EN_ATTENTE'
-                  ? 'bg-amber-100 text-amber-600'
-                  : identite.statut === 'REJETEE'
-                  ? 'bg-red-100 text-red-600'
-                  : 'bg-emerald-100 text-emerald-600'
-              }`}>
-                <IdCard className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-ink">Pièce d'identité</p>
-                <p className="text-xs text-muted mt-0.5">
-                  {!identite?.statut
-                    ? 'Fournissez votre pièce pour apparaître dans la recherche'
-                    : identite.statut === 'EN_ATTENTE'
-                    ? 'En vérification · vous serez visible dans la recherche après validation'
-                    : identite.statut === 'REJETEE'
-                    ? 'Pièce rejetée : envoyez-en une nouvelle pour apparaître dans la recherche'
-                    : 'Identité vérifiée · vous êtes visible dans la recherche'}
-                </p>
-              </div>
-              <span className={`inline-flex flex-shrink-0 items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold ${
-                !identite?.statut
-                  ? 'bg-canvas text-muted'
-                  : STATUTS_IDENTITE[identite.statut]?.color || 'bg-canvas text-muted'
-              }`}>
-                {!identite?.statut ? 'À faire' : identite.statut === 'EN_ATTENTE' ? 'En attente' : STATUTS_IDENTITE[identite.statut]?.label || identite.statut}
-              </span>
-            </Link>
-          </motion.div>
-        )}
-
-        {/* Dossier professionnel — badge « Vérifié » : masqué quand le badge est actif */}
-        {user?.artisan_uid && !(dossierPro?.statut === 'VERIFIEE' && dossierPro.badge_actif) && (
+        {/* Dossier validé mais badge « Vérifié » pas encore activé */}
+        {dossierPro?.statut === 'VERIFIEE' && !dossierPro.badge_actif && (
           <Link
             to="/mon-profil/dossier"
-            className={`flex items-center gap-4 p-4 rounded-xl border transition-colors duration-150 ${
-              dossierPro?.statut === 'VERIFIEE'
-                ? 'bg-emerald-50 border-emerald-200'
-                : dossierPro?.statut === 'REJETEE'
-                ? 'bg-red-50 border-red-200'
-                : 'bg-indigo-50 border-indigo-200'
-            }`}
+            className="flex items-center gap-4 p-4 rounded-xl border bg-emerald-50 border-emerald-200 hover:border-emerald-300 transition-colors duration-150"
           >
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-indigo-600">
+            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-emerald-600">
               <Award className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-ink">Dossier professionnel · badge « Vérifié »</p>
-              <p className="text-xs text-muted mt-0.5">
-                {!dossierPro
-                  ? 'Ajoutez vos certificats et vos travaux réalisés pour obtenir le badge'
-                  : dossierPro.statut === 'EN_ATTENTE'
-                  ? 'Dossier en cours de vérification'
-                  : dossierPro.statut === 'REJETEE'
-                  ? `Dossier rejeté${dossierPro.motif_rejet ? ` : ${dossierPro.motif_rejet}` : ''}`
-                  : dossierPro.badge_actif
-                  ? `Badge « Vérifié » actif jusqu'au ${new Date(dossierPro.badge_expire_le).toLocaleDateString('fr-FR')}`
-                  : 'Dossier validé · activez votre badge pour l\'afficher sur votre profil'}
-              </p>
+              <p className="text-sm font-semibold text-ink">Badge « Vérifié »</p>
+              <p className="text-xs text-muted mt-0.5">Dossier validé · activez votre badge pour l&apos;afficher sur votre profil</p>
             </div>
-            <span className={`inline-flex flex-shrink-0 items-center whitespace-nowrap px-2.5 py-1 rounded-full text-xs font-bold ${
-              !dossierPro ? 'bg-canvas text-muted' : STATUTS_IDENTITE[dossierPro.statut]?.color
-            }`}>
-              {!dossierPro ? 'À faire' : dossierPro.statut === 'EN_ATTENTE' ? 'En attente' : STATUTS_IDENTITE[dossierPro.statut]?.label}
-            </span>
+            <span className="text-xs font-semibold text-emerald-700 flex-shrink-0">Activer →</span>
           </Link>
         )}
 

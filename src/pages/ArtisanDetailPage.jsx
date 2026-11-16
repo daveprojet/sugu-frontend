@@ -16,6 +16,7 @@ import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
 import PhotosPicker from "@/components/demande/PhotosPicker";
 import PortfolioArtisan from "@/components/artisan/PortfolioArtisan";
+import ChoisirPhotoProfil from "@/components/artisan/ChoisirPhotoProfil";
 import VideoPicker from "@/components/demande/VideoPicker";
 import {
   MapPin,
@@ -35,6 +36,7 @@ import {
   Maximize2,
   LogIn,
   Briefcase,
+  Camera,
 } from "lucide-react";
 
 // Sans position exacte, la carte montre le centre du quartier : le cercle signale
@@ -305,6 +307,17 @@ export default function ArtisanDetailPage() {
                   {artisan.prenom?.[0]}
                   {artisan.nom?.[0]}
                 </div>
+              )}
+              {/* Visible seulement par l'artisan sur sa propre fiche */}
+              {!artisan.photo && user?.artisan_uid === uid && (
+                <ChoisirPhotoProfil className="-mt-2 mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-700 underline underline-offset-2 hover:text-indigo-800">
+                  {({ enCours }) => (
+                    <>
+                      <Camera className="w-4 h-4" aria-hidden="true" />
+                      {enCours ? "Envoi…" : "Ajouter ma photo"}
+                    </>
+                  )}
+                </ChoisirPhotoProfil>
               )}
 
               <h1 className="text-2xl font-bold text-ink">
