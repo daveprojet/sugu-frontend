@@ -23,6 +23,7 @@ import {
 import { PROFILS_DOSSIER, STATUTS_IDENTITE, TYPES_DOCUMENT_PRO } from '@/utils/constants'
 import { MAX_FILE_SIZE, resolveImageUrl } from '@/utils/helpers'
 import Spinner from '@/components/common/Spinner'
+import TexteMisEnForme from '@/components/common/TexteMisEnForme'
 
 const inputClass =
   'w-full px-4 py-3 rounded-lg border border-line bg-canvas-soft focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 text-sm text-ink outline-none'
@@ -193,7 +194,7 @@ export default function DossierProPage() {
                 {statutConfig.label}
               </span>
               {statut === 'REJETEE' && dossier?.motif_rejet && (
-                <p className="mt-2 text-sm text-red-700 font-medium">Motif : {dossier.motif_rejet}</p>
+                <div className="mt-2 text-sm text-red-700"><p className="font-semibold">Motif :</p><TexteMisEnForme texte={dossier.motif_rejet} /></div>
               )}
               {statut === 'EN_ATTENTE' && (
                 <p className="mt-1 text-sm text-amber-700">Votre dossier est en cours de vérification par nos équipes.</p>

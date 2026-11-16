@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { IdCard } from 'lucide-react'
 import { useIdentite } from '@/hooks/useArtisans'
 import { marquerRappelIdentiteVu, rappelIdentiteVu } from '@/utils/rappelIdentite'
+import TexteMisEnForme from '@/components/common/TexteMisEnForme'
 
 const PAGE_IDENTITE = '/mon-profil/identite'
 
@@ -58,7 +59,7 @@ export default function RappelIdentiteModal({ artisanUid }) {
             : 'Votre profil n’est pas encore visible par les clients. Il le sera une fois votre pièce d’identité envoyée et validée par notre équipe.'}
         </p>
         {rejetee && identite.motif_rejet && (
-          <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">Motif : {identite.motif_rejet}</p>
+          <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700"><p className="font-semibold">Motif :</p><TexteMisEnForme texte={identite.motif_rejet} /></div>
         )}
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button

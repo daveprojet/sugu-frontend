@@ -9,6 +9,11 @@ const SUIVI_MS = 30 * 1000
 
 // ── Entreprise ────────────────────────────────────────────
 
+/** Profil de l'entreprise connectée (adresse, zone, position sur la carte). */
+export function useMonEntreprise() {
+  return useQuery('mon-entreprise', () => entrepriseService.moi().then((r) => r.data), { staleTime: 5 * 60 * 1000 })
+}
+
 export function useDemandesEntreprise(params = {}) {
   return useQuery(
     ['demandes-entreprise', params],

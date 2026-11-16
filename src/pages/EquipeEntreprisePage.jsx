@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import { ArrowLeft, Crown, UserMinus, UserPlus } from 'lucide-react'
 import Spinner from '@/components/common/Spinner'
+import AdresseEntreprise from '@/components/entreprise/AdresseEntreprise'
 import PhoneField from '@/components/common/PhoneField'
 import { entrepriseService } from '@/services/api'
 import { extractApiError } from '@/utils/errors'
@@ -38,8 +39,15 @@ export default function EquipeEntreprisePage() {
       <Link to="/espace-entreprise" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink mb-4">
         <ArrowLeft className="w-4 h-4" /> Mes demandes
       </Link>
-      <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Mon équipe</h1>
+      <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Mon entreprise</h1>
       <p className="text-sm text-muted mt-1 mb-6">
+        Adresse de l’entreprise et comptes de l’équipe.
+      </p>
+
+      <AdresseEntreprise estGestionnaire={estGestionnaire} />
+
+      <h2 className="font-semibold text-ink mb-1">Comptes de l’équipe</h2>
+      <p className="text-sm text-muted mb-3">
         {membres.length} compte(s) sur {max}. Tous les comptes voient et créent les demandes de l’entreprise.
       </p>
 

@@ -180,7 +180,14 @@ export default function DevenirPartenairePage() {
     );
 
   const informationsValides = () => {
-    if (isEntreprise) return true;
+    if (isEntreprise) {
+      if (form.latitude == null || form.longitude == null) {
+        toast.error("Placez l’entreprise sur la carte.");
+        document.getElementById("position-partenaire")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+      return true;
+    }
     const autres = autresMetiers();
     if (form.categories.length === 0 && autres.length === 0) {
       toast.error("Choisissez au moins un métier ou indiquez-le dans « Autres ».");
@@ -500,7 +507,7 @@ export default function DevenirPartenairePage() {
                   </div>
                 )}
 
-                {(isEntreprise || avecMonCompte) && (
+                {!isEntreprise && avecMonCompte && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={labelClass}>Ville</label>
@@ -526,14 +533,15 @@ export default function DevenirPartenairePage() {
                 </div>
                 )}
 
-                {!isEntreprise && !avecMonCompte && (
+                {(isEntreprise || !avecMonCompte) && (
                   <div>
                     <label id="position-partenaire" className={`${labelClass} flex items-center gap-2`}>
-                      <MapPin className="w-4 h-4" /> Votre position <span className="text-red-300">*</span>
+                      <MapPin className="w-4 h-4" /> {isEntreprise ? "Adresse de l’entreprise" : "Votre position"} <span className="text-red-300">*</span>
                     </label>
                     <p className="text-xs text-indigo-200 mb-2 ml-1">
-                      Cliquez sur la carte, utilisez « Ma position » ou tapez votre adresse : l’endroit où vous
-                      travaillez ou habitez habituellement. L’inspecteur s’en sert pour vous confier des missions proches.
+                      {isEntreprise
+                        ? "Cliquez sur la carte, utilisez « Ma position » ou tapez votre adresse : l’endroit où se trouvent vos locaux. Vos demandes seront suivies par l’inspecteur Bricolibe de votre zone."
+                        : "Cliquez sur la carte, utilisez « Ma position » ou tapez votre adresse : l’endroit où vous travaillez ou habitez habituellement. L’inspecteur s’en sert pour vous confier des missions proches."}
                     </p>
                     <MapPicker
                       value={form.latitude && form.longitude ? { latitude: form.latitude, longitude: form.longitude } : null}

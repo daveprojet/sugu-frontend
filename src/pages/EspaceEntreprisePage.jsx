@@ -34,7 +34,7 @@ export default function EspaceEntreprisePage() {
           to="/espace-entreprise/equipe"
           className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-line bg-white text-ink font-semibold hover:border-primary-300 transition-colors"
         >
-          <UsersRound className="w-5 h-5" /> Mon équipe
+          <UsersRound className="w-5 h-5" /> Mon entreprise
         </Link>
         <Link
           to="/espace-entreprise/nouvelle-demande"
