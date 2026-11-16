@@ -9,10 +9,10 @@ import { extractApiError, getServerErrorMessage } from "@/utils/errors";
 import {
   useArtisan,
   useUpdateArtisan,
-  useUploadArtisanPhoto,
 } from "@/hooks/useArtisans";
 import { useCategories } from "@/hooks/useCategories";
 import Spinner from "@/components/common/Spinner";
+import ChoisirPhotoProfil from "@/components/artisan/ChoisirPhotoProfil";
 import StarRating from "@/components/common/StarRating";
 import MapPicker from "@/components/common/MapPicker";
 import ChampsZone from "@/components/common/ChampsZone";
@@ -25,7 +25,6 @@ export default function MonProfil() {
     isArtisan ? user?.artisan_uid : null,
   );
   const updateArtisan = useUpdateArtisan();
-  const updateArtisanPhoto = useUploadArtisanPhoto();
   const { data: allCategories = [] } = useCategories();
 
   const [accountForm, setAccountForm] = useState({
@@ -181,27 +180,6 @@ export default function MonProfil() {
     await fetchMe();
   };
 
-  const handlePhotoChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Veuillez sélectionner une image valide (PNG, JPG).");
-      return;
-    }
-
-    try {
-      toast.info("Téléchargement de la photo...");
-      await updateArtisanPhoto.mutateAsync({
-        uid: user.artisan_uid,
-        file: file,
-      });
-      await fetchMe();
-    } catch {
-      // Message déjà affiché par useUploadArtisanPhoto (onError) : pas de second toast.
-    }
-  };
-
   // Container animation for smoother loading
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -262,20 +240,32 @@ export default function MonProfil() {
               )}
 
               {isArtisan && artisan && (
-                <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-all duration-300 ring-2 ring-transparent hover:ring-white">
-                  <div className="flex flex-col items-center text-white">
-                    <Camera className="w-6 h-6 mb-0.5" />
-                    <span className="text-[10px] font-medium">Changer</span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                    className="hidden"
-                  />
-                </label>
+                <ChoisirPhotoProfil
+                  className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-white shadow-md transition-colors hover:bg-indigo-700"
+                  title={artisan.photo ? "Changer la photo" : "Ajouter une photo"}
+                >
+                  <Camera className="h-4 w-4" aria-hidden="true" />
+                  <span className="sr-only">{artisan.photo ? "Changer la photo de profil" : "Ajouter une photo de profil"}</span>
+                </ChoisirPhotoProfil>
               )}
             </div>
+
+            {isArtisan && artisan && (
+              <ChoisirPhotoProfil
+                className={`mb-4 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition-all hover:shadow active:translate-y-px active:shadow-none ${
+                  artisan.photo
+                    ? "border border-line bg-white text-ink hover:bg-canvas-soft"
+                    : "border border-indigo-700 bg-indigo-600 text-white hover:bg-indigo-700"
+                }`}
+              >
+                {({ enCours }) => (
+                  <>
+                    <Camera className="h-4 w-4" aria-hidden="true" />
+                    {enCours ? "Envoi…" : artisan.photo ? "Changer la photo" : "Ajouter une photo de profil"}
+                  </>
+                )}
+              </ChoisirPhotoProfil>
+            )}
 
             <h2 className="text-xl font-bold text-ink">
               {user.prenom} {user.nom}
