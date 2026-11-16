@@ -35,6 +35,7 @@ import {
   Wallet,
   HandCoins,
   Camera,
+  Flag,
 } from 'lucide-react'
 
 const defaultAvis = { note: 5, commentaire: '' }
@@ -205,7 +206,7 @@ export default function DashboardClientPage() {
       <button
         type="button"
         onClick={() => setPhotosDemandeId(d.id)}
-        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 hover:text-indigo-800 hover:underline"
+        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 underline underline-offset-2 hover:text-indigo-800"
       >
         <Camera className="w-3.5 h-3.5" />
         {d.photos?.length ? `Photos (${d.photos.length})` : 'Ajouter des photos'}
@@ -232,7 +233,7 @@ export default function DashboardClientPage() {
       <button
         onClick={() => payerEnLigne(d)}
         disabled={payingDemandeId === d.id}
-        className={`inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150 disabled:opacity-60 ${taille}`}
+        className={`inline-flex items-center gap-1.5 border border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:border-indigo-400 shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all duration-150 disabled:opacity-60 ${taille}`}
       >
         <Wallet className="w-4 h-4" />
         {payingDemandeId === d.id ? 'Paiement...' : 'Payer en ligne'}
@@ -241,7 +242,7 @@ export default function DashboardClientPage() {
       <button
         onClick={() => ouvrirEspeces(d)}
         disabled={confirmerPaiement.isLoading}
-        className={`inline-flex items-center gap-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-100 hover:border-emerald-300 transition-colors duration-150 ${taille}`}
+        className={`inline-flex items-center gap-1.5 border border-emerald-300 bg-emerald-50 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-100 hover:border-emerald-400 shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all duration-150 ${taille}`}
       >
         <HandCoins className="w-4 h-4" />
         Confirmer le paiement
@@ -254,7 +255,7 @@ export default function DashboardClientPage() {
       <button
         onClick={() => openCancel(d)}
         disabled={updateDemande.isLoading}
-        className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-800 hover:underline transition-colors whitespace-nowrap"
+        className="inline-flex items-center gap-1 text-xs font-medium text-red-600 underline underline-offset-2 hover:text-red-800 transition-colors whitespace-nowrap"
       >
         <Ban className="w-3.5 h-3.5" />
         Annuler la demande
@@ -267,8 +268,9 @@ export default function DashboardClientPage() {
       <button
         type="button"
         onClick={() => setDemandeSignalee(d)}
-        className="text-xs font-medium text-muted hover:text-red-600 hover:underline transition-colors"
+        className="inline-flex items-center gap-1 text-xs font-medium text-muted underline underline-offset-2 hover:text-red-600 transition-colors"
       >
+        <Flag className="w-3.5 h-3.5" aria-hidden="true" />
         Signaler
       </button>
     )
@@ -286,7 +288,7 @@ export default function DashboardClientPage() {
       <button
         type="button"
         onClick={() => openAvis(d)}
-        className={`inline-flex items-center gap-1.5 border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:border-indigo-300 transition-colors duration-150 ${grand ? 'w-full justify-center text-sm px-4 py-3' : 'text-xs px-3 py-1.5 whitespace-nowrap'}`}
+        className={`inline-flex items-center gap-1.5 border border-indigo-300 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 hover:border-indigo-400 shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all duration-150 ${grand ? 'w-full justify-center text-sm px-4 py-3' : 'text-xs px-3 py-1.5 whitespace-nowrap'}`}
       >
         <MessageSquare className="w-4 h-4" /> Laisser un avis
       </button>
@@ -500,7 +502,7 @@ export default function DashboardClientPage() {
                             {demande.artisan_telephone && (
                               <a
                                 href={`tel:${demande.artisan_telephone}`}
-                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white text-ink text-sm font-semibold px-3 py-2.5 hover:bg-canvas-soft transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white text-ink text-sm font-semibold px-3 py-2.5 hover:bg-canvas-soft shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all duration-150"
                               >
                                 <Phone className="w-4 h-4" /> Appeler
                               </a>
@@ -510,7 +512,7 @@ export default function DashboardClientPage() {
                                 href={`https://wa.me/${demande.artisan_whatsapp.replace(/\D/g, "")}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-2.5 hover:bg-emerald-100 transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700 text-sm font-semibold px-3 py-2.5 hover:bg-emerald-100 shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all duration-150"
                               >
                                 <MessageCircle className="w-4 h-4" /> WhatsApp
                               </a>

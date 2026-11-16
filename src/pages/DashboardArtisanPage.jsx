@@ -35,7 +35,8 @@ import {
   Building2,
   BadgeDollarSign,
   MapPin,
-  X
+  X,
+  Flag
 } from 'lucide-react'
 
 export default function DashboardArtisanPage() {
@@ -631,8 +632,9 @@ export default function DashboardArtisanPage() {
                           <button
                             type="button"
                             onClick={() => setDemandeSignalee(d)}
-                            className="hover:text-red-600 hover:underline transition-colors"
+                            className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-red-600 transition-colors"
                           >
+                            <Flag className="w-3.5 h-3.5" aria-hidden="true" />
                             Signaler ce client
                           </button>
                         </div>
@@ -643,13 +645,13 @@ export default function DashboardArtisanPage() {
                           <>
                             <button
                               onClick={() => verifierEngagement(() => majDemande({ id: d.id, data: { statut: 'ACCEPTEE' } }), d)}
-                              className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                              className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all"
                             >
                               <ThumbsUp className="w-3.5 h-3.5" /> Accepter
                             </button>
                             <button
                               onClick={() => setRefusDemande(d)}
-                              className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                              className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all"
                             >
                               <XCircle className="w-3.5 h-3.5" /> Refuser
                             </button>
@@ -660,7 +662,7 @@ export default function DashboardArtisanPage() {
                             {d.client_telephone && (
                               <a
                                 href={`tel:${d.client_telephone}`}
-                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white text-ink hover:bg-canvas-soft px-4 py-2 text-sm font-semibold transition-colors"
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-line bg-white text-ink hover:bg-canvas-soft px-4 py-2 text-sm font-semibold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all"
                               >
                                 <Phone className="w-4 h-4" /> Appeler le client
                               </a>
@@ -678,13 +680,13 @@ export default function DashboardArtisanPage() {
                               <button
                                 onClick={() => soumettrePrix(d)}
                                 disabled={!prixInputs[d.id] || parseInt(prixInputs[d.id], 10) <= 0 || fixerPrix.isLoading}
-                                className="inline-flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700 border border-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all disabled:opacity-50 disabled:shadow-none disabled:active:translate-y-0"
                               >
                                 <BadgeDollarSign className="w-3.5 h-3.5" /> Fixer le prix
                               </button>
                               <button
                                 onClick={() => setRefusDemande(d)}
-                                className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                                className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 hover:bg-red-100 border border-red-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all"
                               >
                                 <XCircle className="w-3.5 h-3.5" /> Refuser
                               </button>
@@ -698,7 +700,7 @@ export default function DashboardArtisanPage() {
                         {d.statut === 'PRIX_FIXE' && (
                           <button
                             onClick={() => setEtapeTravaux({ id: d.id, etape: 'AVANT' })}
-                            className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                            className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all"
                           >
                             <Clock className="w-3.5 h-3.5" /> Démarrer les travaux
                           </button>
@@ -706,7 +708,7 @@ export default function DashboardArtisanPage() {
                         {d.statut === 'EN_COURS' && (
                           <button
                             onClick={() => setEtapeTravaux({ id: d.id, etape: 'APRES' })}
-                            className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
+                            className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-300 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:shadow active:translate-y-px active:shadow-none transition-all"
                           >
                             <CheckCircle className="w-3.5 h-3.5" /> Marquer terminé
                           </button>
