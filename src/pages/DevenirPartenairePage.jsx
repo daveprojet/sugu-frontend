@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useArtisan, useIdentite } from "@/hooks/useArtisans";
 import { partenaireService } from "@/services/api";
 import { useCategories } from "@/hooks/useCategories";
+import ChoixCategories from "@/components/common/ChoixCategories";
 import { chercherZoneProche } from "@/hooks/useZones";
 import { VILLES } from "@/utils/constants";
 import { extractApiError } from "@/utils/errors";
@@ -554,49 +555,13 @@ export default function DevenirPartenairePage() {
                   <>
                     <div>
                       <label className={labelClass}>Vos métiers</label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-white/10 p-3 rounded-2xl border border-white/20">
-                        {categories.map((cat) => {
-                          const checked = form.categories.includes(cat.uid);
-                          return (
-                            <label
-                              key={cat.uid}
-                              className={`flex items-center gap-2 p-2.5 rounded-xl cursor-pointer text-sm transition-all duration-200 border ${
-                                checked
-                                  ? "bg-white/40 border-white/50 text-indigo-900"
-                                  : "border-transparent text-indigo-100 hover:bg-white/20"
-                              }`}
-                            >
-                              <input
-                                type="checkbox"
-                                className="sr-only"
-                                checked={checked}
-                                onChange={() => toggleCategorie(cat.uid)}
-                              />
-                              <span
-                                className={`w-4 h-4 rounded flex items-center justify-center border ${
-                                  checked ? "bg-indigo-600 border-indigo-600" : "border-white/60"
-                                }`}
-                              >
-                                {checked && <Check className="w-3 h-3 text-white" />}
-                              </span>
-                              {cat.nom}
-                            </label>
-                          );
-                        })}
-                        <label
-                          className={`flex items-center gap-2 p-2.5 rounded-xl cursor-pointer text-sm transition-all duration-200 border ${
-                            autresCoche ? "bg-white/40 border-white/50 text-indigo-900" : "border-transparent text-indigo-100 hover:bg-white/20"
-                          }`}
-                        >
-                          <input type="checkbox" className="sr-only" checked={autresCoche} onChange={() => setAutresCoche((v) => !v)} />
-                          <span className={`w-4 h-4 rounded flex items-center justify-center border ${
-                            autresCoche ? "bg-indigo-600 border-indigo-600" : "border-white/60"
-                          }`}>
-                            {autresCoche && <Check className="w-3 h-3 text-white" />}
-                          </span>
-                          Autres
-                        </label>
-                      </div>
+                      <ChoixCategories
+                        categories={categories}
+                        selection={form.categories}
+                        onToggle={toggleCategorie}
+                        autresCoche={autresCoche}
+                        onToggleAutres={() => setAutresCoche((v) => !v)}
+                      />
                       {autresCoche && (
                         <div className="mt-3">
                           <input
