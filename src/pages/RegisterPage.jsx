@@ -180,7 +180,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Prénom</label>
+                <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Prénom <span className="text-red-300">*</span></label>
                 <input
                   value={form.prenom}
                   onChange={(e) => set("prenom", e.target.value)}
@@ -190,7 +190,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Nom</label>
+                <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Nom <span className="text-red-300">*</span></label>
                 <input
                   value={form.nom}
                   onChange={(e) => set("nom", e.target.value)}
@@ -202,7 +202,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Téléphone</label>
+              <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Téléphone <span className="text-red-300">*</span></label>
               <PhoneField
                 variant="glass"
                 value={form.telephone}
@@ -212,7 +212,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Mot de passe</label>
+              <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Mot de passe <span className="text-red-300">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-indigo-400">
                   <Lock className="w-5 h-5" />
@@ -248,7 +248,7 @@ export default function RegisterPage() {
                 >
                   <div>
                     <label className="block text-sm font-medium text-indigo-200 mb-2">
-                      Catégories (choix multiples)
+                      Catégories (choix multiples) <span className="text-red-300">*</span>
                     </label>
                     <ChoixCategories
                       categories={categories}

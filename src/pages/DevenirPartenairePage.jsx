@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus, MapPin, ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
+import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus, MapPin, ArrowLeft, Eye, EyeOff, Lock, FileText, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useArtisan, useIdentite } from "@/hooks/useArtisans";
 import { partenaireService } from "@/services/api";
@@ -69,7 +69,12 @@ const initialForm = {
   zone_quartier: null,
   password: "",
   confirmation: "",
+  cv: null,
 };
+
+// CV de l'artisan : mêmes formats et taille que ceux acceptés par le serveur.
+const CV_EXTENSIONS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+const CV_TAILLE_MAX = 5 * 1024 * 1024;
 
 const pieceVide = { type_piece: "cni", piece_recto: null, piece_verso: null, piece_selfie: null };
 
@@ -124,7 +129,10 @@ export default function DevenirPartenairePage() {
     setModeCompte(mode);
     setForm(
       mode === "compte"
-        ? { ...initialForm, prenom: user.prenom || "", nom: user.nom || "", telephone: user.telephone || "" }
+        ? {
+            ...initialForm, prenom: user.prenom || "", nom: user.nom || "",
+            telephone: user.telephone || "", email: user.email || "",
+          }
         : initialForm,
     );
   };
@@ -195,6 +203,11 @@ export default function DevenirPartenairePage() {
     }
     if (autres.length > 3) {
       toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
+      return false;
+    }
+    if (!form.cv) {
+      toast.error("Joignez votre CV.");
+      document.getElementById("cv-artisan")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return false;
     }
     if (avecMotDePasse) {
@@ -386,7 +399,7 @@ export default function DevenirPartenairePage() {
                 {isEntreprise && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className={labelClass}>Nom de l'entreprise</label>
+                      <label className={labelClass}>Nom de l'entreprise <span className="text-red-300">*</span></label>
                       <input
                         value={form.raison_sociale}
                         onChange={(e) => set("raison_sociale", e.target.value)}
@@ -413,7 +426,7 @@ export default function DevenirPartenairePage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClass}>{isEntreprise ? "Prénom du contact" : "Prénom"}</label>
+                    <label className={labelClass}>{isEntreprise ? "Prénom du contact" : "Prénom"} <span className="text-red-300">*</span></label>
                     <input
                       value={form.prenom}
                       onChange={(e) => set("prenom", e.target.value)}
@@ -423,7 +436,7 @@ export default function DevenirPartenairePage() {
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>{isEntreprise ? "Nom du contact" : "Nom"}</label>
+                    <label className={labelClass}>{isEntreprise ? "Nom du contact" : "Nom"} <span className="text-red-300">*</span></label>
                     <input
                       value={form.nom}
                       onChange={(e) => set("nom", e.target.value)}
@@ -436,7 +449,7 @@ export default function DevenirPartenairePage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClass}>Téléphone</label>
+                    <label className={labelClass}>Téléphone <span className="text-red-300">*</span></label>
                     {avecMonCompte ? (
                       <input value={form.telephone} readOnly className={`${inputClass} opacity-80`} />
                     ) : (
@@ -449,12 +462,12 @@ export default function DevenirPartenairePage() {
                     )}
                   </div>
                   <div>
-                    <label className={labelClass}>E-mail {isEntreprise ? "" : "(optionnel)"}</label>
+                    <label className={labelClass}>E-mail <span className="text-red-300">*</span></label>
                     <input
                       type="email"
                       value={form.email}
                       onChange={(e) => set("email", e.target.value)}
-                      required={isEntreprise}
+                      required
                       className={inputClass}
                       placeholder="contact@exemple.sn"
                     />
@@ -510,7 +523,7 @@ export default function DevenirPartenairePage() {
                 {!isEntreprise && avecMonCompte && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClass}>Ville</label>
+                    <label className={labelClass}>Ville <span className="text-red-300">*</span></label>
                     <select
                       value={form.ville}
                       onChange={(e) => set("ville", e.target.value)}
@@ -562,7 +575,7 @@ export default function DevenirPartenairePage() {
                 {!isEntreprise && (
                   <>
                     <div>
-                      <label className={labelClass}>Vos métiers</label>
+                      <label className={labelClass}>Vos métiers <span className="text-red-300">*</span></label>
                       <ChoixCategories
                         categories={categories}
                         selection={form.categories}
@@ -597,6 +610,43 @@ export default function DevenirPartenairePage() {
                         className={inputClass}
                         placeholder="5"
                       />
+                    </div>
+                    <div id="cv-artisan">
+                      <label className={labelClass}>Votre CV <span className="text-red-300">*</span></label>
+                      {form.cv ? (
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/40 border border-white/40 text-gray-900">
+                          <FileText className="w-5 h-5 text-indigo-700 shrink-0" />
+                          <span className="flex-1 truncate text-sm">{form.cv.name}</span>
+                          <button
+                            type="button" onClick={() => set("cv", null)} aria-label="Retirer le CV"
+                            className="p-1 rounded-full hover:bg-white/60"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center gap-1 h-24 rounded-xl border-2 border-dashed border-white/40 bg-white/10 hover:bg-white/20 text-indigo-100 cursor-pointer transition">
+                          <FileText className="w-6 h-6" />
+                          <span className="text-sm font-medium">Joindre mon CV</span>
+                          <input
+                            type="file" accept={CV_EXTENSIONS.join(",")} className="sr-only"
+                            onChange={(e) => {
+                              const fichier = e.target.files?.[0];
+                              e.target.value = "";
+                              if (!fichier) return;
+                              const ext = fichier.name.slice(fichier.name.lastIndexOf(".")).toLowerCase();
+                              if (!CV_EXTENSIONS.includes(ext)) {
+                                toast.error("Le CV doit être un fichier PDF, Word (DOC, DOCX), JPG ou PNG.");
+                              } else if (fichier.size > CV_TAILLE_MAX) {
+                                toast.error("Le CV ne doit pas dépasser 5 Mo.");
+                              } else {
+                                set("cv", fichier);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                      <p className="text-xs text-indigo-200 mt-1.5 ml-1">PDF, Word ou photo · 5 Mo maximum.</p>
                     </div>
                   </>
                 )}
