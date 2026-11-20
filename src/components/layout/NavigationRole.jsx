@@ -19,7 +19,15 @@ function useCompteursArtisan(user) {
     { artisan: user?.artisan_uid },
     { enabled: independant && !!user?.artisan_uid },
   );
-  const { data: missions = [] } = useMissions("en_cours", { enabled: artisan && !!user?.partenaire });
+  // Le menu est sur toutes les pages : pas de rafraîchissement en boucle ici (seules les pages
+  // des missions le font). Le compteur se met à jour quand une notification arrive, quand
+  // l'utilisateur revient sur l'onglet, ou quand il ouvre une page des missions.
+  const { data: missions = [] } = useMissions("en_cours", {
+    enabled: artisan && !!user?.partenaire,
+    refetchInterval: false,
+    refetchOnWindowFocus: true,
+    staleTime: 60 * 1000,
+  });
   const { data: commissionsPage } = useCommissions({ enabled: independant });
   const commissions = commissionsPage?.results || [];
   return {

@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react'
 import { getToken, onMessage } from 'firebase/messaging'
 import { messaging } from '@/firebase'
 import { fcmTokenService } from '@/services/api'
+import { useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import { ecouterSonnerie } from '@/utils/sonnerie'
 import { memoriserJetonPush } from '@/utils/jetonPush'
@@ -99,8 +100,25 @@ export function usePushNotifications(user) {
     [],
   )
 
+  // Une notification qui arrive met à jour les compteurs du menu (missions, demandes,
+  // commissions) : ils ne sont pas rafraîchis en boucle sur toutes les pages.
+  const queryClient = useQueryClient()
+  const rafraichirCompteurs = useCallback(() => {
+    ['missions-entreprises', 'demandes', 'commissions'].forEach((cle) => queryClient.invalidateQueries(cle))
+  }, [queryClient])
+
   // Sonnerie des nouvelles demandes, missions et devis (prévenue par le service worker).
   useEffect(() => ecouterSonnerie(pourMoi), [pourMoi])
+
+  // Push reçue app en arrière-plan : le service worker prévient la page.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return undefined
+    const surMessage = (event) => {
+      if (event.data?.type === 'bricolibe-sonnerie' && pourMoi(event.data.destinataire)) rafraichirCompteurs()
+    }
+    navigator.serviceWorker.addEventListener('message', surMessage)
+    return () => navigator.serviceWorker.removeEventListener('message', surMessage)
+  }, [pourMoi, rafraichirCompteurs])
 
   // Notifications reçues en premier plan (app ouverte et active)
   useEffect(() => {
@@ -109,6 +127,7 @@ export function usePushNotifications(user) {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('[Push] Notification reçue en premier plan:', payload)
       if (!pourMoi(payload.data?.destinataire)) return
+      rafraichirCompteurs()
       const title = payload.data?.title || payload.notification?.title || 'Bricolibe'
       const body = payload.data?.body || payload.notification?.body || ''
 
@@ -125,7 +144,7 @@ export function usePushNotifications(user) {
     })
 
     return () => unsubscribe()
-  }, [pourMoi])
+  }, [pourMoi, rafraichirCompteurs])
 
   return { requestPermissionAndRegister, hasRegisteredToken }
 }

@@ -81,7 +81,7 @@ export default function EtapePieceIdentite({ piece, onChange }) {
         à renvoyer une fois votre compte créé.
       </p>
       <div>
-        <label className={labelClass}>Type de pièce</label>
+        <label className={labelClass}>Type de pièce <span className="text-red-300">*</span></label>
         <select
           value={piece.type_piece} onChange={(e) => set("type_piece", e.target.value)}
           className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white/50"
