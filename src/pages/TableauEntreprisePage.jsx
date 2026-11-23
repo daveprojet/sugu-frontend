@@ -90,6 +90,17 @@ export default function TableauEntreprisePage() {
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : (
         <div className="grid gap-5">
+          {(data.factures?.bloquee || data.factures?.nb_en_retard > 0) && (
+            <Link to="/espace-entreprise/factures" className="flex items-start gap-2 text-sm bg-red-50 text-red-800 border border-red-200 rounded-2xl p-4">
+              <AlarmClock className="w-5 h-5 shrink-0" />
+              <span>
+                {data.factures.bloquee
+                  ? 'Une facture relancée reste impayée depuis plus de 15 jours : les nouvelles interventions sont suspendues jusqu’au règlement.'
+                  : `${data.factures.nb_en_retard} facture(s) en retard (${fcfa(data.factures.total_a_payer)} à payer).`}
+                <span className="font-semibold underline ml-1">Voir les factures</span>
+              </span>
+            </Link>
+          )}
           <Formule formule={data.formule} />
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <CarteChiffre

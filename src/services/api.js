@@ -195,6 +195,9 @@ export const entrepriseService = {
   moi:          ()        => api.get('/entreprises/moi/'),
   tableauDeBord: ()       => api.get('/entreprises/tableau-de-bord/'),
   abonnement:   ()        => api.get('/entreprises/abonnement/'),
+  factures:     (params)  => api.get('/entreprises/factures/', { params }),
+  facturePdf:   (uid)     => api.get(`/entreprises/factures/${uid}/pdf/`, { responseType: 'blob' }),
+  payerFacture: (uid)     => api.post(`/entreprises/factures/${uid}/payer/`, {}),
   // action : souscrire | changer | payer | resilier | annuler-resiliation
   actionAbonnement: (action, data = {}) => api.post(`/entreprises/abonnement/${action}/`, data),
   membres:      ()        => api.get('/entreprises/membres/'),

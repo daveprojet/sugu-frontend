@@ -21,6 +21,22 @@ export function useTableauEntreprise() {
   })
 }
 
+/** Factures et relevés de l'entreprise (ceux de son site pour un responsable). */
+export function useFacturesEntreprise() {
+  return useQuery('factures-entreprise', () => entrepriseService.factures().then((r) => r.data), { refetchInterval: SUIVI_MS })
+}
+
+/** Paiement en ligne d'une facture : redirection vers PayTech. */
+export function usePayerFacture() {
+  return useMutation((uid) => entrepriseService.payerFacture(uid).then((r) => r.data), {
+    onSuccess: (data) => {
+      if (data.token) sessionStorage.setItem('paytech_token', data.token)
+      if (data.redirect_url) window.location.href = data.redirect_url
+    },
+    onError: (e) => toast.error(extractApiError(e, 'Paiement impossible')),
+  })
+}
+
 /** Abonnement : formule en vigueur, mois à payer, catalogue des formules. */
 export function useAbonnementEntreprise() {
   return useQuery('abonnement-entreprise', () => entrepriseService.abonnement().then((r) => r.data))

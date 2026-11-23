@@ -74,7 +74,9 @@ export default function PaymentSuccessPage() {
           <>
             <h1 className="font-display text-2xl font-bold text-gray-900">Paiement effectué !</h1>
             <p className="text-sm text-gray-500">
-              {estAbonnement
+              {typePaiement === 'facture_ent'
+                ? 'Votre facture est réglée. Merci pour votre confiance.'
+                : estAbonnement
                 ? 'Votre abonnement est activé. Merci pour votre confiance.'
                 : isArtisan
                 ? 'Votre commission a été réglée avec succès. Merci pour votre confiance.'
@@ -86,10 +88,10 @@ export default function PaymentSuccessPage() {
         <div className="flex flex-col gap-3 pt-2">
           {isEntreprise ? (
             <Link
-              to="/espace-entreprise/abonnement"
+              to={typePaiement === 'facture_ent' ? '/espace-entreprise/factures' : '/espace-entreprise/abonnement'}
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
             >
-              Mon abonnement
+              {typePaiement === 'facture_ent' ? 'Mes factures' : 'Mon abonnement'}
             </Link>
           ) : isArtisan ? (
             <Link

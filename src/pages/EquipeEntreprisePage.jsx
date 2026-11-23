@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import {
-  Building2, ChevronRight, CreditCard, Crown, Mail, MapPin, Phone, ShieldCheck, UserMinus, UserPlus, Users, X,
+  Building2, ChevronRight, CreditCard, Crown, Mail, MapPin, Phone, Receipt, ShieldCheck, UserMinus, UserPlus, Users, X,
 } from 'lucide-react'
 import Spinner from '@/components/common/Spinner'
 import CadreEntreprise from '@/components/espace/CadreEntreprise'
@@ -235,7 +235,12 @@ export default function EquipeEntreprisePage() {
           <div className="grid gap-5">
             <Profil estGestionnaire={estGestionnaire} />
             {sites.length > 0 && <ComptesParSite sites={sites} />}
-            {/* Sur téléphone, l'abonnement n'a pas d'onglet : accès depuis cette page. */}
+            {/* Sur téléphone, factures et abonnement n'ont pas d'onglet : accès depuis cette page. */}
+            <Link to="/espace-entreprise/factures" className="md:hidden flex items-center gap-3 bg-white border border-line rounded-2xl p-4 shadow-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-700"><Receipt className="w-4 h-4" /></span>
+              <span className="flex-1 font-semibold text-ink">Factures</span>
+              <ChevronRight className="w-4 h-4 text-muted" />
+            </Link>
             <Link to="/espace-entreprise/abonnement" className="md:hidden flex items-center gap-3 bg-white border border-line rounded-2xl p-4 shadow-sm">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-600"><CreditCard className="w-4 h-4" /></span>
               <span className="flex-1 font-semibold text-ink">Abonnement et formules</span>
