@@ -14,6 +14,18 @@ export function useMonEntreprise() {
   return useQuery('mon-entreprise', () => entrepriseService.moi().then((r) => r.data), { staleTime: 5 * 60 * 1000 })
 }
 
+/** Tableau de bord de l'entreprise : chiffres clés, actions en attente, délais, sites. */
+export function useTableauEntreprise() {
+  return useQuery('tableau-entreprise', () => entrepriseService.tableauDeBord().then((r) => r.data), {
+    refetchInterval: SUIVI_MS, staleTime: 20 * 1000,
+  })
+}
+
+/** Sites de l'entreprise visibles par le compte (tous, ou le sien pour un responsable de site). */
+export function useSitesEntreprise() {
+  return useQuery('sites-entreprise', () => entrepriseService.sites().then((r) => r.data), { staleTime: 60 * 1000 })
+}
+
 export function useDemandesEntreprise(params = {}) {
   return useQuery(
     ['demandes-entreprise', params],
@@ -46,6 +58,7 @@ export function useActionDemandeEntreprise(uid) {
   const rafraichir = () => {
     qc.invalidateQueries(['demande-entreprise', uid])
     qc.invalidateQueries('demandes-entreprise')
+    qc.invalidateQueries('tableau-entreprise')
   }
   const onError = (e) => toast.error(extractApiError(e, 'Action impossible'))
   return {
@@ -56,6 +69,15 @@ export function useActionDemandeEntreprise(uid) {
     supprimerPhoto: useMutation((photoUid) => entrepriseService.supprimerPhoto(uid, photoUid), { onSuccess: rafraichir, onError }),
     accordPortfolio: useMutation((accord) => entrepriseService.accordPortfolio(uid, accord), {
       onSuccess: rafraichir, onError,
+    }),
+    discuterDevis: useMutation(({ devisUid, message }) => entrepriseService.discuterDevis(uid, devisUid, message), {
+      onSuccess: () => { rafraichir(); toast.success('Message envoyé : l’inspecteur Bricolibe revient vers vous.') }, onError,
+    }),
+    signerPv: useMutation(() => entrepriseService.signerPv(uid), {
+      onSuccess: () => { rafraichir(); toast.success('Procès-verbal signé.') }, onError,
+    }),
+    noter: useMutation(({ note, commentaire }) => entrepriseService.noter(uid, note, commentaire), {
+      onSuccess: () => { rafraichir(); toast.success('Merci pour votre note.') }, onError,
     }),
     repondreDevis: useMutation(
       ({ devisUid, action, motif }) => entrepriseService.repondreDevis(uid, devisUid, action, motif),
@@ -110,6 +132,11 @@ export function useMissions(etat = 'en_cours', options = {}) {
   )
 }
 
+/** Résultats de l'ouvrier sur les missions entreprises (interventions, ponctualité, notes). */
+export function useMesResultats() {
+  return useQuery('mes-resultats-entreprises', () => missionService.mesResultats().then((r) => r.data), { staleTime: 60 * 1000 })
+}
+
 /** Zone de l'ouvrier partenaire et son référent (ou s'il est lui-même référent). */
 export function useMaZone() {
   return useQuery(['ma-zone-entreprises'], () => missionService.maZone().then((r) => r.data), { staleTime: 5 * 60 * 1000 })
@@ -152,14 +179,21 @@ export function useActionMission(uid) {
 }
 
 export const STATUTS_DEMANDE_ENTREPRISE = {
-  NOUVELLE:        { label: 'Reçue · recherche d’un artisan', classe: 'bg-amber-50 text-amber-700' },
-  ARTISAN_AFFECTE: { label: 'Artisan affecté', classe: 'bg-sky-50 text-sky-700' },
+  NOUVELLE:        { label: 'Reçue · recherche d’un ouvrier', classe: 'bg-amber-50 text-amber-700' },
+  ARTISAN_AFFECTE: { label: 'Ouvrier affecté', classe: 'bg-sky-50 text-sky-700' },
   EN_COURS:        { label: 'Intervention en cours', classe: 'bg-indigo-50 text-indigo-700' },
   A_INSPECTER:     { label: 'Terminée · contrôle qualité', classe: 'bg-violet-50 text-violet-700' },
   CLOTUREE:        { label: 'Clôturée', classe: 'bg-emerald-50 text-emerald-700' },
   ANNULEE:         { label: 'Annulée', classe: 'bg-gray-100 text-gray-600' },
   INSPECTION_REFUSEE: { label: 'Contrôle qualité : en cours de règlement', classe: 'bg-red-50 text-red-700' },
 }
+
+/** Niveaux d'urgence de la charte (article 6) ; délais pour la formule à la prestation. */
+export const URGENCES = [
+  ['URGENCE', 'Urgence', 'Coupure de courant, fuite d’eau, climatisation de salle serveur en panne… Intervention sous 24 h.'],
+  ['NORMAL', 'Normal', 'Prise défectueuse, robinet qui fuit, porte qui ferme mal… Intervention sous 48 h.'],
+  ['PLANIFIE', 'Planifié', 'Installation, entretien, petits travaux : à la date que vous choisissez.'],
+]
 
 export const STATUTS_MISSION = {
   PROPOSEE: { label: 'À accepter', classe: 'bg-amber-50 text-amber-700' },

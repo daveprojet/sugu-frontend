@@ -37,13 +37,15 @@ import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
 import PaymentCancelPage from '@/pages/PaymentCancelPage'
 import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
-import EspaceEntreprisePage from '@/pages/EspaceEntreprisePage'
+import TableauEntreprisePage from '@/pages/TableauEntreprisePage'
+import DemandesEntreprisePage from '@/pages/DemandesEntreprisePage'
+import SitesEntreprisePage from '@/pages/SitesEntreprisePage'
 import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
 import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
 import MissionsEntreprisesPage from '@/pages/MissionsEntreprisesPage'
 import EquipeEntreprisePage from '@/pages/EquipeEntreprisePage'
-import { BarreOnglets, avecBarreOnglets } from '@/components/layout/NavigationRole'
+import { BarreOnglets, avecBarreOnglets, estEspaceTravail } from '@/components/layout/NavigationRole'
 
 const queryClient = new QueryClient({
   // Sans cela, une liste qui ne se charge pas à cause du serveur s'affiche comme vide.
@@ -82,6 +84,8 @@ function AppRoutes() {
   const barreActions = pathname.startsWith('/dashboard-artisan/missions-entreprises/')
   // Téléphone : barre d'onglets en bas une fois connecté, le contenu ne doit pas passer dessous.
   const onglets = avecBarreOnglets(user, pathname)
+  // Espaces de travail (entreprise, ouvrier partenaire) : présentés comme un tableau de bord, sans pied de page.
+  const espace = estEspaceTravail(pathname)
 
   return (
     <div className={`flex flex-col min-h-screen ${onglets ? 'pb-16 md:pb-0 avec-onglets' : ''}`}>
@@ -126,7 +130,13 @@ function AppRoutes() {
             <PrivateRoute role="artisan"><MissionEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise" element={
-            <PrivateRoute role="entreprise"><EspaceEntreprisePage /></PrivateRoute>
+            <PrivateRoute role="entreprise"><TableauEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/demandes" element={
+            <PrivateRoute role="entreprise"><DemandesEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/sites" element={
+            <PrivateRoute role="entreprise"><SitesEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise/nouvelle-demande" element={
             <PrivateRoute role="entreprise"><NouvelleDemandeEntreprisePage /></PrivateRoute>
@@ -149,7 +159,7 @@ function AppRoutes() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
-      <Footer />
+      {!espace && <Footer />}
       {user?.role === 'artisan' && <RappelIdentiteModal artisanUid={user.artisan_uid} />}
       {user?.role === 'client' && <RappelAvisModal />}
       {user && !barreActions && (

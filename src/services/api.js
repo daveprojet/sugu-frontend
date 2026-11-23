@@ -193,9 +193,16 @@ export const demandeService = {
 // ── Volet entreprises ─────────────────────────────
 export const entrepriseService = {
   moi:          ()        => api.get('/entreprises/moi/'),
+  tableauDeBord: ()       => api.get('/entreprises/tableau-de-bord/'),
   membres:      ()        => api.get('/entreprises/membres/'),
   ajouterMembre: (data)   => api.post('/entreprises/membres/', data),
   retirerMembre: (uid)    => api.delete(`/entreprises/membres/${uid}/`),
+  // Rattacher un compte à un site (responsable de site) ou à tous les sites (site = null).
+  changerSiteMembre: (uid, site) => api.patch(`/entreprises/membres/${uid}/`, { site }),
+  sites:        ()        => api.get('/entreprises/sites/'),
+  ajouterSite:  (data)    => api.post('/entreprises/sites/', data),
+  majSite:      (uid, data) => api.patch(`/entreprises/sites/${uid}/`, data),
+  retirerSite:  (uid)     => api.delete(`/entreprises/sites/${uid}/`),
   majMoi:       (data)    => api.patch('/entreprises/moi/', data),
   demandes:     (params)  => api.get('/entreprises/demandes/', { params }),
   demande:      (uid)     => api.get(`/entreprises/demandes/${uid}/`),
@@ -209,6 +216,9 @@ export const entrepriseService = {
     api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/${action}/`, { motif }),
   devisPdf:     (uid, devisUid) => api.get(`/entreprises/demandes/${uid}/devis/${devisUid}/pdf/`, { responseType: 'blob' }),
   rapportPdf:   (uid)     => api.get(`/entreprises/demandes/${uid}/rapport/`, { responseType: 'blob' }),
+  discuterDevis: (uid, devisUid, message) => api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/discuter/`, { message }),
+  signerPv:     (uid)     => api.post(`/entreprises/demandes/${uid}/signer-pv/`),
+  noter:        (uid, note, commentaire) => api.post(`/entreprises/demandes/${uid}/noter/`, { note, commentaire }),
   accordPortfolio: (uid, accord) => api.post(`/entreprises/demandes/${uid}/accord-portfolio/`, { accord }),
 }
 
@@ -216,6 +226,7 @@ export const entrepriseService = {
 export const missionService = {
   list:   (etat)       => api.get('/entreprises/missions/', { params: { etat } }),
   maZone: ()           => api.get('/entreprises/ma-zone/'),
+  mesResultats: ()     => api.get('/entreprises/mes-resultats/'),
   detail: (uid)        => api.get(`/entreprises/missions/${uid}/`),
   // action : accepter | refuser | arrivee | terminer
   action: (uid, action, data = {}) => api.post(`/entreprises/missions/${uid}/${action}/`, data),

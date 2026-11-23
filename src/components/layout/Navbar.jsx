@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,7 @@ import {
   Rocket,
   LifeBuoy,
 } from "lucide-react";
-import { LiensRoleBureau, useLiensRole } from "@/components/layout/NavigationRole";
+import { LiensRoleBureau, estEspaceTravail, useLiensRole } from "@/components/layout/NavigationRole";
 
 import logo from "/images/logo.png";
 
@@ -24,6 +24,9 @@ export default function Navbar() {
   const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
   const liensRole = useLiensRole();
+  // Dans un espace de travail, le menu latéral remplace les liens du haut.
+  const { pathname } = useLocation();
+  const menuLateral = estEspaceTravail(pathname);
   const artisanIndependant = user?.role === "artisan" && user.independant !== false;
 
   const handleLogout = async () => {
@@ -49,7 +52,7 @@ export default function Navbar() {
         {/* Nav desktop : pages de travail du rôle connecté, liens publics sinon */}
         {user ? (
           <div className="hidden md:flex items-center gap-6">
-            <LiensRoleBureau liens={liensRole} />
+            {!menuLateral && <LiensRoleBureau liens={liensRole} />}
           </div>
         ) : (
         <div className="hidden md:flex items-center gap-6">
