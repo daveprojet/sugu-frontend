@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Building2, ChevronLeft } from 'lucide-react'
+import { Building2, ChevronLeft, MapPinned, MessageCircle } from 'lucide-react'
 import Spinner from '@/components/common/Spinner'
 import { useAuth } from '@/context/AuthContext'
 import ListeMissions from '@/components/entreprise/MissionsEntreprises'
-import { useMissions } from '@/hooks/useEntreprises'
+import { useMaZone, useMissions } from '@/hooks/useEntreprises'
 
 const ONGLETS = [
   ['en_cours', 'En cours'],
@@ -14,6 +14,36 @@ const ONGLETS = [
 const VIDES = {
   en_cours: 'Aucune mission en cours. L’inspecteur Bricolibe vous prévient par notification et SMS dès qu’une entreprise a besoin de vous.',
   terminees: 'Aucune mission terminée pour l’instant.',
+}
+
+/** Zone d'intervention de l'ouvrier et son référent, qui relaie les consignes de l'inspecteur. */
+function MaZone() {
+  const { data } = useMaZone()
+  if (!data?.zone) return null
+  const { zone, zone_secondaire: secondaire, referent, est_referent: estReferent } = data
+  const numero = (referent?.whatsapp || referent?.telephone || '').replace(/\D/g, '')
+  return (
+    <section className="bg-white border border-line rounded-2xl p-4 text-sm space-y-1">
+      <p className="font-semibold text-ink flex items-center gap-2">
+        <MapPinned className="w-4 h-4" /> Zone {zone.numero} — {zone.nom}
+        {secondaire && <span className="font-normal text-muted">(renfort : zone {secondaire.numero} — {secondaire.nom})</span>}
+      </p>
+      {estReferent ? (
+        <p className="text-muted">Vous êtes le référent de votre zone : vous relayez les consignes de l’inspecteur et l’aidez à trouver un ouvrier disponible.</p>
+      ) : referent ? (
+        <p className="text-muted flex flex-wrap items-center gap-x-2">
+          Votre référent de zone : <b className="text-ink">{referent.nom}</b>
+          {numero && (
+            <a href={`https://wa.me/${numero}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:underline">
+              <MessageCircle className="w-4 h-4" /> {referent.whatsapp || referent.telephone}
+            </a>
+          )}
+        </p>
+      ) : (
+        <p className="text-muted">Pas encore de référent dans votre zone.</p>
+      )}
+    </section>
+  )
 }
 
 /** Missions confiées par l'inspecteur pour des entreprises : séparées des demandes des clients particuliers. */
@@ -47,6 +77,8 @@ export default function MissionsEntreprisesPage() {
             <p className="text-muted text-sm font-medium mt-0.5">Les interventions que l’inspecteur Bricolibe vous confie</p>
           </div>
         </div>
+
+        <MaZone />
 
         {aRepondre > 0 && (
           <p className="text-sm bg-amber-50 text-amber-800 border border-amber-200 rounded-xl p-3">

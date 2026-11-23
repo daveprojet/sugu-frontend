@@ -110,6 +110,11 @@ export function useMissions(etat = 'en_cours', options = {}) {
   )
 }
 
+/** Zone de l'ouvrier partenaire et son référent (ou s'il est lui-même référent). */
+export function useMaZone() {
+  return useQuery(['ma-zone-entreprises'], () => missionService.maZone().then((r) => r.data), { staleTime: 5 * 60 * 1000 })
+}
+
 export function useMission(uid) {
   return useQuery(['mission-entreprise', uid], () => missionService.detail(uid).then((r) => r.data), {
     enabled: !!uid, refetchInterval: SUIVI_MS,

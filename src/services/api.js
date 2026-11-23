@@ -215,6 +215,7 @@ export const entrepriseService = {
 // Missions entreprises de l'artisan (délégations de l'inspecteur).
 export const missionService = {
   list:   (etat)       => api.get('/entreprises/missions/', { params: { etat } }),
+  maZone: ()           => api.get('/entreprises/ma-zone/'),
   detail: (uid)        => api.get(`/entreprises/missions/${uid}/`),
   // action : accepter | refuser | arrivee | terminer
   action: (uid, action, data = {}) => api.post(`/entreprises/missions/${uid}/${action}/`, data),
