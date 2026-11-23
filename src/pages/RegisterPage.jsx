@@ -28,6 +28,8 @@ export default function RegisterPage() {
     prenom: "",
     nom: "",
     telephone: "",
+    whatsapp: "",
+    whatsapp_identique: true,
     password: "",
     role: isArtisanFlow ? "artisan" : "client",
     categories: [],
@@ -93,7 +95,13 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await register({ ...form, autres_metiers: autresMetiers });
+      const { whatsapp_identique: whatsappIdentique, ...donnees } = form;
+      await register({
+        ...donnees,
+        autres_metiers: autresMetiers,
+        // Artisan : WhatsApp seulement s'il diffère du téléphone (sinon, le téléphone).
+        whatsapp: form.role === "artisan" && !whatsappIdentique ? form.whatsapp : "",
+      });
       toast.success("Compte créé avec succès !");
       // Un client venu d'une fiche artisan y retourne, formulaire de demande ouvert.
       const redirect = redirectionDemandee(params);
@@ -209,6 +217,29 @@ export default function RegisterPage() {
                 onChange={(telephone) => set("telephone", telephone)}
                 required
               />
+              {form.role === "artisan" && (
+                <>
+                  <label className="flex items-center gap-2 text-sm text-indigo-100 ml-1 mt-2.5 cursor-pointer">
+                    <input
+                      type="checkbox" checked={form.whatsapp_identique}
+                      onChange={(e) => set("whatsapp_identique", e.target.checked)}
+                      className="w-4 h-4 rounded"
+                    />
+                    C’est aussi mon numéro WhatsApp
+                  </label>
+                  {!form.whatsapp_identique && (
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Numéro WhatsApp <span className="text-red-300">*</span></label>
+                      <PhoneField
+                        variant="glass"
+                        value={form.whatsapp}
+                        onChange={(whatsapp) => set("whatsapp", whatsapp)}
+                        required
+                      />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
 
             <div>

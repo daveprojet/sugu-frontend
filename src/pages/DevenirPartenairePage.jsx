@@ -766,7 +766,7 @@ export default function DevenirPartenairePage() {
                             onChange={(e) => set("whatsapp_identique", e.target.checked)}
                             className="w-4 h-4 rounded"
                           />
-                          Mon numéro WhatsApp est le même que mon téléphone
+                          C’est aussi mon numéro WhatsApp
                         </label>
                         {!form.whatsapp_identique && (
                           <div className="mt-3 sm:w-1/2">
