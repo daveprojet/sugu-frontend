@@ -21,6 +21,11 @@ export function useTableauEntreprise() {
   })
 }
 
+/** Rapports mensuels (formules Pro et Premium). */
+export function useRapportsMensuels() {
+  return useQuery('rapports-entreprise', () => entrepriseService.rapports().then((r) => r.data))
+}
+
 /** Factures et relevés de l'entreprise (ceux de son site pour un responsable). */
 export function useFacturesEntreprise() {
   return useQuery('factures-entreprise', () => entrepriseService.factures().then((r) => r.data), { refetchInterval: SUIVI_MS })
@@ -123,6 +128,15 @@ export function useActionDemandeEntreprise(uid) {
     }),
     noter: useMutation(({ note, commentaire }) => entrepriseService.noter(uid, note, commentaire), {
       onSuccess: () => { rafraichir(); toast.success('Merci pour votre note.') }, onError,
+    }),
+    reclamer: useMutation((donnees) => entrepriseService.reclamer(uid, donnees), {
+      onSuccess: () => { rafraichir(); toast.success('Réclamation envoyée : l’inspecteur l’examine sous 72 heures.') }, onError,
+    }),
+    garantie: useMutation((donnees) => entrepriseService.garantie(uid, donnees).then((r) => r.data), {
+      onSuccess: () => { rafraichir(); toast.success('Retour sous garantie ouvert : intervention offerte.') }, onError,
+    }),
+    replanifier: useMutation((donnees) => entrepriseService.replanifier(uid, donnees), {
+      onSuccess: () => { rafraichir(); toast.success('Visite replanifiée.') }, onError,
     }),
     repondreDevis: useMutation(
       ({ devisUid, action, motif }) => entrepriseService.repondreDevis(uid, devisUid, action, motif),

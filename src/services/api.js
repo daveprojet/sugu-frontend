@@ -224,6 +224,13 @@ export const entrepriseService = {
   rapportPdf:   (uid)     => api.get(`/entreprises/demandes/${uid}/rapport/`, { responseType: 'blob' }),
   discuterDevis: (uid, devisUid, message) => api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/discuter/`, { message }),
   signerPv:     (uid)     => api.post(`/entreprises/demandes/${uid}/signer-pv/`),
+  reclamer: (uid, { photos = [], ...data }) =>
+    api.post(`/entreprises/demandes/${uid}/reclamation/`, enFormData(data, photos), multipart),
+  garantie: (uid, { photos = [], ...data }) =>
+    api.post(`/entreprises/demandes/${uid}/garantie/`, enFormData(data, photos), multipart),
+  replanifier:  (uid, data) => api.patch(`/entreprises/demandes/${uid}/planification/`, data),
+  rapports:     ()        => api.get('/entreprises/rapports/'),
+  rapportMensuelPdf: (cle) => api.get(`/entreprises/rapports/${cle}/pdf/`, { responseType: 'blob' }),
   noter:        (uid, note, commentaire) => api.post(`/entreprises/demandes/${uid}/noter/`, { note, commentaire }),
   accordPortfolio: (uid, accord) => api.post(`/entreprises/demandes/${uid}/accord-portfolio/`, { accord }),
 }

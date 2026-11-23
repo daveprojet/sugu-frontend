@@ -4,6 +4,7 @@ import { ArrowLeft, Building, CalendarClock, CheckCircle2, Circle, FileDown, Map
 import Spinner from '@/components/common/Spinner'
 import CadreEntreprise from '@/components/espace/CadreEntreprise'
 import DevisEntreprise from '@/components/entreprise/DevisEntreprise'
+import { ApresVente, Replanifier } from '@/components/entreprise/ApresVente'
 import Galerie from '@/components/entreprise/Galerie'
 import PhotosPicker from '@/components/demande/PhotosPicker'
 import { entrepriseService } from '@/services/api'
@@ -146,6 +147,7 @@ export default function DemandeEntreprisePage() {
   const { data: demande, isLoading } = useDemandeEntreprise(uid)
   const {
     annuler, ajouterPhotos, supprimerPhoto, repondreDevis, accordPortfolio, discuterDevis, signerPv, noter,
+    reclamer, garantie, replanifier,
   } = useActionDemandeEntreprise(uid)
   const [nouvellesPhotos, setNouvellesPhotos] = useState([])
 
@@ -176,11 +178,23 @@ export default function DemandeEntreprisePage() {
             Envoyée {dateHeure(demande.created_at)}{demande.cree_par_nom ? ` par ${demande.cree_par_nom}` : ''}
           </p>
         </div>
-        <span className={`text-sm font-medium px-3 py-1 rounded-full ${statut.classe}`}>{statut.label}</span>
+        <span className="flex flex-wrap gap-2">
+          {demande.nature && demande.nature !== 'INTERVENTION' && (
+            <span className={`text-sm font-medium px-3 py-1 rounded-full ${demande.nature === 'PREVENTIF' ? 'bg-sky-50 text-sky-700' : 'bg-blue-50 text-blue-700'}`}>{demande.nature_libelle}</span>
+          )}
+          <span className={`text-sm font-medium px-3 py-1 rounded-full ${statut.classe}`}>{statut.label}</span>
+        </span>
       </div>
 
       <Avancement statut={demande.statut} />
       <Delai demande={demande} />
+      <Replanifier key={demande.date_souhaitee} demande={demande} replanifier={replanifier} />
+      {demande.garantie_de_uid && (
+        <p className="text-sm bg-blue-50 text-blue-800 rounded-xl p-3 mb-4">
+          Retour sous garantie : déplacement et main-d’œuvre offerts.{' '}
+          <Link to={`/espace-entreprise/demandes/${demande.garantie_de_uid}`} className="font-semibold underline">Voir l’intervention d’origine</Link>
+        </p>
+      )}
 
       <section className="bg-white border border-line rounded-2xl p-5 grid gap-4 mb-4">
         <p className="text-ink whitespace-pre-line">{demande.description}</p>
@@ -286,6 +300,7 @@ export default function DemandeEntreprisePage() {
       )}
       {demande.rapport_disponible && <ProcesVerbal demande={demande} signerPv={signerPv} />}
       <Note demande={demande} noter={noter} />
+      <ApresVente demande={demande} reclamer={reclamer} garantie={garantie} />
       {demande.statut === 'CLOTUREE' && demande.photos.some((p) => p.type_photo === 'APRES') && (
         <label className="flex items-start gap-3 bg-white border border-line rounded-2xl p-4 mb-4 text-sm cursor-pointer">
           <input

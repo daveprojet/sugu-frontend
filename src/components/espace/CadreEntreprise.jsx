@@ -1,4 +1,4 @@
-import { Building2, CreditCard, Inbox, LayoutDashboard, MapPin, Plus, Receipt, UsersRound } from 'lucide-react'
+import { Building2, CreditCard, FileBarChart, Inbox, LayoutDashboard, MapPin, Plus, Receipt, UsersRound } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useTableauEntreprise } from '@/hooks/useEntreprises'
 import EspaceLayout from './EspaceLayout'
@@ -14,6 +14,7 @@ export default function CadreEntreprise({ titre, sousTitre, actions, children })
     { to: '/espace-entreprise/demandes', label: 'Demandes', Icon: Inbox, compteur: compteurs.en_cours },
     { to: '/espace-entreprise/nouvelle-demande', label: 'Nouvelle demande', Icon: Plus },
     { to: '/espace-entreprise/factures', label: 'Factures', Icon: Receipt, compteur: tableau?.factures?.nb_a_payer || 0 },
+    { to: '/espace-entreprise/rapports', label: 'Rapports mensuels', Icon: FileBarChart },
     { to: '/espace-entreprise/abonnement', label: 'Abonnement', Icon: CreditCard, compteur: tableau?.formule?.a_payer ? 1 : 0 },
     { to: '/espace-entreprise/sites', label: 'Sites', Icon: MapPin },
     { to: '/espace-entreprise/equipe', label: 'Équipe et profil', Icon: UsersRound },

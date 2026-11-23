@@ -42,6 +42,7 @@ import DemandesEntreprisePage from '@/pages/DemandesEntreprisePage'
 import SitesEntreprisePage from '@/pages/SitesEntreprisePage'
 import AbonnementEntreprisePage from '@/pages/AbonnementEntreprisePage'
 import FacturesEntreprisePage from '@/pages/FacturesEntreprisePage'
+import RapportsEntreprisePage from '@/pages/RapportsEntreprisePage'
 import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
 import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
@@ -136,6 +137,9 @@ function AppRoutes() {
           } />
           <Route path="/espace-entreprise/demandes" element={
             <PrivateRoute role="entreprise"><DemandesEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/rapports" element={
+            <PrivateRoute role="entreprise"><RapportsEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise/factures" element={
             <PrivateRoute role="entreprise"><FacturesEntreprisePage /></PrivateRoute>

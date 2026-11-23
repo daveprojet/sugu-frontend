@@ -87,7 +87,10 @@ export default function DemandesEntreprisePage() {
                       <span className="font-semibold text-ink">{demande.metiers}</span>
                       <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${statut.classe}`}>{statut.label}</span>
                       {demande.urgence === 'URGENCE' && <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700">Urgence</span>}
-                      {demande.urgence === 'PLANIFIE' && <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700">Planifiée</span>}
+                      {demande.nature === 'PREVENTIF'
+                        ? <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700">Entretien préventif</span>
+                        : demande.urgence === 'PLANIFIE' && <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700">Planifiée</span>}
+                      {demande.nature === 'GARANTIE' && <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700">Sous garantie</span>}
                       {demande.etat_delai === 'depasse' && <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-700">Délai dépassé</span>}
                     </div>
                     <p className="text-sm text-muted truncate mt-1">{demande.description}</p>
