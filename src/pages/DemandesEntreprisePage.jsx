@@ -43,7 +43,7 @@ export default function DemandesEntreprisePage() {
           {FILTRES.map(([cle, libelle]) => (
             <button
               key={cle} type="button" role="tab" aria-selected={filtre === cle} onClick={() => changer('statut', cle)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${filtre === cle ? 'bg-indigo-600 text-white' : 'text-muted hover:text-ink'}`}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${filtre === cle ? 'bg-blue-600 text-white' : 'text-muted hover:text-ink'}`}
             >
               {libelle}
             </button>
@@ -63,7 +63,7 @@ export default function DemandesEntreprisePage() {
           <input
             type="search" value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder="Métier, adresse, site…"
             aria-label="Rechercher une demande"
-            className="w-full pl-9 pr-3 py-2 rounded-xl text-sm border border-line bg-white text-ink placeholder:text-muted focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+            className="w-full pl-9 pr-3 py-2 rounded-xl text-sm border border-line bg-white text-ink placeholder:text-muted focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
           />
         </label>
       </div>
@@ -78,7 +78,7 @@ export default function DemandesEntreprisePage() {
               <li key={demande.uid}>
                 <Link
                   to={`/espace-entreprise/demandes/${demande.uid}`}
-                  className={`flex items-center gap-4 bg-white border rounded-2xl p-4 shadow-sm hover:border-indigo-300 hover:shadow-card-hover transition-all ${
+                  className={`flex items-center gap-4 bg-white border rounded-2xl p-4 shadow-sm hover:border-blue-300 hover:shadow-card-hover transition-all ${
                     demande.etat_delai === 'depasse' ? 'border-red-200' : 'border-line'
                   }`}
                 >
@@ -92,7 +92,7 @@ export default function DemandesEntreprisePage() {
                     </div>
                     <p className="text-sm text-muted truncate mt-1">{demande.description}</p>
                     <p className="text-xs text-muted mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
-                      {demande.site && sites.length > 1 && <span className="font-medium text-indigo-700">{demande.site.nom}</span>}
+                      {demande.site && sites.length > 1 && <span className="font-medium text-blue-700">{demande.site.nom}</span>}
                       <span>{demande.adresse}, {demande.ville}</span>
                       {demande.echeance_intervention
                         ? <span>Intervention {demande.urgence === 'PLANIFIE' ? 'prévue' : 'au plus tard'} {dateHeure(demande.echeance_intervention)}</span>

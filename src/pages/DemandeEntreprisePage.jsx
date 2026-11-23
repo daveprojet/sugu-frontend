@@ -55,6 +55,7 @@ function Delai({ demande }) {
           {demande.urgence_libelle}
           {etat[1] && ` · ${etat[1]}`}
         </p>
+        {demande.deplacement_libelle && <p className="text-xs mb-0.5">Déplacement et diagnostic : {demande.deplacement_libelle.charAt(0).toLowerCase() + demande.deplacement_libelle.slice(1)}</p>}
         {demande.prise_en_charge_at ? (
           <p>
             Prise en charge {dateHeure(demande.prise_en_charge_at)}
@@ -164,7 +165,7 @@ export default function DemandeEntreprisePage() {
   return (
     <CadreEntreprise
       titre={demande.metiers}
-      sousTitre={<Link to="/espace-entreprise/demandes" className="inline-flex items-center gap-1 text-indigo-600 font-medium"><ArrowLeft className="w-4 h-4" /> Toutes les demandes</Link>}
+      sousTitre={<Link to="/espace-entreprise/demandes" className="inline-flex items-center gap-1 text-blue-600 font-medium"><ArrowLeft className="w-4 h-4" /> Toutes les demandes</Link>}
     >
       <div className="max-w-3xl">
 
@@ -288,7 +289,7 @@ export default function DemandeEntreprisePage() {
       {demande.statut === 'CLOTUREE' && demande.photos.some((p) => p.type_photo === 'APRES') && (
         <label className="flex items-start gap-3 bg-white border border-line rounded-2xl p-4 mb-4 text-sm cursor-pointer">
           <input
-            type="checkbox" className="mt-1 accent-indigo-600" checked={Boolean(demande.accord_portfolio)}
+            type="checkbox" className="mt-1 accent-blue-600" checked={Boolean(demande.accord_portfolio)}
             disabled={accordPortfolio.isLoading} onChange={(e) => accordPortfolio.mutate(e.target.checked)}
           />
           <span>

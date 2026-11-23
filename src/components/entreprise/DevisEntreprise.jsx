@@ -38,6 +38,9 @@ function Totaux({ totaux }) {
   return (
     <dl className="grid gap-1 text-sm sm:ml-auto sm:min-w-[260px]">
       <div className="flex justify-between gap-4 text-muted"><dt>Main-d’œuvre</dt><dd>{fcfa(totaux.main_oeuvre)}</dd></div>
+      {totaux.remise > 0 && (
+        <div className="flex justify-between gap-4 text-emerald-700"><dt>Remise formule ({Number(totaux.remise_pct)} %)</dt><dd>− {fcfa(totaux.remise)}</dd></div>
+      )}
       <div className="flex justify-between gap-4 text-muted"><dt>Matériaux</dt><dd>{fcfa(totaux.materiaux)}</dd></div>
       <div className="flex justify-between gap-4 text-muted"><dt>Déplacement</dt><dd>{fcfa(totaux.deplacement)}</dd></div>
       <div className="flex justify-between gap-4 font-semibold text-ink border-t border-line pt-1"><dt>Total</dt><dd>{fcfa(totaux.total)}</dd></div>

@@ -117,7 +117,7 @@ export default function NouvelleDemandeEntreprisePage() {
                 }`}
               >
                 <span className="flex items-center gap-2 font-semibold text-ink">
-                  <input type="radio" name="urgence" value={valeur} checked={form.urgence === valeur} onChange={() => set('urgence', valeur)} className="accent-indigo-600" />
+                  <input type="radio" name="urgence" value={valeur} checked={form.urgence === valeur} onChange={() => set('urgence', valeur)} className="accent-blue-600" />
                   {libelle}
                 </span>
                 <span className="text-xs text-muted">{aide}</span>

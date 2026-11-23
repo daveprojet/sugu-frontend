@@ -118,7 +118,7 @@ export default function SitesEntreprise({ estGestionnaire }) {
           return (
             <li key={site.uid} className={`bg-white border rounded-2xl p-4 shadow-sm ${edition === site.uid ? 'sm:col-span-2' : ''} ${sansPosition ? 'border-amber-300' : 'border-line'}`}>
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600"><MapPin className="w-4 h-4" /></span>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600"><MapPin className="w-4 h-4" /></span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-ink flex flex-wrap items-center gap-1.5">
                     {site.nom}
@@ -136,7 +136,7 @@ export default function SitesEntreprise({ estGestionnaire }) {
                 </div>
                 {estGestionnaire && edition !== site.uid && (
                   <div className="flex shrink-0 gap-3">
-                    <button type="button" onClick={() => setEdition(site.uid)} className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600" aria-label={`Modifier ${site.nom}`}>
+                    <button type="button" onClick={() => setEdition(site.uid)} className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600" aria-label={`Modifier ${site.nom}`}>
                       <Pencil className="w-3.5 h-3.5" /> Modifier
                     </button>
                     {!site.est_principal && (
@@ -157,7 +157,7 @@ export default function SitesEntreprise({ estGestionnaire }) {
         })}
       </ul>
       {edition === 'nouveau' && (
-        <div className="bg-white border border-indigo-200 rounded-2xl p-4 mt-3 shadow-sm">
+        <div className="bg-white border border-blue-200 rounded-2xl p-4 mt-3 shadow-sm">
           <p className="font-semibold text-ink">Nouveau site</p>
           <FormulaireSite onFermer={() => setEdition(null)} />
         </div>

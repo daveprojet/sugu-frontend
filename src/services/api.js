@@ -194,6 +194,9 @@ export const demandeService = {
 export const entrepriseService = {
   moi:          ()        => api.get('/entreprises/moi/'),
   tableauDeBord: ()       => api.get('/entreprises/tableau-de-bord/'),
+  abonnement:   ()        => api.get('/entreprises/abonnement/'),
+  // action : souscrire | changer | payer | resilier | annuler-resiliation
+  actionAbonnement: (action, data = {}) => api.post(`/entreprises/abonnement/${action}/`, data),
   membres:      ()        => api.get('/entreprises/membres/'),
   ajouterMembre: (data)   => api.post('/entreprises/membres/', data),
   retirerMembre: (uid)    => api.delete(`/entreprises/membres/${uid}/`),

@@ -33,7 +33,7 @@ function MaZone() {
   return (
     <div className="grid gap-3 text-sm">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><MapPinned className="w-5 h-5" /></span>
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><MapPinned className="w-5 h-5" /></span>
         <div>
           <p className="font-semibold text-ink">Zone {zone.numero} — {zone.nom}</p>
           {secondaire && <p className="text-xs text-muted">Renfort : zone {secondaire.numero} — {secondaire.nom}</p>}
@@ -104,8 +104,8 @@ export default function MissionsEntreprisesPage() {
         )}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <CarteChiffre label="À accepter" valeur={aRepondre} Icon={Briefcase} ton={aRepondre ? 'orange' : 'indigo'} aide="Missions proposées" />
-          <CarteChiffre label="En cours" valeur={r?.interventions.en_cours ?? '—'} Icon={Building2} ton="indigo" aide="Acceptées ou sur site" />
+          <CarteChiffre label="À accepter" valeur={aRepondre} Icon={Briefcase} ton={aRepondre ? 'orange' : 'principal'} aide="Missions proposées" />
+          <CarteChiffre label="En cours" valeur={r?.interventions.en_cours ?? '—'} Icon={Building2} ton="principal" aide="Acceptées ou sur site" />
           <CarteChiffre
             label="Terminées ce mois" valeur={r?.interventions.ce_mois ?? '—'} Icon={CalendarCheck} ton="vert"
             aide={r ? `${r.interventions.total} au total` : null}
@@ -122,7 +122,7 @@ export default function MissionsEntreprisesPage() {
               {ONGLETS.map(([cle, libelle]) => (
                 <button
                   key={cle} type="button" role="tab" aria-selected={onglet === cle} onClick={() => setOnglet(cle)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${onglet === cle ? 'bg-indigo-600 text-white' : 'text-muted hover:text-ink'}`}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${onglet === cle ? 'bg-blue-600 text-white' : 'text-muted hover:text-ink'}`}
                 >
                   {libelle}
                   {cle === 'en_cours' && enCours.length > 0 && <span className="ml-1.5 opacity-80">({enCours.length})</span>}
@@ -142,9 +142,9 @@ export default function MissionsEntreprisesPage() {
             <Panneau titre="Ma zone"><MaZone /></Panneau>
             <Panneau titre="Mes résultats">
               <dl className="grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-xl bg-indigo-50 p-3">
-                  <dt className="text-xs text-indigo-700 flex items-center gap-1"><Star className="w-3.5 h-3.5" /> Note d’inspection</dt>
-                  <dd className="font-display text-lg font-bold text-indigo-900">{note(r?.inspections.note_qualite)}</dd>
+                <div className="rounded-xl bg-blue-50 p-3">
+                  <dt className="text-xs text-blue-700 flex items-center gap-1"><Star className="w-3.5 h-3.5" /> Note d’inspection</dt>
+                  <dd className="font-display text-lg font-bold text-blue-900">{note(r?.inspections.note_qualite)}</dd>
                 </div>
                 <div className="rounded-xl bg-sky-50 p-3">
                   <dt className="text-xs text-sky-700">Avis des entreprises</dt>

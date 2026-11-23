@@ -11,6 +11,7 @@ export default function PaymentCancelPage() {
   const { user } = useAuth()
 
   const isArtisan = user?.role === 'artisan'
+  const isEntreprise = user?.role === 'entreprise'
   const token = useMemo(() => {
     return searchParams.get('token') || sessionStorage.getItem('paytech_token') || ''
   }, [searchParams])
@@ -25,7 +26,7 @@ export default function PaymentCancelPage() {
 
   const cancelling = cancel.isLoading
   const typePaiement = cancel.data?.data?.paiement?.type
-  const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost'
+  const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost' || typePaiement === 'abonnement_ent'
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-amber-50/40 via-white to-indigo-50/40 flex items-center justify-center px-4 py-16">
@@ -55,13 +56,13 @@ export default function PaymentCancelPage() {
 
         <div className="flex flex-col gap-3 pt-2">
           <Link
-            to={estAbonnement ? '/dashboard-artisan/abonnements' : isArtisan ? '/dashboard-artisan/commissions' : '/dashboard-client'}
+            to={isEntreprise ? '/espace-entreprise/abonnement' : estAbonnement ? '/dashboard-artisan/abonnements' : isArtisan ? '/dashboard-artisan/commissions' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4" /> Réessayer le paiement
           </Link>
           <Link
-            to={isArtisan ? '/dashboard-artisan' : '/dashboard-client'}
+            to={isEntreprise ? '/espace-entreprise' : isArtisan ? '/dashboard-artisan' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" /> Retour au tableau de bord

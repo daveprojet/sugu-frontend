@@ -12,6 +12,7 @@ export default function PaymentSuccessPage() {
   const { user } = useAuth()
 
   const isArtisan = user?.role === 'artisan'
+  const isEntreprise = user?.role === 'entreprise'
   const token = useMemo(() => {
     return searchParams.get('token') || sessionStorage.getItem('paytech_token') || ''
   }, [searchParams])
@@ -27,7 +28,7 @@ export default function PaymentSuccessPage() {
   const verifying = verify.isLoading
   const reponse = verify.data
   const typePaiement = reponse?.data?.paiement?.type
-  const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost'
+  const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost' || typePaiement === 'abonnement_ent'
   // 202 : PayTech n'a pas encore confirmé, le paiement n'est donc pas acquis.
   const error = verify.isError
     ? extractApiError(verify.error, 'Impossible de confirmer le paiement.')
@@ -83,7 +84,14 @@ export default function PaymentSuccessPage() {
         )}
 
         <div className="flex flex-col gap-3 pt-2">
-          {isArtisan ? (
+          {isEntreprise ? (
+            <Link
+              to="/espace-entreprise/abonnement"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+            >
+              Mon abonnement
+            </Link>
+          ) : isArtisan ? (
             <Link
               to={estAbonnement ? '/dashboard-artisan/abonnements' : '/dashboard-artisan/commissions'}
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
@@ -99,7 +107,7 @@ export default function PaymentSuccessPage() {
             </Link>
           )}
           <Link
-            to={isArtisan ? '/dashboard-artisan' : '/dashboard-client'}
+            to={isEntreprise ? '/espace-entreprise' : isArtisan ? '/dashboard-artisan' : '/dashboard-client'}
             className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" /> Retour au tableau de bord

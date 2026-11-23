@@ -21,6 +21,35 @@ export function useTableauEntreprise() {
   })
 }
 
+/** Abonnement : formule en vigueur, mois à payer, catalogue des formules. */
+export function useAbonnementEntreprise() {
+  return useQuery('abonnement-entreprise', () => entrepriseService.abonnement().then((r) => r.data))
+}
+
+/** Actions sur l'abonnement (compte principal) ; « payer » redirige vers PayTech. */
+export function useActionAbonnement() {
+  const qc = useQueryClient()
+  return useMutation(({ action, ...data }) => entrepriseService.actionAbonnement(action, data).then((r) => r.data), {
+    onSuccess: (data, { action }) => {
+      // Quelque chose à payer (abonnement, formule supérieure) : direction la page de paiement PayTech.
+      if (data.redirect_url) {
+        if (data.token) sessionStorage.setItem('paytech_token', data.token)
+        window.location.href = data.redirect_url
+        return
+      }
+      qc.setQueryData('abonnement-entreprise', data.etat)
+      qc.invalidateQueries('tableau-entreprise')
+      toast.success({
+        changer: 'Changement enregistré : il prend effet au mois suivant.',
+        resilier: 'Résiliation enregistrée.',
+        'annuler-resiliation': 'Résiliation annulée : votre abonnement continue.',
+        'annuler-paiement': 'Paiement abandonné.',
+      }[action] || 'C’est enregistré.')
+    },
+    onError: (e) => toast.error(extractApiError(e, 'Action impossible')),
+  })
+}
+
 /** Sites de l'entreprise visibles par le compte (tous, ou le sien pour un responsable de site). */
 export function useSitesEntreprise() {
   return useQuery('sites-entreprise', () => entrepriseService.sites().then((r) => r.data), { staleTime: 60 * 1000 })

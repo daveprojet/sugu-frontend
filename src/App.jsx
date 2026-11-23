@@ -40,6 +40,7 @@ import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
 import TableauEntreprisePage from '@/pages/TableauEntreprisePage'
 import DemandesEntreprisePage from '@/pages/DemandesEntreprisePage'
 import SitesEntreprisePage from '@/pages/SitesEntreprisePage'
+import AbonnementEntreprisePage from '@/pages/AbonnementEntreprisePage'
 import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
 import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
@@ -134,6 +135,9 @@ function AppRoutes() {
           } />
           <Route path="/espace-entreprise/demandes" element={
             <PrivateRoute role="entreprise"><DemandesEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/abonnement" element={
+            <PrivateRoute role="entreprise"><AbonnementEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise/sites" element={
             <PrivateRoute role="entreprise"><SitesEntreprisePage /></PrivateRoute>
