@@ -254,6 +254,8 @@ export const dossierProService = {
 export const partenaireService = {
   // Multipart : la candidature artisan joint sa pièce d'identité (2e étape).
   candidater: (data) => api.post('/partenaires/candidatures/', enFormData(data), multipart),
+  // Zones d'intervention (plan de recrutement) : zone secondaire de l'ouvrier.
+  zones: () => api.get('/partenaires/zones/'),
 }
 
 // ── Contacts ──────────────────────────────────────────
