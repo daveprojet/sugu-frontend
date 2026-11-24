@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { lienArtisan } from "@/utils/liensArtisan";
 import { MapPin, Star, ChevronRight, BadgeCheck, Navigation } from "lucide-react";
 
 const StarRating = ({ note }) => {
@@ -122,7 +123,7 @@ export default function ArtisanCard({ artisan }) {
       {/* Actions */}
       <div className="mt-auto">
         <Link
-          to={`/artisans/${artisan.uid}`}
+          to={lienArtisan(artisan)}
           className="flex items-center justify-center gap-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold py-2.5 transition-colors duration-150"
         >
           Voir le profil

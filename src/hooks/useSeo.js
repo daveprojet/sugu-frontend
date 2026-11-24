@@ -55,7 +55,8 @@ const PAGES = {
 // Pages publiques à motif (le contenu précis est posé par la page elle-même).
 const MOTIFS = [
   [/^\/artisans\/[^/]+\/avis$/, { titre: 'Avis clients | Bricolibe' }],
-  [/^\/artisans\/[^/]+$/, { titre: 'Profil artisan | Bricolibe' }],
+  [/^\/artisans\/[^/]+$/, { titre: 'Artisans | Bricolibe' }],
+  [/^\/artisans\/[^/]+\/[^/]+$/, { titre: 'Artisans | Bricolibe' }],
 ]
 
 const PUBLIQUES = new Set(Object.keys(PAGES))

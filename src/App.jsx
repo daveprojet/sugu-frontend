@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
+import { extraireUid } from '@/utils/liensArtisan'
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -25,6 +26,7 @@ import RappelAvisModal from '@/components/common/RappelAvisModal'
 const ArtisansPage = lazy(() => import('@/pages/ArtisansPage'))
 const ArtisanDetailPage = lazy(() => import('@/pages/ArtisanDetailPage'))
 const AvisArtisanPage = lazy(() => import('@/pages/AvisArtisanPage'))
+const MetierPage = lazy(() => import('@/pages/MetierPage'))
 const MonProfil = lazy(() => import('@/pages/MonProfil'))
 const IdentitePiecePage = lazy(() => import('@/pages/IdentitePiecePage'))
 const DossierProPage = lazy(() => import('@/pages/DossierProPage'))
@@ -73,6 +75,16 @@ const queryClient = new QueryClient({
 // Route protégée
 const ACCUEIL_PARTENAIRE = '/dashboard-artisan/missions-entreprises'
 
+// Un segment qui finit par un uid est un profil (…/avis : ses avis) ; sinon c'est une page métier.
+function RouteArtisans() {
+  const { uid: segment, suite } = useParams()
+  if (extraireUid(segment)) {
+    if (!suite) return <ArtisanDetailPage />
+    return suite === 'avis' ? <AvisArtisanPage /> : <NotFoundPage />
+  }
+  return <MetierPage key={`${segment}/${suite || ''}`} />
+}
+
 function PrivateRoute({ children, role, independant = false }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>
@@ -109,8 +121,9 @@ function AppRoutes() {
           <Route path="/a-propos"          element={<AboutPage />} />
           <Route path="/contact"           element={<ContactPage />} />
           <Route path="/artisans"          element={<ArtisansPage />} />
-          <Route path="/artisans/:uid"      element={<ArtisanDetailPage />} />
-          <Route path="/artisans/:uid/avis"  element={<AvisArtisanPage />} />
+          {/* /artisans/<prenom-nom>-<uid> : profil ; /artisans/<metier>[/<ville>] : page métier. */}
+          <Route path="/artisans/:uid"        element={<RouteArtisans />} />
+          <Route path="/artisans/:uid/:suite" element={<RouteArtisans />} />
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />

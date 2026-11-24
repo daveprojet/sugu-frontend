@@ -3,18 +3,21 @@ import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import BackLink from "@/components/common/BackLink";
 import { useSeo } from "@/hooks/useSeo";
+import { extraireUid } from "@/utils/liensArtisan";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 
 export default function AvisArtisanPage() {
-  const { uid } = useParams();
+  // Segment « prenom-nom-<uid> » ou « <uid> » (voir utils/liensArtisan).
+  const uid = extraireUid(useParams().uid);
   const { data: artisan } = useArtisan(uid);
   useSeo(artisan ? {
     titre: `Avis clients de ${artisan.prenom} ${artisan.nom} | Bricolibe`,
     description: `${artisan.nb_avis} avis de clients sur ${artisan.prenom} ${artisan.nom}, artisan Bricolibe${artisan.ville ? ` à ${artisan.ville}` : ''}.`,
     noindex: Boolean(artisan.suspendu),
+    chemin: artisan.chemin ? `${artisan.chemin}/avis` : undefined,
   } : null);
   const [page, setPage] = useState(1);
   const [allAvis, setAllAvis] = useState([]);
@@ -84,7 +87,7 @@ export default function AvisArtisanPage() {
           animate={{ opacity: 1, x: 0 }}
         >
           <BackLink
-            fallback={`/artisans/${uid}`}
+            fallback={artisan?.chemin || `/artisans/${uid}`}
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 hover:gap-2 transition-all duration-200 mb-6 font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
