@@ -38,6 +38,9 @@ function Totaux({ totaux }) {
   return (
     <dl className="grid gap-1 text-sm sm:ml-auto sm:min-w-[260px]">
       <div className="flex justify-between gap-4 text-muted"><dt>Main-d’œuvre</dt><dd>{fcfa(totaux.main_oeuvre)}</dd></div>
+      {totaux.remise > 0 && (
+        <div className="flex justify-between gap-4 text-emerald-700"><dt>Remise formule ({Number(totaux.remise_pct)} %)</dt><dd>− {fcfa(totaux.remise)}</dd></div>
+      )}
       <div className="flex justify-between gap-4 text-muted"><dt>Matériaux</dt><dd>{fcfa(totaux.materiaux)}</dd></div>
       <div className="flex justify-between gap-4 text-muted"><dt>Déplacement</dt><dd>{fcfa(totaux.deplacement)}</dd></div>
       <div className="flex justify-between gap-4 font-semibold text-ink border-t border-line pt-1"><dt>Total</dt><dd>{fcfa(totaux.total)}</dd></div>
@@ -57,8 +60,8 @@ function BoutonPdf({ demandeUid, devis }) {
   )
 }
 
-/** Devis validés par l'inspecteur : l'entreprise accepte (l'intervention peut commencer) ou refuse. */
-export default function DevisEntreprise({ demande, repondreDevis }) {
+/** Devis validés par l'inspecteur : l'entreprise accepte (l'intervention peut commencer), en discute ou refuse. */
+export default function DevisEntreprise({ demande, repondreDevis, discuterDevis }) {
   const versions = demande.devis || []
   if (!versions.length) {
     if (['ANNULEE', 'CLOTUREE'].includes(demande.statut)) return null
@@ -66,7 +69,7 @@ export default function DevisEntreprise({ demande, repondreDevis }) {
       <section className="bg-white border border-line rounded-2xl p-5 mb-4">
         <h2 className="font-semibold text-ink mb-1">Devis</h2>
         <p className="text-sm text-muted">
-          L’artisan peut passer faire un diagnostic. Le devis vous sera envoyé ici une fois validé par l’inspecteur Bricolibe :
+          L’ouvrier fait d’abord l’état des lieux sur place. Le devis vous sera envoyé ici une fois validé par l’inspecteur Bricolibe :
           l’intervention commence après votre accord.
         </p>
       </section>
@@ -77,6 +80,10 @@ export default function DevisEntreprise({ demande, repondreDevis }) {
   const refuser = () => {
     const motif = window.prompt('Qu’est-ce qui ne vous convient pas dans ce devis ?')
     if (motif?.trim()) repondreDevis.mutate({ devisUid: courant.uid, action: 'refuser', motif })
+  }
+  const discuter = () => {
+    const message = window.prompt('Que souhaitez-vous discuter (prix, matériel, délai…) ? L’inspecteur vous recontacte.')
+    if (message?.trim()) discuterDevis.mutate({ devisUid: courant.uid, message })
   }
   const accepter = () => {
     if (window.confirm(`Accepter ce devis de ${fcfa(courant.totaux.total)} ? L’intervention pourra commencer.`)) {
@@ -96,6 +103,12 @@ export default function DevisEntreprise({ demande, repondreDevis }) {
         <p className="text-sm bg-canvas-soft rounded-xl p-3"><b>Mot de l’inspecteur :</b> {courant.commentaire_inspecteur}</p>
       )}
       {courant.motif_rejet && <p className="text-sm text-red-700">Votre motif de refus : {courant.motif_rejet}</p>}
+      {courant.discussion && courant.statut === 'VALIDE' && (
+        <p className="text-sm bg-sky-50 text-sky-900 rounded-xl p-3">
+          <b>Votre demande de discussion</b> ({dateHeure(courant.discussion_at)}) : {courant.discussion}
+          <span className="block text-xs mt-1">L’inspecteur vous recontacte ; il peut vous proposer une nouvelle version du devis.</span>
+        </p>
+      )}
       <p className="text-xs text-muted">
         Validé {dateHeure(courant.valide_at)}{courant.valide_par ? ` par ${courant.valide_par}` : ''}
         {courant.reponse_at ? ` · votre réponse ${dateHeure(courant.reponse_at)}` : ''}.
@@ -109,6 +122,12 @@ export default function DevisEntreprise({ demande, repondreDevis }) {
               type="button" onClick={refuser} disabled={repondreDevis.isLoading}
               className="ml-auto px-4 py-2 rounded-lg border border-line text-ink text-sm font-medium"
             >Refuser</button>
+            {discuterDevis && (
+              <button
+                type="button" onClick={discuter} disabled={discuterDevis.isLoading}
+                className="px-4 py-2 rounded-lg border border-primary-300 text-primary-700 text-sm font-medium"
+              >Discuter</button>
+            )}
             <button
               type="button" onClick={accepter} disabled={repondreDevis.isLoading}
               className="px-4 py-2 rounded-lg bg-accent-500 text-white text-sm font-semibold disabled:opacity-60"

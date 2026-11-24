@@ -12,7 +12,7 @@ export default function ListeMissions({ missions }) {
           <li key={mission.uid}>
             <Link
               to={`/dashboard-artisan/missions-entreprises/${mission.uid}`}
-              className={`flex items-center gap-4 bg-white border rounded-2xl p-4 transition-all hover:shadow-sm ${
+              className={`flex items-center gap-4 bg-white border rounded-2xl p-4 transition-all hover:border-blue-300 hover:shadow-sm ${
                 mission.statut === 'PROPOSEE' ? 'border-amber-300 ring-2 ring-amber-100' : 'border-line'
               }`}
             >
