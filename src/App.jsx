@@ -10,6 +10,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import PushPermissionBanner from '@/components/common/PushPermissionBanner'
+import InstallAppBanner from '@/components/common/InstallAppBanner'
 import Spinner from '@/components/common/Spinner'
 import ScrollToTop from '@/components/common/ScrollToTop'
 
@@ -174,11 +175,19 @@ function AppRoutes() {
       {!espace && <Footer />}
       {user?.role === 'artisan' && <RappelIdentiteModal artisanUid={user.artisan_uid} />}
       {user?.role === 'client' && <RappelAvisModal />}
-      {user && !barreActions && (
-        <PushPermissionBanner
-          onAllow={requestPermissionAndRegister}
-          hasRegisteredToken={hasRegisteredToken}
-        />
+      {/* Bannières du bas (installation, notifications) empilées : elles ne se recouvrent pas. */}
+      {!barreActions && (
+        <div className={`fixed left-4 right-4 md:left-auto md:right-4 md:w-[26rem] z-50 flex flex-col gap-3 pointer-events-none ${
+          onglets ? 'bottom-20 md:bottom-4' : 'bottom-4'
+        }`}>
+          {user && (
+            <PushPermissionBanner
+              onAllow={requestPermissionAndRegister}
+              hasRegisteredToken={hasRegisteredToken}
+            />
+          )}
+          <InstallAppBanner />
+        </div>
       )}
       <BarreOnglets />
       <ToastContainer position="bottom-right" theme="light" />
