@@ -139,6 +139,19 @@ export default function MissionsEntreprisesPage() {
           </Panneau>
 
           <div className="grid gap-5 content-start">
+            <Panneau titre="Mes gains">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><Wallet className="w-5 h-5" /></span>
+                <div>
+                  <p className="text-xs text-muted">Total déjà reçu</p>
+                  <p className="font-display text-lg font-bold text-emerald-800">{r ? fcfa(r.montants.paye) : '—'}</p>
+                </div>
+              </div>
+              <p className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
+                Vos gains sont reversés chaque jeudi.
+              </p>
+              <p className="mt-2 text-xs text-muted">Le détail de chaque paiement figure dans la mission terminée.</p>
+            </Panneau>
             <Panneau titre="Ma zone"><MaZone /></Panneau>
             <Panneau titre="Mes résultats">
               <dl className="grid grid-cols-2 gap-3 text-sm">
@@ -153,10 +166,6 @@ export default function MissionsEntreprisesPage() {
                 <div className="rounded-xl bg-primary-50 p-3">
                   <dt className="text-xs text-primary-700">Délégations acceptées</dt>
                   <dd className="font-display text-lg font-bold text-primary-800">{taux(r?.delegations.taux_acceptation)}</dd>
-                </div>
-                <div className="rounded-xl bg-emerald-50 p-3">
-                  <dt className="text-xs text-emerald-700 flex items-center gap-1"><Wallet className="w-3.5 h-3.5" /> Payé</dt>
-                  <dd className="font-display text-lg font-bold text-emerald-800">{r ? fcfa(r.montants.paye) : '—'}</dd>
                 </div>
               </dl>
               {r?.inspections.reprises > 0 && (

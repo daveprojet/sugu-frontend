@@ -154,11 +154,15 @@ export default function CommissionDashboardPage() {
             )}
           </div>
 
+          <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+            Vos gains sont reversés chaque jeudi.
+          </p>
+
           {reversementsLoading ? (
             <div className="flex justify-center py-6"><Spinner size="sm" /></div>
           ) : reversements.length === 0 ? (
             <p className="text-sm text-muted text-center py-4">
-              Aucun gain pour le moment. Vos reversements apparaîtront après le paiement en ligne de vos dépannages.
+              Aucun gain pour le moment. Vos gains apparaîtront ici après le paiement en ligne de vos dépannages, puis vous seront reversés le jeudi.
             </p>
           ) : (
             <div className="space-y-3">
