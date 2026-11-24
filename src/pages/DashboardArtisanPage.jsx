@@ -291,7 +291,7 @@ export default function DashboardArtisanPage() {
           </motion.div>
         )}
 
-        {/* Étapes d'un profil complet : identité, photo, position, dossier pro */}
+        {/* Étapes d'un profil complet : identité, photo, position, photos et vidéos des travaux, dossier pro */}
         {profilArtisan && !identiteChargement && !dossierChargement && (
           <CompleterProfil artisan={profilArtisan} identite={identite} dossierPro={dossierPro} />
         )}
