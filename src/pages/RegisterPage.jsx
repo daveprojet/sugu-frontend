@@ -14,7 +14,7 @@ import { chercherZoneProche } from "@/hooks/useZones";
 import { avecRedirection, redirectionDemandee } from "@/utils/redirection";
 import { marquerRappelIdentiteVu } from "@/utils/rappelIdentite";
 
-import bgImage from '/images/metiers/register-bg.jpg';
+import bgImage from '/images/metiers/register-bg.webp';
 
 export default function RegisterPage() {
   const { register } = useAuth();

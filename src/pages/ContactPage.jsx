@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 // 1. IMPORT DE L'IMAGE DE FOND DU HERO (locale)
-import heroBg from "/images/metiers/register-bg.jpg";
+import heroBg from "/images/metiers/register-bg.webp";
 
 const contactEmail = "info@bricolibe.com";
 const contactPhone = "+221777234086";
