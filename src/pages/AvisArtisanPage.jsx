@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import BackLink from "@/components/common/BackLink";
+import { useSeo } from "@/hooks/useSeo";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import StarRating from "@/components/common/StarRating";
 import Spinner from "@/components/common/Spinner";
@@ -10,6 +11,11 @@ import { ArrowLeft, MessageSquare } from "lucide-react";
 export default function AvisArtisanPage() {
   const { uid } = useParams();
   const { data: artisan } = useArtisan(uid);
+  useSeo(artisan ? {
+    titre: `Avis clients de ${artisan.prenom} ${artisan.nom} | Bricolibe`,
+    description: `${artisan.nb_avis} avis de clients sur ${artisan.prenom} ${artisan.nom}, artisan Bricolibe${artisan.ville ? ` à ${artisan.ville}` : ''}.`,
+    noindex: Boolean(artisan.suspendu),
+  } : null);
   const [page, setPage] = useState(1);
   const [allAvis, setAllAvis] = useState([]);
   const [hasMore, setHasMore] = useState(true);

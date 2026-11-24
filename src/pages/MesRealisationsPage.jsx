@@ -1,72 +1,15 @@
-import { useRef } from 'react'
-import { useMutation, useQuery, useQueryClient } from 'react-query'
-import { toast } from 'react-toastify'
-import { ArrowLeft, ImagePlus, Loader2, MessageCircle, Trash2 } from 'lucide-react'
+import { ArrowLeft, ImagePlus, Loader2, MessageCircle, Trash2, Video } from 'lucide-react'
 import BackLink from '@/components/common/BackLink'
 import Spinner from '@/components/common/Spinner'
+import { BoutonAjoutMedia } from '@/components/artisan/AjoutMedias'
 import { useAuth } from '@/context/AuthContext'
-import { artisanService } from '@/services/api'
-import { extractApiError } from '@/utils/errors'
+import { useMediasArtisan } from '@/hooks/useMediasArtisan'
 import { lienWhatsappProfil, WHATSAPP_BRICOLIBE } from '@/utils/whatsappBricolibe'
-
-const MAX_PHOTO = 5 * 1024 * 1024
-const MAX_VIDEO = 30 * 1024 * 1024
-
-// Contrôle avant l'envoi (le serveur vérifie aussi) : évite d'attendre un long
-// téléversement pour se le voir refuser.
-// Certains téléphones ne donnent pas le type du fichier : l'extension sert alors.
-const genre = (fichier) => {
-  if (fichier.type) return fichier.type.split('/')[0]
-  const ext = fichier.name.split('.').pop().toLowerCase()
-  if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return 'image'
-  return ['mp4', 'mov', 'webm', '3gp', 'm4v'].includes(ext) ? 'video' : ''
-}
-
-function erreurFichier(fichier) {
-  if (genre(fichier) === 'image') {
-    return fichier.size > MAX_PHOTO ? `« ${fichier.name} » dépasse 5 Mo.` : null
-  }
-  if (genre(fichier) === 'video') {
-    return fichier.size > MAX_VIDEO ? `La vidéo « ${fichier.name} » dépasse 30 Mo (1 minute environ).` : null
-  }
-  return `« ${fichier.name} » n'est ni une photo ni une vidéo.`
-}
 
 /** L'artisan ajoute ou retire les photos et vidéos de ses réalisations (onglet « Photos et vidéos » du profil public). */
 export default function MesRealisationsPage() {
   const { user } = useAuth()
-  const uid = user?.artisan_uid
-  const queryClient = useQueryClient()
-  const input = useRef(null)
-  const cle = ['artisan-medias', uid]
-
-  const { data, isLoading } = useQuery(cle, () => artisanService.medias(uid).then((r) => r.data), { enabled: !!uid })
-
-  const apresChangement = (donnees) => {
-    queryClient.setQueryData(cle, donnees)
-    queryClient.invalidateQueries(['artisan-portfolio', uid])
-  }
-  const ajout = useMutation((fichiers) => artisanService.ajouterMedias(uid, fichiers).then((r) => r.data), {
-    onSuccess: (donnees) => { apresChangement(donnees); toast.success('Ajouté à votre profil.') },
-    onError: (err) => toast.error(extractApiError(err, "L'envoi n'a pas abouti.")),
-  })
-  const retrait = useMutation((mediaUid) => artisanService.supprimerMedia(uid, mediaUid).then((r) => r.data), {
-    onSuccess: apresChangement,
-    onError: (err) => toast.error(extractApiError(err, 'Impossible de retirer ce fichier.')),
-  })
-
-  const choisir = (e) => {
-    const fichiers = Array.from(e.target.files || [])
-    e.target.value = ''
-    if (!fichiers.length) return
-    const erreur = fichiers.map(erreurFichier).find(Boolean)
-    if (erreur) { toast.error(erreur); return }
-    ajout.mutate(fichiers)
-  }
-
-  const medias = data?.medias || []
-  const nbPhotos = medias.filter((m) => m.type === 'PHOTO').length
-  const nbVideos = medias.length - nbPhotos
+  const { isLoading, medias, nbPhotos, nbVideos, maxPhotos, maxVideos, retrait } = useMediasArtisan()
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-8 md:py-12">
@@ -79,21 +22,30 @@ export default function MesRealisationsPage() {
       </p>
 
       <div className="mt-6 rounded-2xl border border-sand-200 bg-white p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-          <p className="text-sm text-gray-600">
-            <span className="font-semibold text-gray-900">{nbPhotos}/{data?.max_photos ?? 20}</span> photos ·{' '}
-            <span className="font-semibold text-gray-900">{nbVideos}/{data?.max_videos ?? 3}</span> vidéos
-          </p>
-          <button
-            type="button"
-            onClick={() => input.current?.click()}
-            disabled={ajout.isLoading || !uid}
-            className="btn-primary inline-flex items-center justify-center gap-2"
+        <p className="text-sm text-gray-600">
+          <span className="font-semibold text-gray-900">{nbPhotos}/{maxPhotos}</span> photos ·{' '}
+          <span className="font-semibold text-gray-900">{nbVideos}/{maxVideos}</span> vidéos
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <BoutonAjoutMedia type="photo" className="btn-primary inline-flex items-center justify-center gap-2">
+            {({ enCours }) => (
+              <>
+                {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
+                {enCours ? 'Envoi en cours…' : 'Ajouter des photos'}
+              </>
+            )}
+          </BoutonAjoutMedia>
+          <BoutonAjoutMedia
+            type="video"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary-300 bg-white px-4 py-2.5 text-sm font-semibold text-primary-700 hover:bg-primary-50"
           >
-            {ajout.isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
-            {ajout.isLoading ? 'Envoi en cours…' : 'Ajouter des photos ou vidéos'}
-          </button>
-          <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,video/*" multiple hidden onChange={choisir} />
+            {({ enCours }) => (
+              <>
+                {enCours ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                {enCours ? 'Envoi en cours…' : 'Ajouter une vidéo'}
+              </>
+            )}
+          </BoutonAjoutMedia>
         </div>
         <p className="mt-2 text-xs text-gray-500">Photos : 5 Mo maximum. Vidéos : 30 Mo maximum (1 minute environ).</p>
 

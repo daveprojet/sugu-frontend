@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-le
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import BackLink from "@/components/common/BackLink";
+import { useSeo } from "@/hooks/useSeo";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import { useCreateDemande } from "@/hooks/useDemandes";
 import { useCategorie } from "@/hooks/useCategories";
@@ -76,6 +77,23 @@ function FitBounds({ artisanPos, clientPos }) {
   return null;
 }
 
+// Titre et description du profil pour les moteurs et les aperçus de partage (WhatsApp, Facebook).
+function seoArtisan(artisan) {
+  const nom = `${artisan.prenom} ${artisan.nom}`.trim();
+  const metiers = (artisan.categories || []).map((c) => c.nom).slice(0, 3).join(", ");
+  const lieu = [artisan.quartier, artisan.ville].filter(Boolean).join(", ");
+  const note = artisan.nb_avis > 0 ? ` Note ${Number(artisan.note_moyenne).toFixed(1)}/5 (${artisan.nb_avis} avis).` : "";
+  const bio = (artisan.bio || "").replace(/\s+/g, " ").trim();
+  const resume = `${nom}${metiers ? `, ${metiers}` : ""}${lieu ? ` à ${lieu}` : ""}.${note}`;
+  return {
+    titre: `${nom}${metiers ? ` — ${metiers}` : ""}${artisan.ville ? ` à ${artisan.ville}` : ""} | Bricolibe`,
+    description: (bio ? `${resume} ${bio}` : `${resume} Demandez une intervention sur Bricolibe.`).slice(0, 160),
+    image: artisan.photo || undefined,
+    type: "profile",
+    noindex: Boolean(artisan.suspendu),
+  };
+}
+
 export default function ArtisanDetailPage() {
   const { uid } = useParams();
   const navigate = useNavigate();
@@ -85,6 +103,7 @@ export default function ArtisanDetailPage() {
   const { data: avisPage, isLoading: avisLoading } = useArtisanAvis(uid, { page: 1 });
   const avis = avisPage?.results || [];
   const totalAvis = avisPage?.count || 0;
+  useSeo(artisan ? seoArtisan(artisan) : null);
   const createDemande = useCreateDemande();
   const [showDemandeForm, setShowDemandeForm] = useState(false);
   const demandeFormRef = useRef(null);
