@@ -1,0 +1,12 @@
+# Espaces privés : rien à indexer (les autres pages non publiques portent une balise noindex).
+User-agent: *
+Disallow: /dashboard-artisan
+Disallow: /dashboard-client
+Disallow: /espace-entreprise
+Disallow: /mon-profil
+Disallow: /bienvenue-artisan
+Disallow: /payment/
+Disallow: /reset-mot-de-passe
+Disallow: /mot-de-passe-oublie
+
+Sitemap: https://backend.bricolibe.com/sitemap.xml

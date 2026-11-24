@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { Award, Camera, Check, ChevronRight, IdCard, MapPin } from "lucide-react";
+import { Award, Camera, Check, ChevronRight, IdCard, ImagePlus, MapPin } from "lucide-react";
 import ChoisirPhotoProfil from "@/components/artisan/ChoisirPhotoProfil";
 import { texteBrut } from "@/components/common/TexteMisEnForme";
+import { useMediasArtisan } from "@/hooks/useMediasArtisan";
 
 const TONS = {
   afaire: "bg-canvas text-muted",
@@ -54,6 +55,7 @@ function Etape({ fait, icone: Icone, titre, detail, statut, ton = "afaire", lien
 
 // Liste des étapes pour un profil complet. Masquée une fois tout terminé.
 export default function CompleterProfil({ artisan, identite, dossierPro }) {
+  const { medias, isLoading: mediasChargement } = useMediasArtisan();
   const statutIdentite = identite?.statut;
   const etapes = [
     {
@@ -88,6 +90,15 @@ export default function CompleterProfil({ artisan, identite, dossierPro }) {
       detail: "Pour apparaître au bon endroit et à la bonne distance des clients.",
     },
     {
+      cle: "medias",
+      icone: ImagePlus,
+      titre: "Photos et vidéos de vos travaux",
+      fait: medias.length > 0,
+      lien: "/mon-profil/realisations",
+      statut: "À faire",
+      detail: "Montrez vos plus beaux travaux : ils s'affichent sur votre profil public.",
+    },
+    {
       cle: "dossier",
       icone: Award,
       titre: "Dossier professionnel",
@@ -102,7 +113,7 @@ export default function CompleterProfil({ artisan, identite, dossierPro }) {
   ];
 
   const faites = etapes.filter((e) => e.fait).length;
-  if (faites === etapes.length) return null;
+  if (mediasChargement || faites === etapes.length) return null;
   const pourcentage = Math.round((faites / etapes.length) * 100);
 
   return (

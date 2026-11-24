@@ -13,6 +13,8 @@ import PushPermissionBanner from '@/components/common/PushPermissionBanner'
 import InstallAppBanner from '@/components/common/InstallAppBanner'
 import Spinner from '@/components/common/Spinner'
 import ScrollToTop from '@/components/common/ScrollToTop'
+import { GestionSeo } from '@/hooks/useSeo'
+import NotFoundPage from '@/pages/NotFoundPage'
 
 import HomePage           from '@/pages/HomePage'
 import AboutPage          from '@/pages/AboutPage'
@@ -96,6 +98,7 @@ function AppRoutes() {
   return (
     <div className={`flex flex-col min-h-screen ${onglets ? 'pb-16 md:pb-0 avec-onglets' : ''}`}>
       <ScrollToTop />
+      <GestionSeo />
       <Navbar />
       <div className="flex-1">
         <Routes>
@@ -177,7 +180,7 @@ function AppRoutes() {
           <Route path="/reset-mot-de-passe"  element={<ResetMotDePassePage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/cancel" element={<PaymentCancelPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
       {!espace && <Footer />}
