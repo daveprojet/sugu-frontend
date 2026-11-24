@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus, MapPin, ArrowLeft, Eye, EyeOff, Lock, FileText, X } from "lucide-react";
+import { Building2, Wrench, Check, CheckCircle2, UserCheck, UserPlus, MapPin, ArrowLeft, Eye, EyeOff, Lock, FileText, X, ImagePlus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useArtisan, useIdentite } from "@/hooks/useArtisans";
 import { partenaireService } from "@/services/api";
@@ -28,14 +28,14 @@ const PROFILS = [
     label: "Je suis une entreprise",
     Icon: Building2,
     intro:
-      "Hôtel, agence, syndic, commerce… Confiez vos interventions aux artisans Bricolibe, sélectionnés et suivis par notre équipe.",
+      "Hôtel, agence, syndic, commerce… Confiez vos interventions aux ouvriers et techniciens Bricolibe, vérifiés et supervisés par notre inspecteur.",
   },
   {
     key: "ARTISAN",
-    label: "Je suis un artisan",
+    label: "Je suis un ouvrier / technicien",
     Icon: Wrench,
     intro:
-      "Rejoignez les artisans Bricolibe et intervenez pour nos entreprises partenaires. Notre équipe étudie votre candidature et vous recontacte.",
+      "Rejoignez les ouvriers et techniciens Bricolibe et intervenez pour nos entreprises clientes, près de chez vous. Si votre dossier est retenu, vous êtes convoqué à un entretien en ligne avec notre inspecteur.",
   },
 ];
 
@@ -70,7 +70,96 @@ const initialForm = {
   password: "",
   confirmation: "",
   cv: null,
+  whatsapp: "",
+  whatsapp_identique: true,
+  zone_secondaire: "",
+  jours: [],
+  creneaux: [],
+  photos_travaux: [],
 };
+
+// Disponibilités et photos de travaux : mêmes valeurs et limites que le serveur.
+const JOURS = [
+  ["lun", "Lun"], ["mar", "Mar"], ["mer", "Mer"], ["jeu", "Jeu"], ["ven", "Ven"], ["sam", "Sam"], ["dim", "Dim"],
+];
+const CRENEAUX = [["matin", "Matin"], ["apres_midi", "Après-midi"], ["soir", "Soir"]];
+const MAX_PHOTOS_TRAVAUX = 6;
+const PHOTO_TAILLE_MAX = 10 * 1024 * 1024;
+
+/** Cases à cocher en pastilles (jours, créneaux). */
+function Pastilles({ options, selection, onToggle }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map(([valeur, libelle]) => {
+        const actif = selection.includes(valeur);
+        return (
+          <button
+            key={valeur} type="button" aria-pressed={actif} onClick={() => onToggle(valeur)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${
+              actif ? "bg-white text-indigo-800 border-white" : "border-white/40 text-indigo-100 hover:bg-white/10"
+            }`}
+          >
+            {libelle}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Photos de travaux réalisés : miniatures, ajout et retrait. */
+function PhotosTravaux({ photos, onChange }) {
+  const [apercus, setApercus] = useState([]);
+  useEffect(() => {
+    const urls = photos.map((photo) => URL.createObjectURL(photo));
+    setApercus(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [photos]);
+
+  const ajouter = (fichiers) => {
+    const images = Array.from(fichiers).filter((f) => {
+      if (!f.type.startsWith("image/")) {
+        toast.error(`« ${f.name} » n’est pas une photo.`);
+        return false;
+      }
+      if (f.size > PHOTO_TAILLE_MAX) {
+        toast.error(`« ${f.name} » dépasse 10 Mo.`);
+        return false;
+      }
+      return true;
+    });
+    const total = [...photos, ...images];
+    if (total.length > MAX_PHOTOS_TRAVAUX) toast.info(`${MAX_PHOTOS_TRAVAUX} photos maximum : les suivantes sont ignorées.`);
+    onChange(total.slice(0, MAX_PHOTOS_TRAVAUX));
+  };
+
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+      {apercus.map((url, index) => (
+        <div key={url} className="relative aspect-square rounded-lg overflow-hidden border border-white/40">
+          <img src={url} alt={`Travaux ${index + 1}`} className="w-full h-full object-cover" />
+          <button
+            type="button" aria-label={`Retirer la photo ${index + 1}`}
+            onClick={() => onChange(photos.filter((_, i) => i !== index))}
+            className="absolute top-1 right-1 p-1 rounded-full bg-black/60 text-white hover:bg-black/80"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ))}
+      {photos.length < MAX_PHOTOS_TRAVAUX && (
+        <label className="aspect-square flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-white/40 bg-white/10 hover:bg-white/20 text-indigo-100 cursor-pointer transition text-xs text-center px-1">
+          <ImagePlus className="w-5 h-5" />
+          Ajouter
+          <input
+            type="file" accept="image/*" multiple className="sr-only"
+            onChange={(e) => { ajouter(e.target.files || []); e.target.value = ""; }}
+          />
+        </label>
+      )}
+    </div>
+  );
+}
 
 // CV de l'artisan : mêmes formats et taille que ceux acceptés par le serveur.
 const CV_EXTENSIONS = [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
@@ -122,8 +211,16 @@ export default function DevenirPartenairePage() {
   // Option « Autres » : métiers absents de la liste, validés ensuite par l'équipe.
   const [autresCoche, setAutresCoche] = useState(false);
   const [voirMotDePasse, setVoirMotDePasse] = useState(false);
+  // Zones d'intervention (plan de recrutement), pour la zone secondaire.
+  const [zones, setZones] = useState([]);
+  useEffect(() => {
+    partenaireService.zones().then(({ data }) => setZones(data)).catch(() => setZones([]));
+  }, []);
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+  const basculer = (key, valeur) => setForm((f) => ({
+    ...f, [key]: f[key].includes(valeur) ? f[key].filter((v) => v !== valeur) : [...f[key], valeur],
+  }));
 
   const choisirMode = (mode) => {
     setModeCompte(mode);
@@ -205,6 +302,20 @@ export default function DevenirPartenairePage() {
       toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
       return false;
     }
+    if (form.annees_experience === "") {
+      toast.error("Indiquez vos années d’expérience.");
+      return false;
+    }
+    if (!form.jours.length || !form.creneaux.length) {
+      toast.error("Indiquez vos jours et horaires de disponibilité.");
+      document.getElementById("dispo-artisan")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return false;
+    }
+    if (!form.photos_travaux.length) {
+      toast.error("Ajoutez au moins une photo de vos travaux.");
+      document.getElementById("photos-artisan")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return false;
+    }
     if (!form.cv) {
       toast.error("Joignez votre CV.");
       document.getElementById("cv-artisan")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -255,7 +366,10 @@ export default function DevenirPartenairePage() {
     }
     setLoading(true);
     try {
-      const { confirmation, password, ...champs } = form;
+      const {
+        confirmation, password, whatsapp, whatsapp_identique, zone_secondaire, jours, creneaux, photos_travaux,
+        ...champs
+      } = form;
       const donnees = {
         ...champs,
         password: avecMotDePasse ? password : "",
@@ -264,6 +378,15 @@ export default function DevenirPartenairePage() {
         annees_experience: form.annees_experience === "" ? null : Number(form.annees_experience),
         autres_metiers: isEntreprise ? [] : autresMetiers(),
       };
+      if (!isEntreprise) {
+        Object.assign(donnees, {
+          // Vide : le serveur reprend le numéro de téléphone.
+          whatsapp: whatsapp_identique ? "" : whatsapp,
+          zone_secondaire,
+          disponibilites: JSON.stringify({ jours, creneaux }),
+          photos_travaux,
+        });
+      }
       if (avecEtapePiece) {
         Object.assign(donnees, piece);
         if (piece.type_piece === "passeport") donnees.piece_verso = null;
@@ -308,7 +431,11 @@ export default function DevenirPartenairePage() {
                 Merci {form.prenom} ! Notre équipe étudie votre demande et vous recontacte au{" "}
                 <span className="font-semibold text-white">{form.telephone}</span>.
                 {type === "ARTISAN" && !avecMonCompte && (
-                  <> Dès qu’elle est acceptée, vous recevez un SMS et vous vous connectez avec ce numéro et votre mot de passe.</>
+                  <> Votre compte est créé : il sera activé si vous êtes retenu après l’entretien avec notre inspecteur.
+                    Vous recevrez alors un SMS et vous vous connecterez avec ce numéro et votre mot de passe.</>
+                )}
+                {type === "ARTISAN" && avecMonCompte && (
+                  <> Si vous êtes retenu après l’entretien, vous recevrez nos missions entreprises dans votre espace.</>
                 )}
               </p>
               <Link
@@ -386,7 +513,7 @@ export default function DevenirPartenairePage() {
                 <p className="text-sm mb-6 px-4 py-3 rounded-xl bg-white/15 text-white">
                   Dès que votre candidature est acceptée, votre espace entreprise est créé et vous recevez un SMS.
                   Vous y décrivez vos besoins en ligne (jusqu'à 5 comptes pour votre équipe) : un inspecteur Bricolibe
-                  envoie les artisans et contrôle leur travail. Déjà un compte ?{" "}
+                  envoie les ouvriers et contrôle leur travail. Déjà un compte ?{" "}
                   <Link to="/connexion" className="font-semibold underline">Connectez-vous</Link>.
                 </p>
               )}
@@ -515,7 +642,8 @@ export default function DevenirPartenairePage() {
                       </div>
                     </div>
                     <p className="sm:col-span-2 text-xs text-indigo-200 -mt-2 ml-1">
-                      Vous vous connecterez avec votre numéro et ce mot de passe dès que votre candidature sera acceptée.
+                      Votre compte est créé dès l’envoi, mais il ne sera activé que si vous êtes retenu après l’entretien :
+                      vous vous connecterez alors avec votre numéro et ce mot de passe.
                     </p>
                   </div>
                 )}
@@ -599,17 +727,76 @@ export default function DevenirPartenairePage() {
                         </div>
                       )}
                     </div>
-                    <div className="sm:w-1/2">
-                      <label className={labelClass}>Années d'expérience (optionnel)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="60"
-                        value={form.annees_experience}
-                        onChange={(e) => set("annees_experience", e.target.value)}
-                        className={inputClass}
-                        placeholder="5"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>Années d'expérience <span className="text-red-300">*</span></label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="60"
+                          required
+                          value={form.annees_experience}
+                          onChange={(e) => set("annees_experience", e.target.value)}
+                          className={inputClass}
+                          placeholder="5"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Zone secondaire (optionnel)</label>
+                        <select
+                          value={form.zone_secondaire}
+                          onChange={(e) => set("zone_secondaire", e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="">Aucune</option>
+                          {zones.map((zone) => (
+                            <option key={zone.id} value={zone.id}>Zone {zone.numero} — {zone.nom}</option>
+                          ))}
+                        </select>
+                        <p className="text-xs text-indigo-200 mt-1.5 ml-1">
+                          Une autre zone où vous acceptez d’intervenir, en plus de celle où vous habitez ou travaillez.
+                        </p>
+                      </div>
+                    </div>
+                    {!avecMonCompte && (
+                      <div>
+                        <label className="flex items-center gap-2 text-sm text-indigo-100 ml-1 cursor-pointer">
+                          <input
+                            type="checkbox" checked={form.whatsapp_identique}
+                            onChange={(e) => set("whatsapp_identique", e.target.checked)}
+                            className="w-4 h-4 rounded"
+                          />
+                          C’est aussi mon numéro WhatsApp
+                        </label>
+                        {!form.whatsapp_identique && (
+                          <div className="mt-3 sm:w-1/2">
+                            <label className={labelClass}>Numéro WhatsApp <span className="text-red-300">*</span></label>
+                            <PhoneField
+                              variant="glass"
+                              value={form.whatsapp}
+                              onChange={(whatsapp) => set("whatsapp", whatsapp)}
+                              required
+                            />
+                          </div>
+                        )}
+                        <p className="text-xs text-indigo-200 mt-1.5 ml-1">
+                          Les convocations aux entretiens sont envoyées par WhatsApp et par e-mail.
+                        </p>
+                      </div>
+                    )}
+                    <div id="dispo-artisan">
+                      <label className={labelClass}>Vos disponibilités <span className="text-red-300">*</span></label>
+                      <Pastilles options={JOURS} selection={form.jours} onToggle={(v) => basculer("jours", v)} />
+                      <div className="mt-2">
+                        <Pastilles options={CRENEAUX} selection={form.creneaux} onToggle={(v) => basculer("creneaux", v)} />
+                      </div>
+                    </div>
+                    <div id="photos-artisan">
+                      <label className={labelClass}>Photos de vos travaux <span className="text-red-300">*</span></label>
+                      <PhotosTravaux photos={form.photos_travaux} onChange={(photos) => set("photos_travaux", photos)} />
+                      <p className="text-xs text-indigo-200 mt-1.5 ml-1">
+                        1 à {MAX_PHOTOS_TRAVAUX} photos de chantiers que vous avez réalisés. Elles sont vérifiées lors de l’entretien.
+                      </p>
                     </div>
                     <div id="cv-artisan">
                       <label className={labelClass}>Votre CV <span className="text-red-300">*</span></label>
@@ -663,7 +850,7 @@ export default function DevenirPartenairePage() {
                     placeholder={
                       isEntreprise
                         ? "Types d'interventions, fréquence, nombre de sites…"
-                        : "Vos réalisations, vos disponibilités…"
+                        : "Vos réalisations, vos chantiers en entreprise, vos diplômes…"
                     }
                   />
                 </div>

@@ -150,6 +150,14 @@ export const artisanService = {
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
   // Profil public : avant / après (avec l'accord du client) et travaux réalisés (badge).
   portfolio:   (id, params) => api.get(`/artisans/${id}/portfolio/`, { params }),
+  // Galerie libre de l'artisan (ses photos et vidéos de réalisations).
+  medias:          (id) => api.get(`/artisans/${id}/medias/`),
+  ajouterMedias:   (id, fichiers) => {
+    const fd = new FormData()
+    fichiers.forEach((f) => fd.append('fichiers', f))
+    return api.post(`/artisans/${id}/medias/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
+  supprimerMedia:  (id, mediaUid) => api.delete(`/artisans/${id}/medias/${mediaUid}/`),
 }
 
 // Formulaire multipart : champs simples, photos (répétées) et vidéo facultative.
@@ -193,9 +201,22 @@ export const demandeService = {
 // ── Volet entreprises ─────────────────────────────
 export const entrepriseService = {
   moi:          ()        => api.get('/entreprises/moi/'),
+  tableauDeBord: ()       => api.get('/entreprises/tableau-de-bord/'),
+  abonnement:   ()        => api.get('/entreprises/abonnement/'),
+  factures:     (params)  => api.get('/entreprises/factures/', { params }),
+  facturePdf:   (uid)     => api.get(`/entreprises/factures/${uid}/pdf/`, { responseType: 'blob' }),
+  payerFacture: (uid)     => api.post(`/entreprises/factures/${uid}/payer/`, {}),
+  // action : souscrire | changer | payer | resilier | annuler-resiliation
+  actionAbonnement: (action, data = {}) => api.post(`/entreprises/abonnement/${action}/`, data),
   membres:      ()        => api.get('/entreprises/membres/'),
   ajouterMembre: (data)   => api.post('/entreprises/membres/', data),
   retirerMembre: (uid)    => api.delete(`/entreprises/membres/${uid}/`),
+  // Rattacher un compte à un site (responsable de site) ou à tous les sites (site = null).
+  changerSiteMembre: (uid, site) => api.patch(`/entreprises/membres/${uid}/`, { site }),
+  sites:        ()        => api.get('/entreprises/sites/'),
+  ajouterSite:  (data)    => api.post('/entreprises/sites/', data),
+  majSite:      (uid, data) => api.patch(`/entreprises/sites/${uid}/`, data),
+  retirerSite:  (uid)     => api.delete(`/entreprises/sites/${uid}/`),
   majMoi:       (data)    => api.patch('/entreprises/moi/', data),
   demandes:     (params)  => api.get('/entreprises/demandes/', { params }),
   demande:      (uid)     => api.get(`/entreprises/demandes/${uid}/`),
@@ -209,12 +230,24 @@ export const entrepriseService = {
     api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/${action}/`, { motif }),
   devisPdf:     (uid, devisUid) => api.get(`/entreprises/demandes/${uid}/devis/${devisUid}/pdf/`, { responseType: 'blob' }),
   rapportPdf:   (uid)     => api.get(`/entreprises/demandes/${uid}/rapport/`, { responseType: 'blob' }),
+  discuterDevis: (uid, devisUid, message) => api.post(`/entreprises/demandes/${uid}/devis/${devisUid}/discuter/`, { message }),
+  signerPv:     (uid)     => api.post(`/entreprises/demandes/${uid}/signer-pv/`),
+  reclamer: (uid, { photos = [], ...data }) =>
+    api.post(`/entreprises/demandes/${uid}/reclamation/`, enFormData(data, photos), multipart),
+  garantie: (uid, { photos = [], ...data }) =>
+    api.post(`/entreprises/demandes/${uid}/garantie/`, enFormData(data, photos), multipart),
+  replanifier:  (uid, data) => api.patch(`/entreprises/demandes/${uid}/planification/`, data),
+  rapports:     ()        => api.get('/entreprises/rapports/'),
+  rapportMensuelPdf: (cle) => api.get(`/entreprises/rapports/${cle}/pdf/`, { responseType: 'blob' }),
+  noter:        (uid, note, commentaire) => api.post(`/entreprises/demandes/${uid}/noter/`, { note, commentaire }),
   accordPortfolio: (uid, accord) => api.post(`/entreprises/demandes/${uid}/accord-portfolio/`, { accord }),
 }
 
 // Missions entreprises de l'artisan (délégations de l'inspecteur).
 export const missionService = {
   list:   (etat)       => api.get('/entreprises/missions/', { params: { etat } }),
+  maZone: ()           => api.get('/entreprises/ma-zone/'),
+  mesResultats: ()     => api.get('/entreprises/mes-resultats/'),
   detail: (uid)        => api.get(`/entreprises/missions/${uid}/`),
   // action : accepter | refuser | arrivee | terminer
   action: (uid, action, data = {}) => api.post(`/entreprises/missions/${uid}/${action}/`, data),
@@ -254,6 +287,8 @@ export const dossierProService = {
 export const partenaireService = {
   // Multipart : la candidature artisan joint sa pièce d'identité (2e étape).
   candidater: (data) => api.post('/partenaires/candidatures/', enFormData(data), multipart),
+  // Zones d'intervention (plan de recrutement) : zone secondaire de l'ouvrier.
+  zones: () => api.get('/partenaires/zones/'),
 }
 
 // ── Contacts ──────────────────────────────────────────
@@ -323,6 +358,13 @@ export const fcmTokenService = {
   unregister: (id) => api.delete(`/fcm-tokens/${id}/`),
   // Déconnexion : ce navigateur ne doit plus recevoir les push du compte.
   retirer: (token) => api.delete('/fcm-tokens/', { data: { token } }),
+}
+
+// Cloche du site : notifications reçues (gardées 90 jours).
+export const clocheService = {
+  liste:    () => api.get('/notifications/'),
+  lue:      (uid) => api.post(`/notifications/${uid}/lue/`),
+  toutLire: () => api.post('/notifications/tout-lire/'),
 }
 
 export default api

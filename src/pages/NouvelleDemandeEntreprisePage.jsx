@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { ArrowLeft, Send } from 'lucide-react'
+import { Send } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCategories } from '@/hooks/useCategories'
 import { chercherZoneProche } from '@/hooks/useZones'
-import { useCreerDemandeEntreprise, useMonEntreprise } from '@/hooks/useEntreprises'
+import { URGENCES, useCreerDemandeEntreprise, useSitesEntreprise } from '@/hooks/useEntreprises'
+import CadreEntreprise from '@/components/espace/CadreEntreprise'
 import ChampsZone from '@/components/common/ChampsZone'
 import MapPicker from '@/components/common/MapPicker'
 import PhoneField from '@/components/common/PhoneField'
@@ -30,6 +31,8 @@ export default function NouvelleDemandeEntreprisePage() {
   const [photos, setPhotos] = useState([])
   const [video, setVideo] = useState(null)
   const [form, setForm] = useState({
+    site: '',
+    urgence: 'NORMAL',
     categories: [],
     description: '',
     adresse: '',
@@ -43,19 +46,22 @@ export default function NouvelleDemandeEntreprisePage() {
   })
   const set = (cle, valeur) => setForm((f) => ({ ...f, [cle]: valeur }))
 
-  // Par défaut, l'intervention a lieu à l'adresse de l'entreprise (modifiable ci-dessous).
-  const { data: entreprise } = useMonEntreprise()
+  // L'intervention a lieu à l'adresse du site choisi (précisable ci-dessous) ; par défaut le premier site.
+  const { data: sites = [] } = useSitesEntreprise()
+  const choisirSite = (site) => setForm((f) => ({
+    ...f,
+    site: site.uid,
+    adresse: site.adresse || '',
+    zone_ville: site.zone_ville ?? null,
+    zone_quartier: site.zone_quartier ?? null,
+    latitude: site.latitude != null ? Number(site.latitude) : null,
+    longitude: site.longitude != null ? Number(site.longitude) : null,
+  }))
   useEffect(() => {
-    if (!entreprise) return
-    setForm((f) => (f.zone_ville || f.latitude != null ? f : {
-      ...f,
-      adresse: f.adresse || entreprise.adresse || '',
-      zone_ville: entreprise.zone_ville ?? null,
-      zone_quartier: entreprise.zone_quartier ?? null,
-      latitude: entreprise.latitude != null ? Number(entreprise.latitude) : null,
-      longitude: entreprise.longitude != null ? Number(entreprise.longitude) : null,
-    }))
-  }, [entreprise])
+    if (sites.length && !form.site) choisirSite(sites[0])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sites])
+  const planifiee = form.urgence === 'PLANIFIE'
 
   const surPosition = async ({ latitude, longitude, quartier, noms, communes }) => {
     setForm((f) => ({ ...f, latitude, longitude }))
@@ -69,7 +75,9 @@ export default function NouvelleDemandeEntreprisePage() {
     if (!form.zone_ville) return toast.error('Choisissez la ville du lieu d’intervention.')
     const payload = {
       ...form,
-      date_souhaitee: new Date(form.date_souhaitee).toISOString(),
+      site: form.site || null,
+      // Urgence ou normal : dès que possible (le délai court à partir de la prise en charge).
+      date_souhaitee: planifiee ? new Date(form.date_souhaitee).toISOString() : '',
       // Coordonnées arrondies : le champ accepte 8 décimales.
       latitude: form.latitude != null ? Number(form.latitude).toFixed(6) : null,
       longitude: form.longitude != null ? Number(form.longitude).toFixed(6) : null,
@@ -81,16 +89,44 @@ export default function NouvelleDemandeEntreprisePage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-4 py-8">
-      <Link to="/espace-entreprise" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink mb-4">
-        <ArrowLeft className="w-4 h-4" /> Mes demandes
-      </Link>
-      <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Nouvelle demande</h1>
-      <p className="text-sm text-muted mt-1 mb-6">
-        Plus votre description est précise (photos, vidéo), plus l’inspecteur envoie le bon artisan avec le bon matériel.
-      </p>
+    <CadreEntreprise
+      titre="Nouvelle demande"
+      sousTitre="Plus votre description est précise (photos, vidéo), plus l’inspecteur envoie le bon ouvrier avec le bon matériel."
+    >
+      <form onSubmit={envoyer} className="bg-white border border-line rounded-2xl p-5 md:p-7 grid gap-5 max-w-3xl shadow-sm">
+        {sites.length > 1 && (
+          <div>
+            <label className={label} htmlFor="site">Site concerné</label>
+            <select
+              id="site" value={form.site} className={champ}
+              onChange={(e) => { const site = sites.find((s) => s.uid === e.target.value); if (site) choisirSite(site) }}
+            >
+              {sites.map((site) => <option key={site.uid} value={site.uid}>{site.nom}{site.ville ? ` — ${site.ville}` : ''}</option>)}
+            </select>
+          </div>
+        )}
 
-      <form onSubmit={envoyer} className="bg-white border border-line rounded-2xl p-5 md:p-7 grid gap-5">
+        <fieldset>
+          <legend className={label}>Niveau d’urgence</legend>
+          <div className="grid sm:grid-cols-3 gap-2">
+            {URGENCES.map(([valeur, libelle, aide]) => (
+              <label
+                key={valeur}
+                className={`flex flex-col gap-1 rounded-xl border p-3 cursor-pointer text-sm transition-colors ${
+                  form.urgence === valeur ? 'border-primary-500 bg-primary-50/50' : 'border-line hover:border-primary-300'
+                }`}
+              >
+                <span className="flex items-center gap-2 font-semibold text-ink">
+                  <input type="radio" name="urgence" value={valeur} checked={form.urgence === valeur} onChange={() => set('urgence', valeur)} className="accent-blue-600" />
+                  {libelle}
+                </span>
+                <span className="text-xs text-muted">{aide}</span>
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-muted mt-1.5">Délais comptés à partir de la prise en charge, du lundi au samedi de 8 h à 18 h.</p>
+        </fieldset>
+
         <div>
           <label className={label}>Corps de métier concernés (un ou plusieurs)</label>
           <div className="flex flex-wrap gap-2">
@@ -111,7 +147,7 @@ export default function NouvelleDemandeEntreprisePage() {
               )
             })}
           </div>
-          <p className="text-xs text-muted mt-1.5">L’inspecteur Bricolibe décide du nombre d’artisans pour chaque métier.</p>
+          <p className="text-xs text-muted mt-1.5">L’inspecteur Bricolibe décide du nombre d’ouvriers pour chaque métier.</p>
         </div>
 
         <div>
@@ -135,21 +171,23 @@ export default function NouvelleDemandeEntreprisePage() {
         />
         <VideoPicker video={video} onChange={setVideo} />
 
-        <div>
-          <label className={label}>Début d’intervention souhaité</label>
-          <input
-            type="datetime-local"
-            required
-            value={form.date_souhaitee}
-            onChange={(e) => set('date_souhaitee', e.target.value)}
-            className={champ}
-          />
-          <p className="text-xs text-muted mt-1.5">L’heure à laquelle l’artisan est attendu sur place.</p>
-        </div>
+        {planifiee && (
+          <div>
+            <label className={label}>Date de l’intervention</label>
+            <input
+              type="datetime-local"
+              required
+              value={form.date_souhaitee}
+              onChange={(e) => set('date_souhaitee', e.target.value)}
+              className={champ}
+            />
+            <p className="text-xs text-muted mt-1.5">L’heure à laquelle l’ouvrier est attendu sur place.</p>
+          </div>
+        )}
 
         <div className="grid gap-4 pt-4 border-t border-line">
           <div>
-            <label className={label}>Adresse du lieu d’intervention</label>
+            <label className={label}>Adresse du lieu d’intervention (celle du site, à préciser si besoin)</label>
             <input
               required
               value={form.adresse}
@@ -168,7 +206,7 @@ export default function NouvelleDemandeEntreprisePage() {
             />
           </div>
           <div>
-            <label className={label}>Position sur la carte (facultatif, aide l’artisan à trouver le lieu)</label>
+            <label className={label}>Position sur la carte (facultatif, aide l’ouvrier à trouver le lieu)</label>
             <MapPicker
               value={form.latitude != null ? { latitude: form.latitude, longitude: form.longitude } : null}
               onChange={surPosition}
@@ -200,6 +238,6 @@ export default function NouvelleDemandeEntreprisePage() {
           <Send className="w-4 h-4" /> {creer.isLoading ? 'Envoi…' : 'Envoyer la demande'}
         </button>
       </form>
-    </main>
+    </CadreEntreprise>
   )
 }

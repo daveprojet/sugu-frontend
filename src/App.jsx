@@ -10,6 +10,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import PushPermissionBanner from '@/components/common/PushPermissionBanner'
+import InstallAppBanner from '@/components/common/InstallAppBanner'
 import Spinner from '@/components/common/Spinner'
 import ScrollToTop from '@/components/common/ScrollToTop'
 
@@ -24,6 +25,8 @@ import AvisArtisanPage    from '@/pages/AvisArtisanPage'
 import MonProfil from '@/pages/MonProfil'
 import IdentitePiecePage from '@/pages/IdentitePiecePage'
 import DossierProPage from '@/pages/DossierProPage'
+import MesRealisationsPage from '@/pages/MesRealisationsPage'
+import BienvenueArtisanPage from '@/pages/BienvenueArtisanPage'
 import LoginPage          from '@/pages/LoginPage'
 import RegisterPage       from '@/pages/RegisterPage'
 import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
@@ -37,13 +40,18 @@ import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
 import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
 import PaymentCancelPage from '@/pages/PaymentCancelPage'
 import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
-import EspaceEntreprisePage from '@/pages/EspaceEntreprisePage'
+import TableauEntreprisePage from '@/pages/TableauEntreprisePage'
+import DemandesEntreprisePage from '@/pages/DemandesEntreprisePage'
+import SitesEntreprisePage from '@/pages/SitesEntreprisePage'
+import AbonnementEntreprisePage from '@/pages/AbonnementEntreprisePage'
+import FacturesEntreprisePage from '@/pages/FacturesEntreprisePage'
+import RapportsEntreprisePage from '@/pages/RapportsEntreprisePage'
 import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
 import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
 import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
 import MissionsEntreprisesPage from '@/pages/MissionsEntreprisesPage'
 import EquipeEntreprisePage from '@/pages/EquipeEntreprisePage'
-import { BarreOnglets, avecBarreOnglets } from '@/components/layout/NavigationRole'
+import { BarreOnglets, avecBarreOnglets, estEspaceTravail } from '@/components/layout/NavigationRole'
 
 const queryClient = new QueryClient({
   // Sans cela, une liste qui ne se charge pas à cause du serveur s'affiche comme vide.
@@ -82,6 +90,8 @@ function AppRoutes() {
   const barreActions = pathname.startsWith('/dashboard-artisan/missions-entreprises/')
   // Téléphone : barre d'onglets en bas une fois connecté, le contenu ne doit pas passer dessous.
   const onglets = avecBarreOnglets(user, pathname)
+  // Espaces de travail (entreprise, ouvrier partenaire) : présentés comme un tableau de bord, sans pied de page.
+  const espace = estEspaceTravail(pathname)
 
   return (
     <div className={`flex flex-col min-h-screen ${onglets ? 'pb-16 md:pb-0 avec-onglets' : ''}`}>
@@ -107,6 +117,12 @@ function AppRoutes() {
           <Route path="/mon-profil/identite" element={
             <PrivateRoute role="artisan"><IdentitePiecePage /></PrivateRoute>
           } />
+          <Route path="/mon-profil/realisations" element={
+            <PrivateRoute role="artisan"><MesRealisationsPage /></PrivateRoute>
+          } />
+          <Route path="/bienvenue-artisan" element={
+            <PrivateRoute role="artisan"><BienvenueArtisanPage /></PrivateRoute>
+          } />
           <Route path="/mon-profil/dossier" element={
             <PrivateRoute role="artisan"><DossierProPage /></PrivateRoute>
           } />
@@ -126,7 +142,22 @@ function AppRoutes() {
             <PrivateRoute role="artisan"><MissionEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise" element={
-            <PrivateRoute role="entreprise"><EspaceEntreprisePage /></PrivateRoute>
+            <PrivateRoute role="entreprise"><TableauEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/demandes" element={
+            <PrivateRoute role="entreprise"><DemandesEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/rapports" element={
+            <PrivateRoute role="entreprise"><RapportsEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/factures" element={
+            <PrivateRoute role="entreprise"><FacturesEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/abonnement" element={
+            <PrivateRoute role="entreprise"><AbonnementEntreprisePage /></PrivateRoute>
+          } />
+          <Route path="/espace-entreprise/sites" element={
+            <PrivateRoute role="entreprise"><SitesEntreprisePage /></PrivateRoute>
           } />
           <Route path="/espace-entreprise/nouvelle-demande" element={
             <PrivateRoute role="entreprise"><NouvelleDemandeEntreprisePage /></PrivateRoute>
@@ -149,14 +180,22 @@ function AppRoutes() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
-      <Footer />
+      {!espace && <Footer />}
       {user?.role === 'artisan' && <RappelIdentiteModal artisanUid={user.artisan_uid} />}
       {user?.role === 'client' && <RappelAvisModal />}
-      {user && !barreActions && (
-        <PushPermissionBanner
-          onAllow={requestPermissionAndRegister}
-          hasRegisteredToken={hasRegisteredToken}
-        />
+      {/* Bannières du bas (installation, notifications) empilées : elles ne se recouvrent pas. */}
+      {!barreActions && (
+        <div className={`fixed left-4 right-4 md:left-auto md:right-4 md:w-[26rem] z-50 flex flex-col gap-3 pointer-events-none ${
+          onglets ? 'bottom-20 md:bottom-4' : 'bottom-4'
+        }`}>
+          {user && (
+            <PushPermissionBanner
+              onAllow={requestPermissionAndRegister}
+              hasRegisteredToken={hasRegisteredToken}
+            />
+          )}
+          <InstallAppBanner />
+        </div>
       )}
       <BarreOnglets />
       <ToastContainer position="bottom-right" theme="light" />

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Building2, Inbox, Plus, Search, User, Users, Wallet } from "lucide-react";
+import { Building2, Inbox, LayoutDashboard, Plus, Search, User, Users, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useDemandes } from "@/hooks/useDemandes";
 import { useMissions } from "@/hooks/useEntreprises";
@@ -60,7 +60,8 @@ export function useLiensRole() {
   }
   if (user.role === "entreprise") {
     return [
-      { to: "/espace-entreprise", label: "Nos demandes", court: "Demandes", Icon: Inbox, exact: true },
+      { to: "/espace-entreprise", label: "Tableau de bord", court: "Accueil", Icon: LayoutDashboard, exact: true },
+      { to: "/espace-entreprise/demandes", label: "Demandes", court: "Demandes", Icon: Inbox },
       { to: "/espace-entreprise/nouvelle-demande", label: "Nouvelle demande", court: "Nouvelle", Icon: Plus },
       { to: "/espace-entreprise/equipe", label: "Mon entreprise", court: "Entreprise", Icon: Users },
       profil,
@@ -95,6 +96,11 @@ export function LiensRoleBureau({ liens }) {
       <Compteur valeur={compteur} />
     </NavLink>
   ));
+}
+
+/** Espaces de travail présentés en tableau de bord, avec leur menu latéral sur ordinateur. */
+export function estEspaceTravail(pathname) {
+  return pathname.startsWith("/espace-entreprise") || /^\/dashboard-artisan\/missions-entreprises\/?$/.test(pathname);
 }
 
 // Pages qui ont déjà leur propre barre d'actions en bas de l'écran.

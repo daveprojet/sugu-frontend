@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,8 @@ import {
   Rocket,
   LifeBuoy,
 } from "lucide-react";
-import { LiensRoleBureau, useLiensRole } from "@/components/layout/NavigationRole";
+import NotificationBell from "@/components/layout/NotificationBell";
+import { LiensRoleBureau, estEspaceTravail, useLiensRole } from "@/components/layout/NavigationRole";
 
 import logo from "/images/logo.png";
 
@@ -24,6 +25,9 @@ export default function Navbar() {
   const [burgerOpen, setBurgerOpen] = useState(false);
   const navigate = useNavigate();
   const liensRole = useLiensRole();
+  // Dans un espace de travail, le menu latéral remplace les liens du haut.
+  const { pathname } = useLocation();
+  const menuLateral = estEspaceTravail(pathname);
   const artisanIndependant = user?.role === "artisan" && user.independant !== false;
 
   const handleLogout = async () => {
@@ -33,7 +37,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white/90 backdrop-blur-md border-b border-gray-200/60 shadow-sm sticky top-0 z-50 transition-all duration-200">
+    <nav className={`bg-white/90 backdrop-blur-md border-b border-gray-200/60 shadow-sm sticky top-0 z-50 transition-all duration-200 ${menuLateral ? "md:hidden" : ""}`}>
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
@@ -49,7 +53,7 @@ export default function Navbar() {
         {/* Nav desktop : pages de travail du rôle connecté, liens publics sinon */}
         {user ? (
           <div className="hidden md:flex items-center gap-6">
-            <LiensRoleBureau liens={liensRole} />
+            {!menuLateral && <LiensRoleBureau liens={liensRole} />}
           </div>
         ) : (
         <div className="hidden md:flex items-center gap-6">
@@ -82,6 +86,7 @@ export default function Navbar() {
 
         {/* Actions / Profil Utilisateur */}
         <div className="flex items-center gap-3">
+          {user && <NotificationBell />}
           {user ? (
             <div className="relative">
               <button
