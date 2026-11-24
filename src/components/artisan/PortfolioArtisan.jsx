@@ -111,6 +111,27 @@ function AvantApres({ paires, onOuvrir }) {
   );
 }
 
+/** Photos et vidéos ajoutées par l'artisan (ou par l'équipe pour lui). */
+function Medias({ medias, onOuvrir }) {
+  const photos = medias.filter((m) => m.type === "PHOTO");
+  return (
+    <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {medias.map((media) => (
+        <li key={media.uid}>
+          {media.type === "VIDEO" ? (
+            <video
+              src={media.url} controls preload="metadata" playsInline
+              className="w-full aspect-[4/3] rounded-lg bg-black object-cover"
+            />
+          ) : (
+            <Vignette photo={media} alt="Réalisation" onClick={() => onOuvrir(photos, photos.indexOf(media))} />
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const VIGNETTES_PAR_REALISATION = 3;
 
 function Realisations({ realisations, onOuvrir }) {
@@ -138,7 +159,7 @@ function Realisations({ realisations, onOuvrir }) {
   );
 }
 
-/** Galerie du profil public : « Avant / après » et « Travaux réalisés » (badge « Vérifié »). */
+/** Galerie du profil public : « Photos et vidéos », « Avant / après » et « Travaux réalisés » (badge « Vérifié »). */
 export default function PortfolioArtisan({ uid }) {
   const { data } = useQuery(["artisan-portfolio", uid], () => artisanService.portfolio(uid).then((r) => r.data), {
     enabled: !!uid, staleTime: 60 * 1000,
@@ -165,6 +186,7 @@ export default function PortfolioArtisan({ uid }) {
     };
   };
   const onglets = [
+    ["medias", "Photos et vidéos"],
     ["avant_apres", "Avant / après"],
     ["realisations", "Travaux réalisés"],
   ].map(([cle, libelle]) => ({ cle, libelle, ...etat(cle) })).filter((o) => o.total > 0);
@@ -203,6 +225,7 @@ export default function PortfolioArtisan({ uid }) {
           ))}
         </div>
       )}
+      {actif.cle === "medias" && <Medias medias={actif.resultats} onOuvrir={ouvrir} />}
       {actif.cle === "avant_apres" && <AvantApres paires={actif.resultats} onOuvrir={ouvrir} />}
       {actif.cle === "realisations" && (
         <>

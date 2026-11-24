@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info, Award } from "lucide-react";
+import { Camera, Check, Lock, Pencil, User, IdCard, Tag, MapPin, Info, Award, ImagePlus } from "lucide-react";
 import PhoneField from "@/components/common/PhoneField";
 import { useAuth } from "@/context/AuthContext";
 import { extractApiError, getServerErrorMessage } from "@/utils/errors";
@@ -293,6 +293,26 @@ export default function MonProfil() {
                   </p>
                 </div>
                 <span className="text-xs text-muted group-hover:text-amber-500 transition-colors">→</span>
+              </Link>
+            )}
+
+            {isArtisan && (
+              <Link
+                to="/mon-profil/realisations"
+                className="mt-3 flex items-center gap-3 w-full rounded-lg border border-line-soft bg-canvas-soft hover:border-primary-300 px-4 py-3 transition-colors duration-150 group"
+              >
+                <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 group-hover:bg-primary-200 transition-colors">
+                  <ImagePlus className="w-4 h-4" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-semibold text-ink group-hover:text-primary-700 transition-colors">
+                    Mes photos et vidéos
+                  </p>
+                  <p className="text-[11px] text-muted font-medium">
+                    Vos réalisations sur votre profil public
+                  </p>
+                </div>
+                <span className="text-xs text-muted group-hover:text-primary-500 transition-colors">→</span>
               </Link>
             )}
 

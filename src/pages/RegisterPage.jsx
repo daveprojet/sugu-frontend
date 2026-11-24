@@ -106,11 +106,11 @@ export default function RegisterPage() {
       // Un client venu d'une fiche artisan y retourne, formulaire de demande ouvert.
       const redirect = redirectionDemandee(params);
       if (form.role === "artisan") {
-        // L'artisan va directement déposer sa pièce d'identité : beaucoup ne lisaient pas
-        // le rappel. Celui-ci reste en place pour les connexions suivantes, mais on le
-        // masque pour cette session afin qu'il ne surgisse pas juste après.
+        // Écran de bienvenue : ajouter ses photos lui-même, ou tout envoyer sur WhatsApp
+        // (pièce d'identité comprise) pour que l'assistance remplisse le profil. Le rappel
+        // d'identité reste en place pour les connexions suivantes, masqué pour cette session.
         marquerRappelIdentiteVu();
-        navigate("/mon-profil/identite");
+        navigate("/bienvenue-artisan");
       } else {
         navigate(redirect || "/", { replace: !!redirect });
       }

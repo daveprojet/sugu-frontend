@@ -150,6 +150,14 @@ export const artisanService = {
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
   // Profil public : avant / après (avec l'accord du client) et travaux réalisés (badge).
   portfolio:   (id, params) => api.get(`/artisans/${id}/portfolio/`, { params }),
+  // Galerie libre de l'artisan (ses photos et vidéos de réalisations).
+  medias:          (id) => api.get(`/artisans/${id}/medias/`),
+  ajouterMedias:   (id, fichiers) => {
+    const fd = new FormData()
+    fichiers.forEach((f) => fd.append('fichiers', f))
+    return api.post(`/artisans/${id}/medias/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
+  supprimerMedia:  (id, mediaUid) => api.delete(`/artisans/${id}/medias/${mediaUid}/`),
 }
 
 // Formulaire multipart : champs simples, photos (répétées) et vidéo facultative.
