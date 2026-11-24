@@ -2,6 +2,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { LifeBuoy, LogOut, UserRound } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import logo from '/images/logo.png'
+import NotificationBell from '@/components/layout/NotificationBell'
 
 /**
  * Cadre des espaces de travail (entreprise, ouvrier partenaire), comme les tableaux de bord de
@@ -87,6 +88,7 @@ export default function EspaceLayout({ marque, liens, titre, sousTitre, actions,
             <span className="mx-2 text-line">/</span>{titre}
           </p>
           <span className="flex items-center gap-2.5 text-sm">
+            <NotificationBell className="mr-2" />
             <span className="text-right leading-tight">
               <span className="block font-semibold text-ink">{[user?.prenom, user?.nom].filter(Boolean).join(' ')}</span>
               <span className="block text-xs text-muted">{marque.sousTitre}</span>

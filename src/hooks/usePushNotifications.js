@@ -104,7 +104,7 @@ export function usePushNotifications(user) {
   // commissions) : ils ne sont pas rafraîchis en boucle sur toutes les pages.
   const queryClient = useQueryClient()
   const rafraichirCompteurs = useCallback(() => {
-    ['missions-entreprises', 'demandes', 'commissions'].forEach((cle) => queryClient.invalidateQueries(cle))
+    ['missions-entreprises', 'demandes', 'commissions', 'cloche'].forEach((cle) => queryClient.invalidateQueries(cle))
   }, [queryClient])
 
   // Sonnerie des nouvelles demandes, missions et devis (prévenue par le service worker).

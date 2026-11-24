@@ -14,6 +14,7 @@ import {
   Rocket,
   LifeBuoy,
 } from "lucide-react";
+import NotificationBell from "@/components/layout/NotificationBell";
 import { LiensRoleBureau, estEspaceTravail, useLiensRole } from "@/components/layout/NavigationRole";
 
 import logo from "/images/logo.png";
@@ -85,6 +86,7 @@ export default function Navbar() {
 
         {/* Actions / Profil Utilisateur */}
         <div className="flex items-center gap-3">
+          {user && <NotificationBell />}
           {user ? (
             <div className="relative">
               <button

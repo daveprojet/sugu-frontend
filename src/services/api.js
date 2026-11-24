@@ -360,4 +360,11 @@ export const fcmTokenService = {
   retirer: (token) => api.delete('/fcm-tokens/', { data: { token } }),
 }
 
+// Cloche du site : notifications reçues (gardées 90 jours).
+export const clocheService = {
+  liste:    () => api.get('/notifications/'),
+  lue:      (uid) => api.post(`/notifications/${uid}/lue/`),
+  toutLire: () => api.post('/notifications/tout-lire/'),
+}
+
 export default api
