@@ -1,13 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
-import { ChevronRight, HelpCircle, MapPin, Tag } from 'lucide-react'
+import { ChevronRight, HelpCircle, MapPin } from 'lucide-react'
 import ArtisanCard from '@/components/artisan/ArtisanCard'
 import Spinner from '@/components/common/Spinner'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { useSeo } from '@/hooks/useSeo'
 import { artisanService } from '@/services/api'
 
-const fcfa = (n) => `${Number(n).toLocaleString('fr-FR')} FCFA`
 const libelle = (p) => `${p.metier_pluriel.charAt(0).toUpperCase()}${p.metier_pluriel.slice(1)}${p.ville ? ` à ${p.ville}` : ' au Sénégal'}`
 
 /** Page de référencement « métier » (/artisans/plombier) ou « métier × ville » (/artisans/plombier/dakar). */
@@ -67,24 +66,7 @@ export default function MetierPage() {
         </Link>
       </section>
 
-      <div className="mt-12 grid gap-6 lg:grid-cols-2">
-        {page.prix.length > 0 && (
-          <section className="rounded-xl border border-line bg-white p-5" aria-labelledby="prix-indicatifs">
-            <h2 id="prix-indicatifs" className="flex items-center gap-2 text-lg font-bold text-ink">
-              <Tag className="w-5 h-5 text-indigo-600" /> Prix indicatifs
-            </h2>
-            <ul className="mt-3 divide-y divide-line-soft text-sm">
-              {page.prix.map((p) => (
-                <li key={p.nom} className="flex items-center justify-between gap-3 py-2.5">
-                  <span className="text-ink">{p.nom}{p.duree && <span className="text-muted"> · {p.duree}</span>}</span>
-                  <span className="shrink-0 font-semibold text-ink">dès {fcfa(p.prix_base)}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-xs text-muted">Prix de base du catalogue Bricolibe ; le prix final dépend du travail constaté sur place.</p>
-          </section>
-        )}
-
+      <div className="mt-12 max-w-3xl">
         <section className="rounded-xl border border-line bg-white p-5" aria-labelledby="faq-metier">
           <h2 id="faq-metier" className="flex items-center gap-2 text-lg font-bold text-ink">
             <HelpCircle className="w-5 h-5 text-indigo-600" /> Questions fréquentes
