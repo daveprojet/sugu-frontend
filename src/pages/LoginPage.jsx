@@ -8,7 +8,7 @@ import { Lock, Eye, EyeOff } from "lucide-react";
 import PhoneField from "@/components/common/PhoneField";
 import { avecRedirection, espaceParDefaut, redirectionDemandee } from "@/utils/redirection";
 
-import loginBg from "/images/metiers/register-bg.jpg";
+import loginBg from "/images/metiers/register-bg.webp";
 
 export default function LoginPage() {
   const { login } = useAuth();

@@ -6,6 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import BackLink from "@/components/common/BackLink";
 import { useSeo } from "@/hooks/useSeo";
+import { extraireUid } from "@/utils/liensArtisan";
 import { useArtisan, useArtisanAvis } from "@/hooks/useArtisans";
 import { useCreateDemande } from "@/hooks/useDemandes";
 import { useCategorie } from "@/hooks/useCategories";
@@ -91,11 +92,14 @@ function seoArtisan(artisan) {
     image: artisan.photo || undefined,
     type: "profile",
     noindex: Boolean(artisan.suspendu),
+    // Adresse canonique lisible, même si la page a été ouverte par /artisans/<uid>.
+    chemin: artisan.chemin,
   };
 }
 
 export default function ArtisanDetailPage() {
-  const { uid } = useParams();
+  // Segment « prenom-nom-<uid> » ou « <uid> » (voir utils/liensArtisan).
+  const uid = extraireUid(useParams().uid);
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -692,7 +696,7 @@ export default function ArtisanDetailPage() {
                   </div>
                   {totalAvis > 5 && (
                     <Link
-                      to={`/artisans/${uid}/avis`}
+                      to={`${artisan.chemin || `/artisans/${uid}`}/avis`}
                       className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-800 transition-colors duration-150"
                     >
                       Voir les {totalAvis} avis →

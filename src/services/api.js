@@ -148,6 +148,9 @@ export const artisanService = {
     return api.patch(`/artisans/${id}/`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
   },
   avis:        (id, params) => api.get(`/artisans/${id}/avis/`, { params }),
+  // Pages de référencement « métier » et « métier × ville ».
+  pagesMetiers: () => api.get('/artisans/pages-metiers/'),
+  pageMetier:   (metier, ville) => api.get(`/artisans/pages-metiers/${metier}/${ville ? `${ville}/` : ''}`),
   // Profil public : avant / après (avec l'accord du client) et travaux réalisés (badge).
   portfolio:   (id, params) => api.get(`/artisans/${id}/portfolio/`, { params }),
   // Galerie libre de l'artisan (ses photos et vidéos de réalisations).

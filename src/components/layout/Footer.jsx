@@ -2,6 +2,31 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Wrench, HelpCircle, Scale, Heart } from "lucide-react";
 import logo from "/images/logo.png";
+import { useQuery } from "react-query";
+import { artisanService } from "@/services/api";
+
+function LiensMetiers() {
+  const { data: pages = [] } = useQuery(
+    "pages-metiers",
+    () => artisanService.pagesMetiers().then((r) => r.data),
+    { staleTime: 30 * 60 * 1000 },
+  );
+  if (!pages.length) return null;
+  const libelle = (p) =>
+    `${p.metier_pluriel.charAt(0).toUpperCase()}${p.metier_pluriel.slice(1)}${p.ville ? ` à ${p.ville}` : " au Sénégal"}`;
+  return (
+    <nav aria-label="Artisans par métier" className="mt-10">
+      <h4 className="font-semibold text-gray-900 text-sm tracking-wide mb-3">Artisans par métier</h4>
+      <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500">
+        {pages.map((p) => (
+          <li key={p.chemin}>
+            <Link to={p.chemin} className="hover:text-indigo-600">{libelle(p)}</Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export default function Footer() {
   // Animation d'entrée en cascade
@@ -134,6 +159,9 @@ export default function Footer() {
             </ul>
           </motion.div>
         </motion.div>
+
+        {/* Pages métier : liens vers « Plombiers à Dakar »… (référencement et navigation). */}
+        <LiensMetiers />
 
         {/* Separator & Copyright */}
         <motion.div

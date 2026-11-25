@@ -1,6 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react'
-import { getToken, onMessage } from 'firebase/messaging'
-import { messaging } from '@/firebase'
+import { obtenirMessaging } from '@/firebase'
 import { fcmTokenService } from '@/services/api'
 import { useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
@@ -27,8 +26,11 @@ export function usePushNotifications(user) {
 
   // Enregistre le token (sans dialogue navigateur, permission déjà accordée).
   const registerToken = useCallback(async () => {
-    if (!user || !messaging) return false
+    if (!user) return false
     try {
+      const messaging = await obtenirMessaging()
+      if (!messaging) return false
+      const { getToken } = await import('firebase/messaging')
       const token = await getToken(messaging, { vapidKey: VAPID_KEY })
       if (!token) {
         console.error('[Push] Impossible d\'obtenir le token FCM')
@@ -63,7 +65,7 @@ export function usePushNotifications(user) {
 
   // Demande explicite via badge : ouvre le dialogue navigateur, puis enregistre.
   const requestPermissionAndRegister = useCallback(async () => {
-    if (!user || !messaging) return 'unsupported'
+    if (!user || !(await obtenirMessaging())) return 'unsupported'
     if (tokenSentRef.current) return 'already_registered'
 
     try {
@@ -120,31 +122,37 @@ export function usePushNotifications(user) {
     return () => navigator.serviceWorker.removeEventListener('message', surMessage)
   }, [pourMoi, rafraichirCompteurs])
 
-  // Notifications reçues en premier plan (app ouverte et active)
+  // Notifications reçues en premier plan (app ouverte et active), une fois connecté :
+  // Firebase n'est téléchargé que pour un compte connecté.
+  const connecte = !!user
   useEffect(() => {
-    if (!messaging) return
+    if (!connecte) return undefined
+    let unsubscribe = () => {}
+    let actif = true
+    Promise.all([obtenirMessaging(), import('firebase/messaging')]).then(([messaging, { onMessage }]) => {
+      if (!messaging || !actif) return
+      unsubscribe = onMessage(messaging, (payload) => {
+        console.log('[Push] Notification reçue en premier plan:', payload)
+        if (!pourMoi(payload.data?.destinataire)) return
+        rafraichirCompteurs()
+        const title = payload.data?.title || payload.notification?.title || 'Bricolibe'
+        const body = payload.data?.body || payload.notification?.body || ''
 
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('[Push] Notification reçue en premier plan:', payload)
-      if (!pourMoi(payload.data?.destinataire)) return
-      rafraichirCompteurs()
-      const title = payload.data?.title || payload.notification?.title || 'Bricolibe'
-      const body = payload.data?.body || payload.notification?.body || ''
-
-      const sonne = payload.data?.sonnerie === '1'
-      toast.info(`${title}\n${body}`, {
-        position: 'top-right',
-        // Nouvelle demande, mission, devis : reste affichée ; toucher la page
-        // (le toast compris) coupe la sonnerie.
-        autoClose: sonne ? false : 8000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
+        const sonne = payload.data?.sonnerie === '1'
+        toast.info(`${title}\n${body}`, {
+          position: 'top-right',
+          // Nouvelle demande, mission, devis : reste affichée ; toucher la page
+          // (le toast compris) coupe la sonnerie.
+          autoClose: sonne ? false : 8000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+        })
       })
     })
 
-    return () => unsubscribe()
-  }, [pourMoi, rafraichirCompteurs])
+    return () => { actif = false; unsubscribe() }
+  }, [connecte, pourMoi, rafraichirCompteurs])
 
   return { requestPermissionAndRegister, hasRegisteredToken }
 }

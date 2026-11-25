@@ -1,4 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
+import { extraireUid } from '@/utils/liensArtisan'
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -17,42 +19,43 @@ import { GestionSeo } from '@/hooks/useSeo'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 import HomePage           from '@/pages/HomePage'
-import AboutPage          from '@/pages/AboutPage'
-import ContactPage        from '@/pages/ContactPage'
+const AboutPage = lazy(() => import('@/pages/AboutPage'))
+const ContactPage = lazy(() => import('@/pages/ContactPage'))
 import RappelIdentiteModal from '@/components/common/RappelIdentiteModal'
 import RappelAvisModal from '@/components/common/RappelAvisModal'
-import ArtisansPage       from '@/pages/ArtisansPage'
-import ArtisanDetailPage  from '@/pages/ArtisanDetailPage'
-import AvisArtisanPage    from '@/pages/AvisArtisanPage'
-import MonProfil from '@/pages/MonProfil'
-import IdentitePiecePage from '@/pages/IdentitePiecePage'
-import DossierProPage from '@/pages/DossierProPage'
-import MesRealisationsPage from '@/pages/MesRealisationsPage'
-import BienvenueArtisanPage from '@/pages/BienvenueArtisanPage'
-import LoginPage          from '@/pages/LoginPage'
-import RegisterPage       from '@/pages/RegisterPage'
-import DashboardArtisanPage from '@/pages/DashboardArtisanPage'
-import DashboardClientPage from '@/pages/DashboardClientPage'
-import TermsPage from '@/pages/TermsPage'
-import ConfidentialitePage from '@/pages/ConfidentialitePage'
-import CommissionDashboardPage from '@/pages/CommissionDashboardPage'
-import AbonnementsPage from '@/pages/AbonnementsPage'
-import MotDePasseOubliePage from '@/pages/MotDePasseOubliePage'
-import ResetMotDePassePage from '@/pages/ResetMotDePassePage'
-import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
-import PaymentCancelPage from '@/pages/PaymentCancelPage'
-import DevenirPartenairePage from '@/pages/DevenirPartenairePage'
-import TableauEntreprisePage from '@/pages/TableauEntreprisePage'
-import DemandesEntreprisePage from '@/pages/DemandesEntreprisePage'
-import SitesEntreprisePage from '@/pages/SitesEntreprisePage'
-import AbonnementEntreprisePage from '@/pages/AbonnementEntreprisePage'
-import FacturesEntreprisePage from '@/pages/FacturesEntreprisePage'
-import RapportsEntreprisePage from '@/pages/RapportsEntreprisePage'
-import NouvelleDemandeEntreprisePage from '@/pages/NouvelleDemandeEntreprisePage'
-import DemandeEntreprisePage from '@/pages/DemandeEntreprisePage'
-import MissionEntreprisePage from '@/pages/MissionEntreprisePage'
-import MissionsEntreprisesPage from '@/pages/MissionsEntreprisesPage'
-import EquipeEntreprisePage from '@/pages/EquipeEntreprisePage'
+const ArtisansPage = lazy(() => import('@/pages/ArtisansPage'))
+const ArtisanDetailPage = lazy(() => import('@/pages/ArtisanDetailPage'))
+const AvisArtisanPage = lazy(() => import('@/pages/AvisArtisanPage'))
+const MetierPage = lazy(() => import('@/pages/MetierPage'))
+const MonProfil = lazy(() => import('@/pages/MonProfil'))
+const IdentitePiecePage = lazy(() => import('@/pages/IdentitePiecePage'))
+const DossierProPage = lazy(() => import('@/pages/DossierProPage'))
+const MesRealisationsPage = lazy(() => import('@/pages/MesRealisationsPage'))
+const BienvenueArtisanPage = lazy(() => import('@/pages/BienvenueArtisanPage'))
+const LoginPage = lazy(() => import('@/pages/LoginPage'))
+const RegisterPage = lazy(() => import('@/pages/RegisterPage'))
+const DashboardArtisanPage = lazy(() => import('@/pages/DashboardArtisanPage'))
+const DashboardClientPage = lazy(() => import('@/pages/DashboardClientPage'))
+const TermsPage = lazy(() => import('@/pages/TermsPage'))
+const ConfidentialitePage = lazy(() => import('@/pages/ConfidentialitePage'))
+const CommissionDashboardPage = lazy(() => import('@/pages/CommissionDashboardPage'))
+const AbonnementsPage = lazy(() => import('@/pages/AbonnementsPage'))
+const MotDePasseOubliePage = lazy(() => import('@/pages/MotDePasseOubliePage'))
+const ResetMotDePassePage = lazy(() => import('@/pages/ResetMotDePassePage'))
+const PaymentSuccessPage = lazy(() => import('@/pages/PaymentSuccessPage'))
+const PaymentCancelPage = lazy(() => import('@/pages/PaymentCancelPage'))
+const DevenirPartenairePage = lazy(() => import('@/pages/DevenirPartenairePage'))
+const TableauEntreprisePage = lazy(() => import('@/pages/TableauEntreprisePage'))
+const DemandesEntreprisePage = lazy(() => import('@/pages/DemandesEntreprisePage'))
+const SitesEntreprisePage = lazy(() => import('@/pages/SitesEntreprisePage'))
+const AbonnementEntreprisePage = lazy(() => import('@/pages/AbonnementEntreprisePage'))
+const FacturesEntreprisePage = lazy(() => import('@/pages/FacturesEntreprisePage'))
+const RapportsEntreprisePage = lazy(() => import('@/pages/RapportsEntreprisePage'))
+const NouvelleDemandeEntreprisePage = lazy(() => import('@/pages/NouvelleDemandeEntreprisePage'))
+const DemandeEntreprisePage = lazy(() => import('@/pages/DemandeEntreprisePage'))
+const MissionEntreprisePage = lazy(() => import('@/pages/MissionEntreprisePage'))
+const MissionsEntreprisesPage = lazy(() => import('@/pages/MissionsEntreprisesPage'))
+const EquipeEntreprisePage = lazy(() => import('@/pages/EquipeEntreprisePage'))
 import { BarreOnglets, avecBarreOnglets, estEspaceTravail } from '@/components/layout/NavigationRole'
 
 const queryClient = new QueryClient({
@@ -71,6 +74,16 @@ const queryClient = new QueryClient({
 
 // Route protégée
 const ACCUEIL_PARTENAIRE = '/dashboard-artisan/missions-entreprises'
+
+// Un segment qui finit par un uid est un profil (…/avis : ses avis) ; sinon c'est une page métier.
+function RouteArtisans() {
+  const { uid: segment, suite } = useParams()
+  if (extraireUid(segment)) {
+    if (!suite) return <ArtisanDetailPage />
+    return suite === 'avis' ? <AvisArtisanPage /> : <NotFoundPage />
+  }
+  return <MetierPage key={`${segment}/${suite || ''}`} />
+}
 
 function PrivateRoute({ children, role, independant = false }) {
   const { user, loading } = useAuth()
@@ -101,13 +114,16 @@ function AppRoutes() {
       <GestionSeo />
       <Navbar />
       <div className="flex-1">
+        {/* Pages téléchargées à la demande : le premier chargement ne contient que l'accueil. */}
+        <Suspense fallback={<div className="flex justify-center py-24"><Spinner size="lg" /></div>}>
         <Routes>
           <Route path="/"                  element={<HomePage />} />
           <Route path="/a-propos"          element={<AboutPage />} />
           <Route path="/contact"           element={<ContactPage />} />
           <Route path="/artisans"          element={<ArtisansPage />} />
-          <Route path="/artisans/:uid"      element={<ArtisanDetailPage />} />
-          <Route path="/artisans/:uid/avis"  element={<AvisArtisanPage />} />
+          {/* /artisans/<prenom-nom>-<uid> : profil ; /artisans/<metier>[/<ville>] : page métier. */}
+          <Route path="/artisans/:uid"        element={<RouteArtisans />} />
+          <Route path="/artisans/:uid/:suite" element={<RouteArtisans />} />
           <Route path="/connexion"         element={<LoginPage />} />
           <Route path="/inscription"       element={<RegisterPage />} />
           <Route path="/inscription-artisan" element={<RegisterPage />} />
@@ -182,6 +198,7 @@ function AppRoutes() {
           <Route path="/payment/cancel" element={<PaymentCancelPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </Suspense>
       </div>
       {!espace && <Footer />}
       {user?.role === 'artisan' && <RappelIdentiteModal artisanUid={user.artisan_uid} />}
