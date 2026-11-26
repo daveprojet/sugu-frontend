@@ -13,6 +13,13 @@ const PLATFORM_ROLES = ['client', 'artisan', 'entreprise']
 
 const RESTORE_RETRY_MAX_MS = 30 * 1000
 
+// Repère « session » lisible par JS (le refresh token, lui, est en cookie httpOnly) :
+// '0' = déconnexion constatée, on ne sollicite plus /me/ au chargement (évite deux
+// appels 401 à chaque visite) ; '1' ou absent = on vérifie la session comme avant.
+const CLE_SESSION = 'bricolibe_session'
+const lireSession = () => { try { return localStorage.getItem(CLE_SESSION) } catch { return null } }
+const noterSession = (connecte) => { try { localStorage.setItem(CLE_SESSION, connecte ? '1' : '0') } catch { /* stockage indisponible */ } }
+
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,13 +30,16 @@ export function AuthProvider({ children }) {
       const { data } = await authService.me()
       if (PLATFORM_ROLES.includes(data.role)) {
         setUser(data)
+        noterSession(true)
       } else {
         clearAuthToken()
         setUser(null)
+        noterSession(false)
       }
     } catch (err) {
       if (isTransientError(err)) return extractApiError(err)
       setUser(null)
+      noterSession(false)
     }
     setLoading(false)
     return null
@@ -43,6 +53,11 @@ export function AuthProvider({ children }) {
     let cancelled = false
     let timer = null
     let attempt = 0
+
+    if (lireSession() === '0') {
+      setLoading(false)
+      return undefined
+    }
 
     const restore = async () => {
       const transientError = await fetchMe()
@@ -63,7 +78,10 @@ export function AuthProvider({ children }) {
   // vide l'access token et prévient ici → user passe à null et PrivateRoute
   // redirige vers /connexion (plus de hard reload brutal).
   useEffect(() => {
-    setSessionExpiredHandler(() => setUser(null))
+    setSessionExpiredHandler(() => {
+      setUser(null)
+      noterSession(false)
+    })
   }, [])
 
   const login = async (credentials) => {
@@ -87,6 +105,7 @@ export function AuthProvider({ children }) {
     } finally {
       clearAuthToken()
       setUser(null)
+      noterSession(false)
     }
   }
 

@@ -28,3 +28,18 @@ export function validateIdentityFile(file) {
   }
   return null;
 }
+
+/**
+ * Nom affiché proprement : un nom saisi tout en majuscules (« PABOCHA PANGOU »)
+ * passe en « Pabocha Pangou » ; un nom déjà en casse mixte reste tel quel.
+ */
+export function nomPropre(texte) {
+  const t = (texte || "").trim();
+  if (!t || t !== t.toUpperCase() || t === t.toLowerCase()) return t;
+  return t.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (_, sep, lettre) => sep + lettre.toUpperCase());
+}
+
+/** « Prénom Nom » d'un artisan ou d'un utilisateur, en casse propre. */
+export function nomComplet(personne) {
+  return [personne?.prenom, personne?.nom].map(nomPropre).filter(Boolean).join(" ");
+}

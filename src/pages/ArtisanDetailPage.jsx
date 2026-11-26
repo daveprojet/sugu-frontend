@@ -12,6 +12,7 @@ import { useCreateDemande } from "@/hooks/useDemandes";
 import { useCategorie } from "@/hooks/useCategories";
 import { useAuth } from "@/context/AuthContext";
 import { getServerErrorMessage } from "@/utils/errors";
+import { nomComplet } from "@/utils/helpers";
 import { normalizeCoord } from "@/utils/geo";
 import { toast } from "react-toastify";
 import StarRating from "@/components/common/StarRating";
@@ -40,6 +41,7 @@ import {
   LogIn,
   Briefcase,
   Camera,
+  Sparkles,
 } from "lucide-react";
 
 // Sans position exacte, la carte montre le centre du quartier : le cercle signale
@@ -81,7 +83,7 @@ function FitBounds({ artisanPos, clientPos }) {
 
 // Titre et description du profil pour les moteurs et les aperçus de partage (WhatsApp, Facebook).
 function seoArtisan(artisan) {
-  const nom = `${artisan.prenom} ${artisan.nom}`.trim();
+  const nom = nomComplet(artisan);
   const metiers = (artisan.categories || []).map((c) => c.nom).slice(0, 3).join(", ");
   const lieu = [artisan.quartier, artisan.ville].filter(Boolean).join(", ");
   const note = artisan.nb_avis > 0 ? ` Note ${Number(artisan.note_moyenne).toFixed(1)}/5 (${artisan.nb_avis} avis).` : "";
@@ -345,7 +347,7 @@ export default function ArtisanDetailPage() {
               )}
 
               <h1 className="text-2xl font-bold text-ink">
-                {artisan.prenom} {artisan.nom}
+                {nomComplet(artisan)}
               </h1>
               {artisan.est_verifie && (
                 <span className="inline-flex items-center mt-2 rounded-full px-2.5 py-1 text-xs font-bold bg-[#dff3e8] text-[#1f6b45]">
@@ -365,8 +367,17 @@ export default function ArtisanDetailPage() {
               </div>
 
               <div className="flex items-center justify-center gap-2 mt-3 bg-canvas-soft border border-line-soft rounded-lg px-2.5 py-2">
-                <StarRating note={artisan.note_moyenne || 0} size="md" />
-                <span className="text-sm font-bold text-ink">({totalAvis})</span>
+                {totalAvis > 0 ? (
+                  <>
+                    <StarRating note={artisan.note_moyenne || 0} size="md" />
+                    <span className="text-sm font-bold text-ink">({totalAvis})</span>
+                  </>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-700">
+                    <Sparkles className="w-4 h-4" aria-hidden="true" />
+                    Nouveau sur Bricolibe
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center justify-center gap-1.5 mt-4 text-sm text-muted bg-canvas-soft border border-line-soft rounded-lg px-4 py-1.5">
@@ -402,7 +413,7 @@ export default function ArtisanDetailPage() {
                   >
                     <TileLayer attribution='&copy; <a href="https://osm.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                     <Marker position={[artisan.latitude, artisan.longitude]} icon={artisanIcon}>
-                      <Popup>{artisan.prenom} {artisan.nom}</Popup>
+                      <Popup>{nomComplet(artisan)}</Popup>
                     </Marker>
                     {artisan.position_approximative && (
                       <Circle center={[artisan.latitude, artisan.longitude]} radius={RAYON_APPROXIMATIF_M} pathOptions={CERCLE_APPROXIMATIF} />
@@ -439,7 +450,7 @@ export default function ArtisanDetailPage() {
                     onClick={openDemandeOrAuth}
                     className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-3 transition-colors duration-150"
                   >
-                    Demander un rendez-vous
+                    Demander une intervention
                   </button>
                 </div>
               )}
@@ -655,7 +666,7 @@ export default function ArtisanDetailPage() {
 
               {totalAvis === 0 ? (
                 <p className="text-sm text-muted">
-                  Aucun avis pour le moment.
+                  Pas encore d’avis : faites partie des premiers clients à noter cet artisan après une intervention.
                 </p>
               ) : (
                 <>
@@ -769,7 +780,7 @@ export default function ArtisanDetailPage() {
               <TileLayer attribution='&copy; <a href="https://osm.org/copyright">OSM</a>' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Marker position={[artisan.latitude, artisan.longitude]} icon={artisanIcon}>
                 <Popup>
-                  {artisan.prenom} {artisan.nom}
+                  {nomComplet(artisan)}
                   {artisan.position_approximative && <><br />Position approximative : quartier {artisan.quartier}</>}
                 </Popup>
               </Marker>
@@ -838,7 +849,7 @@ export default function ArtisanDetailPage() {
 
             <p className="text-sm text-muted leading-relaxed">
               {authModal === "artisan"
-                ? "Les demandes de rendez-vous sont réservées aux comptes clients. Connectez-vous avec un compte client pour envoyer une demande à cet artisan."
+                ? "Les demandes d’intervention sont réservées aux comptes clients. Connectez-vous avec un compte client pour envoyer une demande à cet artisan."
                 : "Pour envoyer une demande à cet artisan, vous devez être connecté : cela lui permet de vous recontacter, de suivre le statut de votre demande et de confirmer le prix depuis votre tableau de bord."}
             </p>
 

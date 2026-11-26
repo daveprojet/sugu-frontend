@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { lienArtisan } from "@/utils/liensArtisan";
-import { MapPin, Star, ChevronRight, BadgeCheck, Navigation } from "lucide-react";
+import { MapPin, Star, ChevronRight, BadgeCheck, Navigation, Sparkles } from "lucide-react";
+import { nomComplet } from "@/utils/helpers";
+import AvatarArtisan from "@/components/artisan/AvatarArtisan";
 
 const StarRating = ({ note }) => {
   const fullStars = Math.floor(note);
@@ -30,13 +32,14 @@ const StarRating = ({ note }) => {
 };
 
 export default function ArtisanCard({ artisan }) {
+  const nom = nomComplet(artisan);
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-xl border border-line p-4 hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 flex flex-col gap-3.5"
+      className="relative bg-white rounded-xl border border-line p-4 hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 flex flex-col gap-3.5"
     >
       {artisan.est_booste && (
         <span className="self-start rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
@@ -47,18 +50,7 @@ export default function ArtisanCard({ artisan }) {
       {/* En-tête */}
       <div className="flex items-start gap-3">
         <div className="relative flex-shrink-0">
-          {artisan.photo ? (
-            <img
-              src={artisan.photo}
-              alt={`${artisan.prenom} ${artisan.nom}`}
-              className="w-12 h-12 rounded-full object-cover border border-line"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-extrabold text-[15px] uppercase">
-              {artisan.prenom?.[0]}
-              {artisan.nom?.[0]}
-            </div>
-          )}
+          <AvatarArtisan artisan={artisan} />
           {artisan.disponible && (
             <span
               className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"
@@ -70,7 +62,7 @@ export default function ArtisanCard({ artisan }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <h3 className="text-[15px] font-bold text-ink truncate">
-              {artisan.prenom} {artisan.nom}
+              {nom}
             </h3>
             {artisan.est_verifie && (
               <BadgeCheck className="w-4 h-4 flex-shrink-0 text-emerald-600" aria-label="Profil vérifié" />
@@ -108,9 +100,18 @@ export default function ArtisanCard({ artisan }) {
 
       {/* Note */}
       <div className="flex items-center gap-2 bg-canvas-soft border border-line-soft rounded-lg px-2.5 py-2 text-xs text-muted">
-        <StarRating note={artisan.note_moyenne || 0} />
-        <b className="text-ink">{Number(artisan.note_moyenne || 0).toFixed(1)}</b>
-        <span>({artisan.nb_avis || 0} avis)</span>
+        {artisan.nb_avis > 0 ? (
+          <>
+            <StarRating note={artisan.note_moyenne || 0} />
+            <b className="text-ink">{Number(artisan.note_moyenne || 0).toFixed(1)}</b>
+            <span>({artisan.nb_avis} avis)</span>
+          </>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 font-semibold text-indigo-700">
+            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+            Nouveau sur Bricolibe
+          </span>
+        )}
       </div>
 
       {/* Bio */}
@@ -122,9 +123,11 @@ export default function ArtisanCard({ artisan }) {
 
       {/* Actions */}
       <div className="mt-auto">
+        {/* Le lien couvre toute la carte (after:inset-0) : toute la carte est cliquable. */}
         <Link
           to={lienArtisan(artisan)}
-          className="flex items-center justify-center gap-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold py-2.5 transition-colors duration-150"
+          aria-label={`Voir le profil de ${nom}`}
+          className="after:absolute after:inset-0 after:rounded-xl flex items-center justify-center gap-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-bold py-2.5 transition-colors duration-150"
         >
           Voir le profil
           <ChevronRight className="w-4 h-4" />

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Search, User, Phone, Wrench, Star, ArrowRight } from "lucide-react";
+import { Search, User, Phone, ArrowRight, ShieldCheck, Star, MapPin } from "lucide-react";
 import SearchBar from "@/components/home/SearchBar";
 import MetierGrid from "@/components/home/MetierGrid";
 
@@ -81,23 +81,27 @@ export default function HomePage() {
             <SearchBar />
           </motion.div>
 
-          <motion.div
+          {/* Repères de confiance (sans chiffres tant que la base d'artisans est jeune). */}
+          <motion.ul
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-indigo-200"
+            className="mt-8 flex flex-wrap justify-center gap-3 text-sm"
           >
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
-              <Wrench className="w-4 h-4 text-white" />
-              <span className="font-bold text-white">500+</span>
-              <span>artisans disponibles</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
-              <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" />
-              <span className="font-bold text-white">4.8/5</span>
-              <span>de satisfaction</span>
-            </div>
-          </motion.div>
+            {[
+              { icon: ShieldCheck, texte: "Artisans à l’identité vérifiée", couleur: "text-emerald-300" },
+              { icon: Star, texte: "Avis de vrais clients", couleur: "text-yellow-300 fill-yellow-300" },
+              { icon: MapPin, texte: "Près de chez vous", couleur: "text-orange-300" },
+            ].map(({ icon: Icon, texte, couleur }) => (
+              <li
+                key={texte}
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-white/20"
+              >
+                <Icon className={`w-4 h-4 ${couleur}`} aria-hidden="true" />
+                <span className="font-medium text-white">{texte}</span>
+              </li>
+            ))}
+          </motion.ul>
         </div>
       </section>
 
@@ -148,8 +152,8 @@ export default function HomePage() {
               {
                 step: "3",
                 icon: Phone,
-                title: "Contactez",
-                desc: "Appelez ou envoyez un message WhatsApp",
+                title: "Demandez une intervention",
+                desc: "L’artisan vous appelle pour convenir du rendez-vous",
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <motion.div
