@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useCategories } from "@/hooks/useCategories";
 import { toast } from "react-toastify";
 import { extractApiError } from "@/utils/errors";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import PhoneField from "@/components/common/PhoneField";
-import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info } from "lucide-react";
+import { User, Wrench, Lock, Check, Eye, EyeOff, MapPin, Info, ArrowLeft, ArrowRight } from "lucide-react";
 import MapPicker from "@/components/common/MapPicker";
 import ChampsZone from "@/components/common/ChampsZone";
 import ChoixCategories from "@/components/common/ChoixCategories";
@@ -15,6 +15,8 @@ import { avecRedirection, redirectionDemandee } from "@/utils/redirection";
 import { marquerRappelIdentiteVu } from "@/utils/rappelIdentite";
 
 import bgImage from '/images/metiers/register-bg.webp';
+
+const ETAPES_ARTISAN = ["Vos infos", "Votre métier", "Votre position"];
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -47,6 +49,32 @@ export default function RegisterPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   // Option « Autres » : métiers absents de la liste, validés ensuite par l'assistance.
   const [autresCoche, setAutresCoche] = useState(false);
+  // Artisan : inscription en 3 étapes (le formulaire d'un seul tenant décourageait sur téléphone).
+  const [etape, setEtape] = useState(1);
+  const carteRef = useRef(null);
+  const estArtisan = form.role === "artisan";
+  const derniereEtape = !estArtisan || etape === ETAPES_ARTISAN.length;
+
+  const allerA = (n) => {
+    setEtape(n);
+    carteRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const metiersSaisis = () =>
+    autresCoche ? form.autres_metiers.split(",").map((nom) => nom.trim()).filter(Boolean) : [];
+
+  const metiersValides = () => {
+    const autres = metiersSaisis();
+    if (!form.categories.length && !autres.length) {
+      toast.error("Choisissez au moins une catégorie ou indiquez votre métier dans « Autres ».");
+      return false;
+    }
+    if (autres.length > 3) {
+      toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
+      return false;
+    }
+    return true;
+  };
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -75,16 +103,16 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const autresMetiers = autresCoche
-      ? form.autres_metiers.split(",").map((nom) => nom.trim()).filter(Boolean)
-      : [];
+    // Étapes intermédiaires : le navigateur a déjà vérifié les champs requis affichés.
+    if (estArtisan && !derniereEtape) {
+      if (etape === 2 && !metiersValides()) return;
+      allerA(etape + 1);
+      return;
+    }
+    const autresMetiers = metiersSaisis();
     if (form.role === "artisan") {
-      if (!form.categories.length && !autresMetiers.length) {
-        toast.error("Choisissez au moins une catégorie ou indiquez votre métier dans « Autres ».");
-        return;
-      }
-      if (autresMetiers.length > 3) {
-        toast.error("Indiquez au maximum 3 métiers dans « Autres ».");
+      if (!metiersValides()) {
+        allerA(2);
         return;
       }
       if (form.latitude == null || form.longitude == null) {
@@ -161,7 +189,7 @@ export default function RegisterPage() {
         </div>
 
         {/* === LE FORMULAIRE EN EFFET "VITRE" (GLASSMORPHISM) === */}
-        <div className="bg-white/20 backdrop-blur-xl p-8 md:p-10 rounded-3xl border border-white/30 shadow-2xl shadow-black/30">
+        <div ref={carteRef} className="scroll-mt-24 bg-white/20 backdrop-blur-xl p-6 sm:p-8 md:p-10 rounded-3xl border border-white/30 shadow-2xl shadow-black/30">
           
           {/* Toggle client / artisan - également en verre dépoli */}
           <div className="flex bg-white/20 backdrop-blur-sm p-1.5 rounded-2xl mb-6 relative">
@@ -172,7 +200,7 @@ export default function RegisterPage() {
               <button
                 key={key}
                 type="button"
-                onClick={() => set("role", key)}
+                onClick={() => { set("role", key); setEtape(1); }}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                   form.role === key
                     ? "bg-white shadow-sm text-indigo-800 scale-105"
@@ -185,7 +213,33 @@ export default function RegisterPage() {
             ))}
           </div>
 
+          {estArtisan && (
+            <ol className="mb-6 grid grid-cols-3 gap-2" aria-label="Étapes de l’inscription">
+              {ETAPES_ARTISAN.map((titre, i) => {
+                const n = i + 1;
+                const faite = n < etape;
+                return (
+                  <li key={titre} aria-current={n === etape ? "step" : undefined}>
+                    <button
+                      type="button"
+                      disabled={n >= etape}
+                      onClick={() => allerA(n)}
+                      className="w-full text-left disabled:cursor-default"
+                    >
+                      <span className={`block h-1.5 rounded-full transition-colors ${n <= etape ? "bg-white" : "bg-white/25"}`} />
+                      <span className={`mt-2 flex items-center gap-1 text-xs font-semibold ${n <= etape ? "text-white" : "text-indigo-200/70"}`}>
+                        {faite ? <Check className="w-3.5 h-3.5" aria-hidden="true" /> : <span aria-hidden="true">{n}.</span>}
+                        {titre}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {(!estArtisan || etape === 1) && (<>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">Prénom <span className="text-red-300">*</span></label>
@@ -266,16 +320,16 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
+            </>)}
 
-            {/* Champs artisan avec animation */}
-            <AnimatePresence>
-              {form.role === "artisan" && (
+            {/* Étape 2 : métier */}
+            {estArtisan && etape === 2 && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                  className="space-y-5 overflow-hidden pt-2 border-t border-white/30"
+                  key="etape-2"
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-5"
                 >
                   <div>
                     <label className="block text-sm font-medium text-indigo-200 mb-2">
@@ -306,6 +360,30 @@ export default function RegisterPage() {
                   </div>
 
                   <div>
+                    <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
+                      Présentation (optionnel)
+                    </label>
+                    <textarea
+                      value={form.bio}
+                      onChange={(e) => set("bio", e.target.value)}
+                      rows={3}
+                      className="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm resize-none"
+                      placeholder="Décrivez votre expérience, vos spécialités..."
+                    />
+                  </div>
+                </motion.div>
+            )}
+
+            {/* Étape 3 : position */}
+            {estArtisan && etape === 3 && (
+                <motion.div
+                  key="etape-3"
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-5"
+                >
+                  <div>
                     <label id="position-artisan" className="block text-sm font-medium text-indigo-200 mb-2 flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
                       Votre position géographique <span className="text-red-300">*</span>
@@ -330,7 +408,10 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <p className="-mb-2 text-xs text-indigo-200 ml-1">
+                    Ville et quartier se remplissent depuis la carte ; corrigez-les si besoin.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ChampsZone
                       zoneVille={form.zone_ville}
                       zoneQuartier={form.zone_quartier}
@@ -340,22 +421,30 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-indigo-200 mb-2 ml-1">
-                      Présentation (optionnel)
-                    </label>
-                    <textarea
-                      value={form.bio}
-                      onChange={(e) => set("bio", e.target.value)}
-                      rows={3}
-                      className="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm resize-none"
-                      placeholder="Décrivez votre expérience, vos spécialités..."
-                    />
-                  </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
+            )}
 
+            {!derniereEtape && (
+              <div className="flex gap-3 mt-2">
+                {etape > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => allerA(etape - 1)}
+                    className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-3.5 rounded-xl border border-white/40 text-white font-semibold hover:bg-white/10 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Retour
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200"
+                >
+                  Continuer <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </div>
+            )}
+
+            {derniereEtape && (<>
             <label className="flex items-start gap-3 text-sm text-indigo-200">
               <input
                 type="checkbox"
@@ -375,13 +464,23 @@ export default function RegisterPage() {
               </span>
             </label>
 
+            <div className="flex gap-3 mt-4">
+            {estArtisan && (
+              <button
+                type="button"
+                onClick={() => allerA(etape - 1)}
+                className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-3.5 rounded-xl border border-white/40 text-white font-semibold hover:bg-white/10 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Retour
+              </button>
+            )}
             <motion.button
               type="submit"
               disabled={loading || !acceptedTerms}
               aria-describedby={!acceptedTerms ? "aide-cgu" : undefined}
               whileHover={acceptedTerms && !loading ? { scale: 1.02, y: -2 } : undefined}
               whileTap={acceptedTerms && !loading ? { scale: 0.98 } : undefined}
-              className="w-full mt-4 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-40 disabled:saturate-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 whitespace-nowrap py-3.5 px-3 sm:px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-40 disabled:saturate-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -397,11 +496,13 @@ export default function RegisterPage() {
                 </>
               )}
             </motion.button>
+            </div>
             {!acceptedTerms && (
               <p id="aide-cgu" className="-mt-2 text-center text-xs text-indigo-200">
                 Cochez la case ci-dessus pour pouvoir créer votre compte.
               </p>
             )}
+            </>)}
           </form>
 
           <p className="text-center text-sm text-indigo-200 mt-6 pt-6 border-t border-white/30">
