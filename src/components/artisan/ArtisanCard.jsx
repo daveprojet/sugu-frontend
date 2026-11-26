@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { lienArtisan } from "@/utils/liensArtisan";
-import { MapPin, Star, ChevronRight, BadgeCheck, Navigation, Sparkles } from "lucide-react";
+import { MapPin, Star, ChevronRight, BadgeCheck, Navigation, Sparkles, ThumbsUp } from "lucide-react";
 import { nomComplet } from "@/utils/helpers";
 import AvatarArtisan from "@/components/artisan/AvatarArtisan";
 
@@ -42,8 +42,9 @@ export default function ArtisanCard({ artisan }) {
       className="relative bg-white rounded-xl border border-line p-4 hover:border-indigo-300 hover:shadow-[0_6px_18px_rgba(22,48,91,.06)] transition-all duration-150 flex flex-col gap-3.5"
     >
       {artisan.est_booste && (
-        <span className="self-start rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-          Mis en avant
+        <span className="self-start inline-flex items-center gap-1 rounded-full bg-[#dff3e8] px-2 py-0.5 text-[10px] font-bold text-[#1f6b45]">
+          <ThumbsUp className="w-3 h-3" aria-hidden="true" />
+          Recommandé
         </span>
       )}
 
@@ -107,7 +108,7 @@ export default function ArtisanCard({ artisan }) {
             <span>({artisan.nb_avis} avis)</span>
           </>
         ) : (
-          <span className="inline-flex items-center gap-1.5 font-semibold text-indigo-700">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-amber-600">
             <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
             Nouveau sur Bricolibe
           </span>

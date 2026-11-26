@@ -208,8 +208,14 @@ export default function DashboardArtisanPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {profilArtisan && !profilArtisan.suspendu && (
-              <PartagerProfil artisan={profilArtisan} soi libelle="Partager mon profil" />
+            {/* Pièce d'identité pas encore validée : le profil n'apparaît pas dans la recherche,
+                on partage alors Bricolibe (fait venir des clients, profil partageable ensuite). */}
+            {profilArtisan && !profilArtisan.suspendu && !identiteChargement && (
+              identite?.statut === 'VERIFIEE' ? (
+                <PartagerProfil artisan={profilArtisan} soi libelle="Partager mon profil" />
+              ) : (
+                <PartagerProfil artisan={profilArtisan} soi siteSeulement libelle="Partager Bricolibe" />
+              )
             )}
             <button
               type="button"

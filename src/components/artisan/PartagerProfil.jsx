@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Share2, Link2, MessageCircle } from 'lucide-react'
 import { lienArtisan } from '@/utils/liensArtisan'
+import { nomComplet } from '@/utils/helpers'
 
 /**
  * Bouton « Partager le profil » d'un artisan.
@@ -9,6 +10,7 @@ import { lienArtisan } from '@/utils/liensArtisan'
  * Ailleurs : petit menu WhatsApp / Facebook / copier le lien.
  * `pleineLargeur` : le bouton occupe toute la largeur de son bloc.
  * `soi` : l'artisan partage sa propre fiche (texte du message adapté).
+ * `siteSeulement` : partage la page d'accueil de Bricolibe (profil pas encore visible).
  */
 function IconeFacebook(props) {
   return (
@@ -18,7 +20,7 @@ function IconeFacebook(props) {
   )
 }
 
-export default function PartagerProfil({ artisan, soi = false, pleineLargeur = false, className = '', libelle = 'Partager le profil' }) {
+export default function PartagerProfil({ artisan, soi = false, siteSeulement = false, pleineLargeur = false, className = '', libelle = 'Partager le profil' }) {
   const [ouvert, setOuvert] = useState(false)
   const conteneur = useRef(null)
 
@@ -38,17 +40,21 @@ export default function PartagerProfil({ artisan, soi = false, pleineLargeur = f
 
   if (!artisan) return null
 
-  const url = `${window.location.origin}${lienArtisan(artisan)}`
-  const nom = `${artisan.prenom || ''} ${artisan.nom || ''}`.trim()
+  const nom = nomComplet(artisan)
   const metier = artisan.categories?.[0]?.nom
-  const texte = soi
-    ? `Retrouvez mon profil sur Bricolibe${metier ? ` (${metier})` : ''} et demandez-moi une intervention :`
-    : `Je vous recommande ${nom}${metier ? `, ${metier}` : ''}, sur Bricolibe :`
+  // Profil pas encore visible (pièce d'identité en attente) : on fait connaître Bricolibe à la place.
+  const url = siteSeulement ? `${window.location.origin}/` : `${window.location.origin}${lienArtisan(artisan)}`
+  const titre = siteSeulement ? 'Bricolibe' : `${nom} | Bricolibe`
+  const texte = siteSeulement
+    ? 'Besoin d’un plombier, d’un électricien ou d’un autre artisan ? Trouvez un artisan près de chez vous sur Bricolibe :'
+    : soi
+      ? `Retrouvez mon profil sur Bricolibe${metier ? ` (${metier})` : ''} et demandez-moi une intervention :`
+      : `Je vous recommande ${nom}${metier ? `, ${metier}` : ''}, sur Bricolibe :`
 
   const copier = async () => {
     try {
       await navigator.clipboard.writeText(url)
-      toast.success('Lien du profil copié')
+      toast.success(siteSeulement ? 'Lien de Bricolibe copié' : 'Lien du profil copié')
     } catch {
       toast.error('Impossible de copier le lien')
     }
@@ -58,7 +64,7 @@ export default function PartagerProfil({ artisan, soi = false, pleineLargeur = f
   const partager = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${nom} | Bricolibe`, text: texte, url })
+        await navigator.share({ title: titre, text: texte, url })
         return
       } catch (e) {
         // Partage annulé par l'utilisateur : rien à faire.

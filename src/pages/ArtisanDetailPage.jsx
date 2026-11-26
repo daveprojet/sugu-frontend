@@ -82,6 +82,8 @@ function FitBounds({ artisanPos, clientPos }) {
   return null;
 }
 
+const CLE_DEROULE_MASQUE = "bricolibe_deroule_intervention_masque";
+
 // Titre et description du profil pour les moteurs et les aperçus de partage (WhatsApp, Facebook).
 function seoArtisan(artisan) {
   const nom = nomComplet(artisan);
@@ -114,6 +116,14 @@ export default function ArtisanDetailPage() {
   useSeo(artisan ? seoArtisan(artisan) : null);
   const createDemande = useCreateDemande();
   const [showDemandeForm, setShowDemandeForm] = useState(false);
+  // Encadré « Comment se passe une intervention ? » : fermé une fois, il ne revient plus dans ce navigateur.
+  const [derouleMasque, setDerouleMasque] = useState(() => {
+    try { return localStorage.getItem(CLE_DEROULE_MASQUE) === "1"; } catch { return false; }
+  });
+  const masquerDeroule = () => {
+    try { localStorage.setItem(CLE_DEROULE_MASQUE, "1"); } catch { /* stockage indisponible */ }
+    setDerouleMasque(true);
+  };
   const demandeFormRef = useRef(null);
   const [authModal, setAuthModal] = useState(null);
   const [selectedCategorie, setSelectedCategorie] = useState(null);
@@ -374,7 +384,7 @@ export default function ArtisanDetailPage() {
                     <span className="text-sm font-bold text-ink">({totalAvis})</span>
                   </>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-700">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-600">
                     <Sparkles className="w-4 h-4" aria-hidden="true" />
                     Nouveau sur Bricolibe
                   </span>
@@ -476,9 +486,17 @@ export default function ArtisanDetailPage() {
             )}
 
             {/* Déroulé d'une intervention : rassure le client, remplit la colonne quand il n'y a ni bio ni avis */}
-            {!showDemandeForm && user?.artisan_uid !== uid && (
-              <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6">
-                <h2 className="text-lg font-bold text-ink mb-4">Comment se passe une intervention ?</h2>
+            {!showDemandeForm && !derouleMasque && user?.artisan_uid !== uid && (
+              <motion.div variants={itemVariants} className="relative bg-white rounded-xl border border-line p-6">
+                <button
+                  type="button"
+                  onClick={masquerDeroule}
+                  aria-label="Fermer"
+                  className="absolute top-3 right-3 rounded-full p-1.5 text-muted hover:bg-canvas-soft hover:text-ink transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <h2 className="text-lg font-bold text-ink mb-4 pr-8">Comment se passe une intervention ?</h2>
                 <ol className="flex flex-col gap-4">
                   {[
                     { icon: Send, titre: "Vous envoyez votre demande", texte: "Décrivez votre besoin, ajoutez des photos si vous le souhaitez." },
