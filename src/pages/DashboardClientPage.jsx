@@ -14,6 +14,7 @@ import PhotosDemande, { peutModifierPhotos } from '@/components/demande/PhotosDe
 import DescriptionDepliable from '@/components/demande/DescriptionDepliable'
 import { STATUTS_DEMANDE, STATUTS_DEMANDE_SIGNALABLE } from '@/utils/constants'
 import FriseEtapes from '@/components/demande/FriseEtapes'
+import MomentSouhaite from '@/components/demande/MomentSouhaite'
 import {
   Inbox,
   Clock,
@@ -492,6 +493,8 @@ export default function DashboardClientPage() {
                           className={demande.service_element_nom ? 'mt-1' : 'mt-3'}
                         />
 
+                        <MomentSouhaite demande={demande} className="mt-3" />
+
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mt-3">
                           {prix}
                           <span className="text-xs text-muted">Envoyée le {dateDemande(demande)}</span>
@@ -600,6 +603,7 @@ export default function DashboardClientPage() {
                                 {demande.service_element_nom}
                               </p>
                             )}
+                            <MomentSouhaite demande={demande} className="mt-1.5" />
                             <div className="mt-1.5">{boutonPhotos(demande)}</div>
                           </td>
                           <td className="px-6 py-4 align-middle">

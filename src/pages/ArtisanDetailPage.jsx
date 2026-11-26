@@ -22,6 +22,7 @@ import PortfolioArtisan from "@/components/artisan/PortfolioArtisan";
 import ChoisirPhotoProfil from "@/components/artisan/ChoisirPhotoProfil";
 import PartagerProfil from "@/components/artisan/PartagerProfil";
 import VideoPicker from "@/components/demande/VideoPicker";
+import ChoixMoment, { MOMENT_INITIAL, momentPourApi } from "@/components/demande/ChoixMoment";
 import {
   MapPin,
   Phone,
@@ -129,6 +130,7 @@ export default function ArtisanDetailPage() {
   const [selectedCategorie, setSelectedCategorie] = useState(null);
   const [selectedServiceUid, setSelectedServiceUid] = useState(null);
   const [description, setDescription] = useState("");
+  const [momentChoisi, setMomentChoisi] = useState(MOMENT_INITIAL);
   const [photosPanne, setPhotosPanne] = useState([]);
   const [videoPanne, setVideoPanne] = useState(null);
   const [copied, setCopied] = useState(null);
@@ -256,7 +258,13 @@ export default function ArtisanDetailPage() {
       toast.error("Veuillez choisir une prestation ou \"Autre\".", { position: "top-right" });
       return;
     }
+    const moment = momentPourApi(momentChoisi);
+    if (moment.erreur) {
+      toast.error(moment.erreur, { position: "top-right" });
+      return;
+    }
     const payload = {
+      ...moment,
       artisan: artisan.id,
       description,
       mode_paiement: modePaiement,
@@ -280,6 +288,7 @@ export default function ArtisanDetailPage() {
     setSelectedCategorie(null);
     setSelectedServiceUid(null);
     setDescription("");
+    setMomentChoisi(MOMENT_INITIAL);
     setPhotosPanne([]);
     setVideoPanne(null);
   };
@@ -620,6 +629,9 @@ export default function ArtisanDetailPage() {
                       className="w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink placeholder:text-muted focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150 resize-none"
                     />
                   </div>
+
+                  {/* Moment souhaité : dès que possible, aujourd'hui à une heure, un autre jour */}
+                  <ChoixMoment valeur={momentChoisi} onChange={setMomentChoisi} />
 
                   {/* 4. Photos de la panne (facultatives) */}
                   <PhotosPicker

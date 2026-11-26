@@ -17,6 +17,7 @@ import { useMissions } from '@/hooks/useEntreprises'
 import { STATUTS_DEMANDE } from '@/utils/constants'
 import CarteChaineWhatsApp, { LienChaineWhatsApp, useChaineMasquee } from '@/components/artisan/CarteChaineWhatsApp'
 import PartagerProfil from '@/components/artisan/PartagerProfil'
+import MomentSouhaite from '@/components/demande/MomentSouhaite'
 import CompleterProfil from '@/components/artisan/CompleterProfil'
 import FriseEtapes from '@/components/demande/FriseEtapes'
 import {
@@ -541,6 +542,7 @@ export default function DashboardArtisanPage() {
                             {d.categorie_nom} — {d.service_element_nom}
                           </p>
                         )}
+                        <MomentSouhaite demande={d} className="mt-1 mb-2" />
                         <p className="text-sm text-muted leading-relaxed">{d.description}</p>
                         {/* Avant / après : ajoutées dans la fenêtre de changement de statut ;
                             ici, seulement celles déjà prises. */}
