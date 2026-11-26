@@ -11,7 +11,7 @@ import Pagination from '@/components/common/Pagination'
 import SelectRecherche from '@/components/common/SelectRecherche'
 import { useZones } from '@/hooks/useZones'
 import BoutonAutour from '@/components/common/BoutonAutour'
-import { Building2, Filter, X, MapPin, Star, Briefcase, LocateFixed } from 'lucide-react'
+import { Building2, Filter, X, MapPin, Star, Briefcase, LocateFixed, ChevronDown } from 'lucide-react'
 
 // D'anciens liens contiennent le nom du quartier : on ignore ce qui n'est pas un identifiant.
 const idZone = (valeur) => (/^\d+$/.test(valeur || '') ? valeur : '')
@@ -20,6 +20,8 @@ export default function ArtisansPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const topRef = useRef(null)
   const [page, setPage] = useState(1)
+  // Téléphone : filtres repliés pour que les résultats soient visibles tout de suite.
+  const [filtresOuverts, setFiltresOuverts] = useState(false)
 
   const filters = {
     ville:       idZone(searchParams.get('ville')),
@@ -164,11 +166,35 @@ export default function ArtisansPage() {
           </BoutonAutour>
         )}
 
-        {/* Filtres - Design Premium Glassmorphism */}
+        {/* Téléphone : bouton qui ouvre les filtres, avec le nombre de filtres actifs */}
+        {(() => {
+          const nbActifs = [filters.categorie, !autour && filters.ville, !autour && filters.quartier, filters.note_moyenne].filter(Boolean).length
+          return (
+            <button
+              type="button"
+              onClick={() => setFiltresOuverts(o => !o)}
+              aria-expanded={filtresOuverts}
+              aria-controls="filtres-artisans"
+              className="sm:hidden mb-4 w-full flex items-center justify-between gap-2 rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted" aria-hidden="true" />
+                Filtres
+                {nbActifs > 0 && (
+                  <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[11px] font-bold text-white">{nbActifs}</span>
+                )}
+              </span>
+              <ChevronDown className={`w-4 h-4 text-muted transition-transform ${filtresOuverts ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+          )
+        })()}
+
+        {/* Filtres */}
         <motion.div 
+          id="filtres-artisans"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl border border-line p-4 mb-6 flex flex-wrap items-end gap-3"
+          className={`bg-white rounded-xl border border-line p-4 mb-6 ${filtresOuverts ? 'flex' : 'hidden'} sm:flex flex-wrap items-end gap-3`}
         >
           <div className="items-center gap-2 text-xs font-semibold text-muted pr-3 py-3 border-r border-line hidden sm:flex">
             <Filter className="w-4 h-4" /> Filtres

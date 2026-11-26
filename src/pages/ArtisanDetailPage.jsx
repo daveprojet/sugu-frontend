@@ -42,6 +42,7 @@ import {
   Briefcase,
   Camera,
   Sparkles,
+  Star,
 } from "lucide-react";
 
 // Sans position exacte, la carte montre le centre du quartier : le cercle signale
@@ -471,6 +472,37 @@ export default function ArtisanDetailPage() {
                   À propos
                 </h2>
                 <p className="text-muted leading-relaxed">{artisan.bio}</p>
+              </motion.div>
+            )}
+
+            {/* Déroulé d'une intervention : rassure le client, remplit la colonne quand il n'y a ni bio ni avis */}
+            {!showDemandeForm && user?.artisan_uid !== uid && (
+              <motion.div variants={itemVariants} className="bg-white rounded-xl border border-line p-6">
+                <h2 className="text-lg font-bold text-ink mb-4">Comment se passe une intervention ?</h2>
+                <ol className="flex flex-col gap-4">
+                  {[
+                    { icon: Send, titre: "Vous envoyez votre demande", texte: "Décrivez votre besoin, ajoutez des photos si vous le souhaitez." },
+                    { icon: Phone, titre: "L’artisan vous appelle", texte: `${nomComplet(artisan).split(" ")[0] || "L’artisan"} vous contacte pour comprendre le problème et convenir du rendez-vous.` },
+                    { icon: Star, titre: "Vous donnez votre avis", texte: "Après l’intervention, votre note aide les autres clients à choisir." },
+                  ].map(({ icon: Icon, titre, texte }, i) => (
+                    <li key={titre} className="flex gap-3">
+                      <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-700">
+                        <Icon className="w-4 h-4" aria-hidden="true" />
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">{i + 1}</span>
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-ink">{titre}</p>
+                        <p className="text-sm text-muted">{texte}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+                {artisan.est_verifie && (
+                  <p className="mt-5 flex items-start gap-2 rounded-lg bg-[#eef8f2] px-3 py-2.5 text-sm text-[#1f6b45]">
+                    <BadgeCheck className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
+                    Profil vérifié : l’équipe Bricolibe a contrôlé le dossier professionnel de cet artisan.
+                  </p>
+                )}
               </motion.div>
             )}
 
