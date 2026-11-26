@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { MotionConfig } from 'framer-motion'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { extraireUid } from '@/utils/liensArtisan'
 import { QueryCache, QueryClient, QueryClientProvider } from 'react-query'
@@ -227,9 +228,12 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        {/* Animations coupées si le téléphone demande moins d'animations (accessibilité, appareils lents). */}
+        <MotionConfig reducedMotion="user">
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </MotionConfig>
       </AuthProvider>
     </QueryClientProvider>
   )

@@ -193,8 +193,8 @@ export default function RegisterPage() {
                   value={form.prenom}
                   onChange={(e) => set("prenom", e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
-                  placeholder="Moussa"
+                  className="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  placeholder="Ex. : Moussa"
                 />
               </div>
               <div>
@@ -203,8 +203,8 @@ export default function RegisterPage() {
                   value={form.nom}
                   onChange={(e) => set("nom", e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
-                  placeholder="Diallo"
+                  className="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  placeholder="Ex. : Diallo"
                 />
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function RegisterPage() {
                   onChange={(e) => set("password", e.target.value)}
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-12 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                  className="w-full pl-12 pr-12 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                   placeholder="6 caractères minimum"
                 />
                 <button
@@ -295,7 +295,7 @@ export default function RegisterPage() {
                           onChange={(e) => set("autres_metiers", e.target.value)}
                           maxLength={190}
                           placeholder="Ex. : Tapissier, Ferronnier"
-                          className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50"
+                          className="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50"
                         />
                         <p className="text-xs text-indigo-200 mt-1.5 ml-1">
                           Votre métier n'est pas dans la liste ? Indiquez-le (3 au maximum, séparés par des virgules).
@@ -336,7 +336,7 @@ export default function RegisterPage() {
                       zoneQuartier={form.zone_quartier}
                       onChange={(zone) => setForm((f) => ({ ...f, ...zone }))}
                       labelClass="block text-sm font-medium text-indigo-200 mb-2 ml-1"
-                      champClass="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
+                      champClass="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm"
                     />
                   </div>
 
@@ -348,7 +348,7 @@ export default function RegisterPage() {
                       value={form.bio}
                       onChange={(e) => set("bio", e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3 bg-white/40 backdrop-blur-sm border border-white/40 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm resize-none"
+                      className="w-full px-4 py-3 bg-white/90 border border-white/60 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/50 transition-all duration-200 shadow-sm resize-none"
                       placeholder="Décrivez votre expérience, vos spécialités..."
                     />
                   </div>
@@ -378,9 +378,10 @@ export default function RegisterPage() {
             <motion.button
               type="submit"
               disabled={loading || !acceptedTerms}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full mt-4 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              aria-describedby={!acceptedTerms ? "aide-cgu" : undefined}
+              whileHover={acceptedTerms && !loading ? { scale: 1.02, y: -2 } : undefined}
+              whileTap={acceptedTerms && !loading ? { scale: 0.98 } : undefined}
+              className="w-full mt-4 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-40 disabled:saturate-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -396,6 +397,11 @@ export default function RegisterPage() {
                 </>
               )}
             </motion.button>
+            {!acceptedTerms && (
+              <p id="aide-cgu" className="-mt-2 text-center text-xs text-indigo-200">
+                Cochez la case ci-dessus pour pouvoir créer votre compte.
+              </p>
+            )}
           </form>
 
           <p className="text-center text-sm text-indigo-200 mt-6 pt-6 border-t border-white/30">

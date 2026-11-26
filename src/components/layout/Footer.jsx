@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Wrench, HelpCircle, Scale, Heart } from "lucide-react";
+import { Wrench, HelpCircle, Scale, Heart, ChevronDown } from "lucide-react";
 import logo from "/images/logo.png";
 import { useQuery } from "react-query";
 import { artisanService } from "@/services/api";
 
 function LiensMetiers() {
+  // Sur téléphone la liste est repliée (elle allongeait beaucoup le pied de page) ;
+  // les liens restent dans la page pour le référencement.
+  const [ouvert, setOuvert] = useState(false);
   const { data: pages = [] } = useQuery(
     "pages-metiers",
     () => artisanService.pagesMetiers().then((r) => r.data),
@@ -16,8 +20,19 @@ function LiensMetiers() {
     `${p.metier_pluriel.charAt(0).toUpperCase()}${p.metier_pluriel.slice(1)}${p.ville ? ` à ${p.ville}` : " au Sénégal"}`;
   return (
     <nav aria-label="Artisans par métier" className="mt-10">
-      <h4 className="font-semibold text-gray-900 text-sm tracking-wide mb-3">Artisans par métier</h4>
-      <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500">
+      <h4 className="font-semibold text-gray-900 text-sm tracking-wide mb-3">
+        <button
+          type="button"
+          onClick={() => setOuvert((o) => !o)}
+          aria-expanded={ouvert}
+          aria-controls="liens-metiers"
+          className="flex w-full items-center justify-between gap-2 text-left md:pointer-events-none"
+        >
+          Artisans par métier
+          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform md:hidden ${ouvert ? "rotate-180" : ""}`} aria-hidden="true" />
+        </button>
+      </h4>
+      <ul id="liens-metiers" className={`${ouvert ? "flex" : "hidden"} md:flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500`}>
         {pages.map((p) => (
           <li key={p.chemin}>
             <Link to={p.chemin} className="hover:text-indigo-600">{libelle(p)}</Link>
@@ -47,7 +62,7 @@ export default function Footer() {
     <motion.footer
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true }}
       variants={containerVariants}
       className="bg-white/90 backdrop-blur-md border-t border-gray-200/80 shadow-sm mt-auto"
     >
