@@ -1,7 +1,7 @@
 {
-  "name": "Bricolibe — Trouvez vos artisans au Sénégal",
+  "name": "Bricolibe — Trouver un artisan au Sénégal",
   "short_name": "Bricolibe",
-  "description": "Trouvez facilement des plombiers, électriciens, menuisiers et autres artisans près de chez vous au Sénégal.",
+  "description": "Trouver un artisan au Sénégal : plombiers, électriciens, menuisiers et autres artisans vérifiés près de chez vous.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",

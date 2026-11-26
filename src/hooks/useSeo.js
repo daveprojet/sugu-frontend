@@ -13,9 +13,9 @@ import { useLocation } from 'react-router-dom'
 
 export const SITE_URL = 'https://bricolibe.com'
 const NOM = 'Bricolibe'
-const TITRE_DEFAUT = 'Bricolibe — Trouvez vos artisans au Sénégal'
+const TITRE_DEFAUT = 'Trouver un artisan au Sénégal | Bricolibe'
 const DESCRIPTION_DEFAUT =
-  'Trouvez facilement des plombiers, électriciens, menuisiers et autres artisans près de chez vous au Sénégal.'
+  'Trouver un artisan au Sénégal : plombiers, électriciens, menuisiers et autres artisans vérifiés près de chez vous.'
 const IMAGE_DEFAUT = `${SITE_URL}/images/logo-512.png`
 // Seul le site de production est indexé : l'UAT et le poste local restent hors des moteurs.
 const HOTES_INDEXES = ['bricolibe.com']
@@ -24,11 +24,11 @@ const HOTES_INDEXES = ['bricolibe.com']
 const PAGES = {
   '/': {
     titre: TITRE_DEFAUT,
-    description: 'Plombiers, électriciens, menuisiers, maçons… Trouvez un artisan vérifié près de chez vous au Sénégal, comparez les avis et demandez une intervention en quelques clics.',
+    description: 'Trouver un artisan au Sénégal : plombiers, électriciens, menuisiers, maçons vérifiés près de chez vous. Comparez les avis et demandez une intervention.',
   },
   '/artisans': {
-    titre: 'Artisans près de chez vous au Sénégal | Bricolibe',
-    description: 'Parcourez les artisans de Bricolibe à Dakar et au Sénégal : métiers, quartiers, avis clients et disponibilités.',
+    titre: 'Trouver les artisans près de chez vous au Sénégal | Bricolibe',
+    description: 'Trouver les artisans près de chez vous à Dakar et au Sénégal : métiers, quartiers, avis clients et disponibilités.',
   },
   '/a-propos': {
     titre: 'À propos de Bricolibe',
