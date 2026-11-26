@@ -14,7 +14,8 @@ import SignalementModal from '@/components/common/SignalementModal'
 import PhotosDemande from '@/components/demande/PhotosDemande'
 import EtapeTravauxModal from '@/components/demande/EtapeTravauxModal'
 import { useMissions } from '@/hooks/useEntreprises'
-import { STATUTS_DEMANDE } from '@/utils/constants'
+import { STATUTS_DEMANDE, CHAINE_WHATSAPP_URL } from '@/utils/constants'
+import PartagerProfil from '@/components/artisan/PartagerProfil'
 import CompleterProfil from '@/components/artisan/CompleterProfil'
 import FriseEtapes from '@/components/demande/FriseEtapes'
 import {
@@ -35,7 +36,9 @@ import {
   Building2,
   BadgeDollarSign,
   X,
-  Flag
+  Flag,
+  Megaphone,
+  ExternalLink
 } from 'lucide-react'
 
 export default function DashboardArtisanPage() {
@@ -205,6 +208,9 @@ export default function DashboardArtisanPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {profilArtisan && !profilArtisan.suspendu && (
+              <PartagerProfil artisan={profilArtisan} soi libelle="Partager mon profil" />
+            )}
             <button
               type="button"
               role="switch"
@@ -232,6 +238,23 @@ export default function DashboardArtisanPage() {
             </button>
           </div>
         </motion.div>
+
+        {/* Chaîne WhatsApp Bricolibe : actualités et conseils pour les artisans. */}
+        <a
+          href={CHAINE_WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 bg-[#e7f8ee] border border-[#bfe9cf] rounded-xl p-4 text-[#14532d] hover:bg-[#d9f3e4] transition-colors"
+        >
+          <Megaphone className="w-5 h-5 shrink-0 text-[#1f9d55]" aria-hidden="true" />
+          <span className="flex-1 text-sm">
+            <span className="font-semibold">Rejoignez la chaîne WhatsApp Bricolibe</span>
+            <span className="block text-[#166534]/80">Actualités, nouveautés et conseils pour les artisans.</span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold whitespace-nowrap">
+            Rejoindre <ExternalLink className="w-4 h-4" aria-hidden="true" />
+          </span>
+        </a>
 
         {/* Mission entreprise à accepter : l'artisan a 5 minutes pour répondre, on le signale ici. */}
         {missionsARepondre > 0 && (

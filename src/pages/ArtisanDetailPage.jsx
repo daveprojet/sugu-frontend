@@ -19,6 +19,7 @@ import Spinner from "@/components/common/Spinner";
 import PhotosPicker from "@/components/demande/PhotosPicker";
 import PortfolioArtisan from "@/components/artisan/PortfolioArtisan";
 import ChoisirPhotoProfil from "@/components/artisan/ChoisirPhotoProfil";
+import PartagerProfil from "@/components/artisan/PartagerProfil";
 import VideoPicker from "@/components/demande/VideoPicker";
 import {
   MapPin,
@@ -440,6 +441,12 @@ export default function ArtisanDetailPage() {
                   >
                     Demander un rendez-vous
                   </button>
+                </div>
+              )}
+
+              {!artisan.suspendu && (
+                <div className={artisan.bloque || artisan.bloque_refus ? "mt-6" : "mt-3"}>
+                  <PartagerProfil artisan={artisan} soi={user?.artisan_uid === uid} pleineLargeur />
                 </div>
               )}
             </div>

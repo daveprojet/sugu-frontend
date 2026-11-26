@@ -101,3 +101,6 @@ export const METIER_TO_CATEGORIE_NOM = {
 }
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL
+
+// Chaîne WhatsApp Bricolibe proposée aux artisans depuis leur tableau de bord.
+export const CHAINE_WHATSAPP_URL = 'https://whatsapp.com/channel/0029VbDmG1qBfxo6zAiJ0Q3P'
