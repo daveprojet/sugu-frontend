@@ -1,8 +1,8 @@
 import { Zap, Clock, CalendarDays } from "lucide-react";
 
-// Créneaux proposés : de 7h à 21h, toutes les 30 minutes.
-const PREMIERE_HEURE = 7;
-const DERNIERE_HEURE = 21;
+// Heures d'intervention possibles.
+const HEURE_MIN = "07:00";
+const HEURE_MAX = "21:00";
 // Pour « aujourd'hui », on laisse à l'artisan au moins ce délai.
 const DELAI_MIN_MINUTES = 30;
 // Même limite que le serveur pour « un autre jour ».
@@ -13,42 +13,42 @@ const JOURS_MAX = 60;
 const deuxChiffres = (n) => String(n).padStart(2, "0");
 const jourDakar = (d) => d.toISOString().slice(0, 10);
 const plusJours = (n) => new Date(Date.now() + n * 24 * 60 * 60 * 1000);
+const libelleHeure = (h) => h.replace(":", "h");
 
-function creneaux() {
-  const liste = [];
-  for (let h = PREMIERE_HEURE; h <= DERNIERE_HEURE; h += 1) {
-    liste.push(`${deuxChiffres(h)}:00`);
-    if (h < DERNIERE_HEURE) liste.push(`${deuxChiffres(h)}:30`);
-  }
-  return liste;
-}
-
-function creneauxRestantsAujourdhui() {
+/** Première heure possible aujourd'hui (« HH:MM », arrondie aux 5 minutes), null s'il est trop tard. */
+function heureMinAujourdhui() {
   const limite = new Date(Date.now() + DELAI_MIN_MINUTES * 60 * 1000);
-  const minutesLimite = jourDakar(limite) === jourDakar(new Date()) ? limite.getUTCHours() * 60 + limite.getUTCMinutes() : 24 * 60;
-  return creneaux().filter((c) => {
-    const [h, m] = c.split(":").map(Number);
-    return h * 60 + m >= minutesLimite;
-  });
+  if (jourDakar(limite) !== jourDakar(new Date())) return null;
+  let minutes = Math.ceil((limite.getUTCHours() * 60 + limite.getUTCMinutes()) / 5) * 5;
+  const [hMin, mMin] = HEURE_MIN.split(":").map(Number);
+  minutes = Math.max(minutes, hMin * 60 + mMin);
+  const heure = `${deuxChiffres(Math.floor(minutes / 60))}:${deuxChiffres(minutes % 60)}`;
+  return heure > HEURE_MAX ? null : heure;
 }
-
-const libelleHeure = (c) => c.replace(":", "h");
 
 export const MOMENT_INITIAL = { moment: "DES_QUE_POSSIBLE", jour: "", heure: "" };
 
-/** Champs à envoyer à l'API ; `erreur` si le choix est incomplet. */
+/** Champs à envoyer à l'API ; `erreur` si le choix est incomplet ou hors des heures possibles. */
 export function momentPourApi({ moment, jour, heure }) {
   if (moment === "DES_QUE_POSSIBLE") return { moment_souhaite: moment };
   const date = moment === "AUJOURDHUI" ? jourDakar(new Date()) : jour;
   if (!date) return { erreur: "Choisissez le jour de l’intervention." };
   if (!heure) return { erreur: "Choisissez l’heure de l’intervention." };
+  if (heure < HEURE_MIN || heure > HEURE_MAX) {
+    return { erreur: `Choisissez une heure entre ${libelleHeure(HEURE_MIN)} et ${libelleHeure(HEURE_MAX)}.` };
+  }
+  if (moment === "AUJOURDHUI") {
+    const min = heureMinAujourdhui();
+    if (!min) return { erreur: "Il est trop tard pour aujourd’hui : choisissez un autre jour." };
+    if (heure < min) return { erreur: `Pour aujourd’hui, choisissez une heure à partir de ${libelleHeure(min)}.` };
+  }
   return { moment_souhaite: moment, date_souhaitee: `${date}T${heure}:00+00:00` };
 }
 
 /** « Quand souhaitez-vous l'intervention ? » : dès que possible, aujourd'hui ou un autre jour. */
 export default function ChoixMoment({ valeur, onChange }) {
-  const restants = creneauxRestantsAujourdhui();
-  const tropTard = restants.length === 0;
+  const minAujourdhui = heureMinAujourdhui();
+  const tropTard = !minAujourdhui;
   const options = [
     { cle: "DES_QUE_POSSIBLE", titre: "Dès que possible", icon: Zap },
     { cle: "AUJOURDHUI", titre: "Aujourd’hui", icon: Clock, desactive: tropTard },
@@ -57,6 +57,25 @@ export default function ChoixMoment({ valeur, onChange }) {
   const choisir = (moment) => onChange({ ...valeur, moment, heure: "" });
   const champ =
     "w-full px-4 py-3 bg-canvas-soft border border-line rounded-lg text-ink text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-colors duration-150";
+
+  // Champ heure natif du navigateur : heures à gauche, minutes à droite (sélecteur du téléphone sur mobile).
+  const champHeure = (id, min, aide) => (
+    <div>
+      <label htmlFor={id} className="block text-xs font-semibold text-muted mb-1.5">À quelle heure ?</label>
+      <input
+        id={id}
+        type="time"
+        value={valeur.heure}
+        min={min}
+        max={HEURE_MAX}
+        step={300}
+        onChange={(e) => onChange({ ...valeur, heure: e.target.value })}
+        required
+        className={champ}
+      />
+      <p className="mt-1 text-xs text-muted">{aide}</p>
+    </div>
+  );
 
   return (
     <fieldset>
@@ -94,19 +113,9 @@ export default function ChoixMoment({ valeur, onChange }) {
         <p className="mt-1.5 text-xs text-muted">Il est trop tard pour une intervention aujourd’hui : choisissez un autre jour.</p>
       )}
 
-      {valeur.moment === "AUJOURDHUI" && (
+      {valeur.moment === "AUJOURDHUI" && minAujourdhui && (
         <div className="mt-3">
-          <label htmlFor="heure-aujourdhui" className="block text-xs font-semibold text-muted mb-1.5">À quelle heure ?</label>
-          <select
-            id="heure-aujourdhui"
-            value={valeur.heure}
-            onChange={(e) => onChange({ ...valeur, heure: e.target.value })}
-            required
-            className={champ}
-          >
-            <option value="">Choisir l’heure</option>
-            {restants.map((c) => <option key={c} value={c}>{libelleHeure(c)}</option>)}
-          </select>
+          {champHeure("heure-aujourdhui", minAujourdhui, `Entre ${libelleHeure(minAujourdhui)} et ${libelleHeure(HEURE_MAX)}.`)}
         </div>
       )}
 
@@ -125,19 +134,7 @@ export default function ChoixMoment({ valeur, onChange }) {
               className={champ}
             />
           </div>
-          <div>
-            <label htmlFor="heure-intervention" className="block text-xs font-semibold text-muted mb-1.5">À quelle heure ?</label>
-            <select
-              id="heure-intervention"
-              value={valeur.heure}
-              onChange={(e) => onChange({ ...valeur, heure: e.target.value })}
-              required
-              className={champ}
-            >
-              <option value="">Choisir l’heure</option>
-              {creneaux().map((c) => <option key={c} value={c}>{libelleHeure(c)}</option>)}
-            </select>
-          </div>
+          {champHeure("heure-intervention", HEURE_MIN, `Entre ${libelleHeure(HEURE_MIN)} et ${libelleHeure(HEURE_MAX)}.`)}
         </div>
       )}
     </fieldset>
