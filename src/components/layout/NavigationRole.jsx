@@ -89,8 +89,8 @@ export function LiensRoleBureau({ liens }) {
   return liens.filter((l) => l.to !== "/mon-profil").map(({ to, label, compteur, exact }) => (
     <NavLink
       key={to} to={to} end={exact}
-      className={({ isActive }) => `inline-flex items-center gap-1.5 font-medium transition-colors duration-200 ${
-        isActive ? "text-indigo-600" : "text-gray-600 hover:text-primary-500"
+      className={({ isActive }) => `relative inline-flex items-center gap-1.5 font-medium transition-colors duration-200 after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full ${
+        isActive ? "text-primary-500 after:bg-primary-500" : "text-gray-600 hover:text-primary-500 after:bg-transparent"
       }`}
     >
       {label}
@@ -128,7 +128,7 @@ export function BarreOnglets() {
             <NavLink
               to={to} end={exact}
               className={({ isActive }) => `flex flex-col items-center justify-center gap-0.5 h-16 text-[11px] font-semibold transition-colors ${
-                isActive ? "text-indigo-600" : "text-gray-500"
+                isActive ? "text-primary-500" : "text-gray-500"
               }`}
             >
               <span className="relative">

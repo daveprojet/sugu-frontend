@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -19,6 +19,16 @@ import NotificationBell from "@/components/layout/NotificationBell";
 import { LiensRoleBureau, estEspaceTravail, useLiensRole } from "@/components/layout/NavigationRole";
 
 import logo from "/images/logo.png";
+
+// Onglet actif en orange (trait dessous sur ordinateur, fond clair dans le menu mobile).
+const classeLienBureau = ({ isActive }) =>
+  `relative font-medium transition-colors duration-200 after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-colors ${
+    isActive ? "text-primary-500 after:bg-primary-500" : "text-gray-600 hover:text-primary-500 after:bg-transparent"
+  }`;
+const classeLienMobile = ({ isActive }) =>
+  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+    isActive ? "bg-primary-50 text-primary-600" : "text-gray-700 hover:bg-primary-50 hover:text-primary-500"
+  }`;
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -58,36 +68,36 @@ export default function Navbar() {
           </div>
         ) : (
         <div className="hidden md:flex items-center gap-6">
-          <Link
+          <NavLink
             to="/a-propos"
-            className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            className={classeLienBureau}
           >
             À propos
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/artisans"
-            className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            className={classeLienBureau}
           >
             Trouver un artisan
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/marketplace"
-            className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            className={classeLienBureau}
           >
             Marketplace
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/devenir-partenaire"
-            className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            className={classeLienBureau}
           >
             Devenir partenaire
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/contact"
-            className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            className={classeLienBureau}
           >
             Contact
-          </Link>
+          </NavLink>
         </div>
         )}
 
@@ -209,43 +219,43 @@ export default function Navbar() {
             className="md:hidden overflow-hidden bg-white/95 backdrop-blur-md border-b border-gray-200/60 shadow-sm"
           >
             <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1.5">
-              <Link
+              <NavLink
                 to="/a-propos"
                 onClick={() => setBurgerOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
+                className={classeLienMobile}
               >
                 À propos
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/artisans"
                 onClick={() => setBurgerOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
+                className={classeLienMobile}
               >
                 <Wrench className="w-4 h-4 text-gray-400" />
                 Trouver un artisan
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/marketplace"
                 onClick={() => setBurgerOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
+                className={classeLienMobile}
               >
                 <Palette className="w-4 h-4 text-gray-400" />
                 Marketplace
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/devenir-partenaire"
                 onClick={() => setBurgerOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
+                className={classeLienMobile}
               >
                 Devenir partenaire
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/contact"
                 onClick={() => setBurgerOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
+                className={classeLienMobile}
               >
                 Contact
-              </Link>
+              </NavLink>
 
               {!user && (
                 <>
