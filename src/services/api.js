@@ -370,4 +370,19 @@ export const clocheService = {
   toutLire: () => api.post('/notifications/tout-lire/'),
 }
 
+// ── Marketplace (artistes et œuvres) ──────────────
+export const marketplaceService = {
+  regles:      () => api.get('/marketplace/regles/'),
+  categories:  () => api.get('/marketplace/categories/'),
+  monProfil:   () => api.get('/marketplace/mon-profil/'),
+  creerProfil: (data) => api.post('/marketplace/mon-profil/', data),
+  modifierProfil: (data) => api.patch('/marketplace/mon-profil/', data),
+  envoyerPiece: ({ type_piece, recto, verso }) =>
+    api.put('/marketplace/mon-profil/piece-identite/', enFormData({ type_piece, recto, verso }), multipart),
+  ajouterRealisations: (photos) => api.post('/marketplace/mon-profil/realisations/', enFormData({}, photos), multipart),
+  supprimerRealisation: (id) => api.delete(`/marketplace/mon-profil/realisations/${id}/`),
+  renvoyerEmail: () => api.post('/marketplace/mon-profil/renvoyer-email/'),
+  confirmerEmail: (jeton) => api.post('/marketplace/confirmer-email/', { jeton }),
+}
+
 export default api

@@ -46,6 +46,10 @@ const PAGES = {
     titre: 'Inscription artisan | Bricolibe',
     description: 'Artisan au Sénégal ? Créez votre profil Bricolibe gratuitement et recevez des demandes de clients près de chez vous.',
   },
+  '/marketplace/devenir-artiste': {
+    titre: 'Vendre vos œuvres d’art au Sénégal | Marketplace Bricolibe',
+    description: 'Peintres, sculpteurs, bijoutiers, céramistes : exposez et vendez vos œuvres sur la Marketplace Bricolibe. Les acheteurs vous contactent directement, sans commission.',
+  },
   '/cgu': { titre: 'Conditions générales d’utilisation | Bricolibe' },
   '/confidentialite': { titre: 'Politique de confidentialité | Bricolibe' },
   '/connexion': { titre: 'Connexion | Bricolibe', noindex: true },

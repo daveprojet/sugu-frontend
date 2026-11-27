@@ -4,6 +4,8 @@ Disallow: /dashboard-artisan
 Disallow: /dashboard-client
 Disallow: /espace-entreprise
 Disallow: /mon-profil
+Disallow: /espace-artiste
+Disallow: /marketplace/confirmer-email
 Disallow: /bienvenue-artisan
 Disallow: /payment/
 Disallow: /reset-mot-de-passe
