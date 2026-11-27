@@ -89,7 +89,7 @@ export function LiensRoleBureau({ liens }) {
     <NavLink
       key={to} to={to} end={exact}
       className={({ isActive }) => `inline-flex items-center gap-1.5 font-medium transition-colors duration-200 ${
-        isActive ? "text-indigo-600" : "text-gray-600 hover:text-indigo-600"
+        isActive ? "text-indigo-600" : "text-gray-600 hover:text-primary-500"
       }`}
     >
       {label}
