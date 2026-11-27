@@ -43,3 +43,8 @@ export function nomPropre(texte) {
 export function nomComplet(personne) {
   return [personne?.prenom, personne?.nom].map(nomPropre).filter(Boolean).join(" ");
 }
+
+/** 45000 → « 45 000 FCFA ». */
+export function prixFCFA(montant) {
+  return `${new Intl.NumberFormat('fr-FR').format(montant || 0).replace(/ | /g, ' ')} FCFA`;
+}

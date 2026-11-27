@@ -13,6 +13,7 @@ import {
   X,
   Rocket,
   LifeBuoy,
+  Palette,
 } from "lucide-react";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { LiensRoleBureau, estEspaceTravail, useLiensRole } from "@/components/layout/NavigationRole";
@@ -68,6 +69,12 @@ export default function Navbar() {
             className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
           >
             Trouver un artisan
+          </Link>
+          <Link
+            to="/marketplace"
+            className="text-gray-600 hover:text-primary-500 font-medium transition-colors duration-200"
+          >
+            Marketplace
           </Link>
           <Link
             to="/devenir-partenaire"
@@ -216,6 +223,14 @@ export default function Navbar() {
               >
                 <Wrench className="w-4 h-4 text-gray-400" />
                 Trouver un artisan
+              </Link>
+              <Link
+                to="/marketplace"
+                onClick={() => setBurgerOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-all duration-200"
+              >
+                <Palette className="w-4 h-4 text-gray-400" />
+                Marketplace
               </Link>
               <Link
                 to="/devenir-partenaire"

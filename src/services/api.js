@@ -372,6 +372,10 @@ export const clocheService = {
 
 // ── Marketplace (artistes et œuvres) ──────────────
 export const marketplaceService = {
+  catalogue:   (params) => api.get('/marketplace/oeuvres/', { params }),
+  oeuvre:      (segment) => api.get(`/marketplace/oeuvres/${segment}/`),
+  artiste:     (segment) => api.get(`/marketplace/artistes/${segment}/`),
+  contact:     (segment, canal) => api.post(`/marketplace/oeuvres/${segment}/contact/`, { canal }),
   regles:      () => api.get('/marketplace/regles/'),
   categories:  () => api.get('/marketplace/categories/'),
   monProfil:   () => api.get('/marketplace/mon-profil/'),

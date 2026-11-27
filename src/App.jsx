@@ -39,6 +39,9 @@ const DashboardArtisanPage = lazy(() => import('@/pages/DashboardArtisanPage'))
 const DashboardClientPage = lazy(() => import('@/pages/DashboardClientPage'))
 const TermsPage = lazy(() => import('@/pages/TermsPage'))
 const DevenirArtistePage = lazy(() => import('@/pages/DevenirArtistePage'))
+const MarketplacePage = lazy(() => import('@/pages/MarketplacePage'))
+const OeuvrePage = lazy(() => import('@/pages/OeuvrePage'))
+const ArtisteMarketplacePage = lazy(() => import('@/pages/ArtisteMarketplacePage'))
 const ConfirmerEmailArtistePage = lazy(() => import('@/pages/ConfirmerEmailArtistePage'))
 const ConfidentialitePage = lazy(() => import('@/pages/ConfidentialitePage'))
 const CommissionDashboardPage = lazy(() => import('@/pages/CommissionDashboardPage'))
@@ -134,6 +137,9 @@ function AppRoutes() {
           <Route path="/inscription-entreprise" element={<Navigate to="/devenir-partenaire" replace />} />
           <Route path="/devenir-partenaire" element={<DevenirPartenairePage />} />
           {/* Marketplace : inscription des artistes (le suivi sert aussi d'espace artiste pour l'instant) */}
+          <Route path="/marketplace" element={<MarketplacePage />} />
+          <Route path="/marketplace/oeuvres/:segment" element={<OeuvrePage />} />
+          <Route path="/marketplace/artistes/:segment" element={<ArtisteMarketplacePage />} />
           <Route path="/marketplace/devenir-artiste" element={<DevenirArtistePage />} />
           <Route path="/marketplace/confirmer-email" element={<ConfirmerEmailArtistePage />} />
           <Route path="/espace-artiste" element={<PrivateRoute><DevenirArtistePage /></PrivateRoute>} />

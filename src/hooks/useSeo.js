@@ -46,6 +46,10 @@ const PAGES = {
     titre: 'Inscription artisan | Bricolibe',
     description: 'Artisan au Sénégal ? Créez votre profil Bricolibe gratuitement et recevez des demandes de clients près de chez vous.',
   },
+  '/marketplace': {
+    titre: 'Acheter des œuvres d’art au Sénégal | Marketplace Bricolibe',
+    description: 'Peintures, sculptures, bijoux, céramiques : achetez des œuvres uniques directement auprès d’artistes sénégalais vérifiés, sans intermédiaire.',
+  },
   '/marketplace/devenir-artiste': {
     titre: 'Vendre vos œuvres d’art au Sénégal | Marketplace Bricolibe',
     description: 'Peintres, sculpteurs, bijoutiers, céramistes : exposez et vendez vos œuvres sur la Marketplace Bricolibe. Les acheteurs vous contactent directement, sans commission.',
@@ -58,6 +62,8 @@ const PAGES = {
 
 // Pages publiques à motif (le contenu précis est posé par la page elle-même).
 const MOTIFS = [
+  [/^\/marketplace\/oeuvres\/[^/]+$/, { titre: 'Œuvre | Marketplace Bricolibe' }],
+  [/^\/marketplace\/artistes\/[^/]+$/, { titre: 'Artiste | Marketplace Bricolibe' }],
   [/^\/artisans\/[^/]+\/avis$/, { titre: 'Avis clients | Bricolibe' }],
   [/^\/artisans\/[^/]+$/, { titre: 'Artisans | Bricolibe' }],
   [/^\/artisans\/[^/]+\/[^/]+$/, { titre: 'Artisans | Bricolibe' }],

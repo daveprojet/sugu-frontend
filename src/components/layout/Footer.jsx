@@ -109,6 +109,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  to="/marketplace"
+                  className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200"
+                >
+                  Marketplace des artistes
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/devenir-partenaire"
                   className="inline-flex items-center gap-1 hover:text-indigo-600 hover:translate-x-1 transition-all duration-200"
                 >

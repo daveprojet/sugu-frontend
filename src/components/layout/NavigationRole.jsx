@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Building2, Inbox, LayoutDashboard, Plus, Search, User, Users, Wallet } from "lucide-react";
+import { Building2, Inbox, LayoutDashboard, Palette, Plus, Search, User, Users, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useDemandes } from "@/hooks/useDemandes";
 import { useMissions } from "@/hooks/useEntreprises";
@@ -69,6 +69,7 @@ export function useLiensRole() {
   }
   return [
     { to: "/artisans", label: "Trouver un artisan", court: "Trouver", Icon: Search },
+    { to: "/marketplace", label: "Marketplace", court: "Marketplace", Icon: Palette },
     { to: "/dashboard-client", label: "Mes demandes", court: "Demandes", Icon: Inbox },
     profil,
   ];
