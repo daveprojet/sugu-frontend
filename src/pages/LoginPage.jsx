@@ -79,8 +79,8 @@ export default function LoginPage() {
             to="/"
             className="inline-flex items-center justify-center mb-6 group"
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 group-hover:shadow-xl transition-all duration-300">
-              <span className="text-white font-bold text-3xl">S</span>
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-black/20 transform group-hover:scale-105 group-hover:shadow-xl transition-all duration-300">
+              <img src="/images/logo-192.png" alt="Bricolibe" className="w-12 h-12 object-contain" />
             </div>
           </Link>
           <h1 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight drop-shadow-md">
