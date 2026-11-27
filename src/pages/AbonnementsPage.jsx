@@ -118,7 +118,7 @@ export default function AbonnementsPage() {
   const boostBloqueParIdentite = Boolean(offresBoost[0]?.bloque_par_identite)
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 py-8 px-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
           <BackLink

@@ -308,7 +308,7 @@ export default function DashboardClientPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 py-8 px-4">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}

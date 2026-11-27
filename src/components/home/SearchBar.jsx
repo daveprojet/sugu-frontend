@@ -99,7 +99,7 @@ const handleSearch = (e) => {
         type="submit"
         whileHover={{ scale: 1.03, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        className="inline-flex items-center justify-center gap-2 px-8 py-3.5 md:px-10 bg-gradient-to-r from-[#F97316] -600 to- [#1256CC]-600 hover:from-[#F97316] -700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 whitespace-nowrap"
+        className="inline-flex items-center justify-center gap-2 px-8 py-3.5 md:px-10 bg-gradient-to-r from-[#F97316] -600 to- [#1256CC]-600 hover:from-[#F97316] -700 hover:to-indigo-800 text-white font-semibold rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 whitespace-nowrap"
       >
         <Search className="w-5 h-5" />
         Chercher

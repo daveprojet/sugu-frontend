@@ -241,7 +241,7 @@ export const STATUTS_DEMANDE_ENTREPRISE = {
   NOUVELLE:        { label: 'Reçue · recherche d’un ouvrier', classe: 'bg-amber-50 text-amber-700' },
   ARTISAN_AFFECTE: { label: 'Ouvrier affecté', classe: 'bg-sky-50 text-sky-700' },
   EN_COURS:        { label: 'Intervention en cours', classe: 'bg-indigo-50 text-indigo-700' },
-  A_INSPECTER:     { label: 'Terminée · contrôle qualité', classe: 'bg-violet-50 text-violet-700' },
+  A_INSPECTER:     { label: 'Terminée · contrôle qualité', classe: 'bg-orange-50 text-orange-700' },
   CLOTUREE:        { label: 'Clôturée', classe: 'bg-emerald-50 text-emerald-700' },
   ANNULEE:         { label: 'Annulée', classe: 'bg-gray-100 text-gray-600' },
   INSPECTION_REFUSEE: { label: 'Contrôle qualité : en cours de règlement', classe: 'bg-red-50 text-red-700' },

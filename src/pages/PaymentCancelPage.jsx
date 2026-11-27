@@ -57,7 +57,7 @@ export default function PaymentCancelPage() {
         <div className="flex flex-col gap-3 pt-2">
           <Link
             to={isEntreprise ? (typePaiement === 'facture_ent' ? '/espace-entreprise/factures' : '/espace-entreprise/abonnement') : estAbonnement ? '/dashboard-artisan/abonnements' : isArtisan ? '/dashboard-artisan/commissions' : '/dashboard-client'}
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
           >
             <RotateCcw className="w-4 h-4" /> Réessayer le paiement
           </Link>

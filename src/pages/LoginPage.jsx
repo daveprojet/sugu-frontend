@@ -61,7 +61,7 @@ export default function LoginPage() {
           className="w-full h-full object-cover"
         />
         {/* Overlay dégradé pour créer l'ambiance derrière la vitre */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-purple-800/75 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-indigo-900/75 mix-blend-multiply" />
       </div>
       {/* ========================================== */}
 
@@ -79,7 +79,7 @@ export default function LoginPage() {
             to="/"
             className="inline-flex items-center justify-center mb-6 group"
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 group-hover:shadow-xl transition-all duration-300">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 group-hover:shadow-xl transition-all duration-300">
               <span className="text-white font-bold text-3xl">S</span>
             </div>
           </Link>
@@ -88,7 +88,7 @@ export default function LoginPage() {
           </h1>
           <p className="text-indigo-200 text-sm mt-2 font-medium drop-shadow-sm">
             Bon retour sur{" "}
-            <span className="text-purple-300 font-semibold">Bricolibe</span> !
+            <span className="text-indigo-300 font-semibold">Bricolibe</span> !
           </p>
         </motion.div>
 
@@ -158,7 +158,7 @@ export default function LoginPage() {
               disabled={loading}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full mt-4 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full mt-4 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export default function LoginPage() {
               Pas encore de compte ?{" "}
               <Link
                 to={avecRedirection("/inscription", searchParams)}
-                className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors"
+                className="text-white font-semibold hover:text-indigo-200 hover:underline transition-colors"
               >
                 S'inscrire
               </Link>

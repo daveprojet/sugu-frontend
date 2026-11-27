@@ -4,6 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        // « indigo » = bleu du logo Bricolibe (#1257CC en 600) : toutes les classes indigo-* du site le suivent.
+        indigo: {
+          50:  '#EEF4FF',
+          100: '#DBE7FD',
+          200: '#BCD3FB',
+          300: '#8FB5F7',
+          400: '#5A8EF0',
+          500: '#2F6BE3',
+          600: '#1257CC',
+          700: '#0F47A8',
+          800: '#113D88',
+          900: '#133670',
+          950: '#0D2249',
+        },
         primary: {
           50:  '#FFF8F0',
           100: '#FFE8C7',

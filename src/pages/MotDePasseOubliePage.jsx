@@ -28,7 +28,7 @@ export default function MotDePasseOubliePage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-purple-800/75" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-indigo-900/75" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -37,7 +37,7 @@ export default function MotDePasseOubliePage() {
       >
         <motion.div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center justify-center mb-6 group">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 transition-all duration-300">
+            <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 transform group-hover:scale-105 transition-all duration-300">
               <span className="text-white font-bold text-3xl font-display">B</span>
             </div>
           </Link>
@@ -68,7 +68,7 @@ export default function MotDePasseOubliePage() {
               disabled={loading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-70 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

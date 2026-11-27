@@ -40,7 +40,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
             onClick={() => onPageChange(page)}
             className={`inline-flex items-center justify-center w-9 h-9 rounded-full text-sm font-medium transition-all duration-150 shadow-sm ${
               page === currentPage
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-500/30'
                 : 'border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300'
             }`}
           >

@@ -24,7 +24,7 @@ export default function HomePage() {
         className="relative text-white overflow-hidden min-h-[600px] flex items-center"
         style={{
           backgroundImage: `
-            linear-gradient(to bottom right, rgba(67, 56, 202, 0.85), rgba(147, 51, 234, 0.75)),
+            linear-gradient(to bottom right, rgba(13, 34, 73, 0.88), rgba(18, 87, 204, 0.72)),
             url('https://images.unsplash.com/photo-1621905251918-48416bd8575a?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')
           `,
           backgroundSize: "cover",
@@ -57,7 +57,7 @@ export default function HomePage() {
           >
             Trouvez l'artisan qu'il vous faut,
             <br />
-            <span className="text-purple-200 drop-shadow-md">
+            <span className="text-indigo-200 drop-shadow-md">
               près de chez vous
             </span>
           </motion.h1>

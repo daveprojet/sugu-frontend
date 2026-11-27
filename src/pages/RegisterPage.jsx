@@ -166,7 +166,7 @@ export default function RegisterPage() {
           className="w-full h-full object-cover"
         />
         {/* Overlay dégradé pour créer l'ambiance derrière la vitre */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-purple-800/75 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-indigo-900/75 mix-blend-multiply" />
       </div>
       {/* ========================================== */}
 
@@ -184,7 +184,7 @@ export default function RegisterPage() {
             Créer un compte
           </h1>
           <p className="text-indigo-200 text-sm mt-2 font-medium drop-shadow-sm">
-            Rejoignez <span className="text-purple-300 font-semibold">Bricolibe</span> en quelques secondes
+            Rejoignez <span className="text-indigo-300 font-semibold">Bricolibe</span> en quelques secondes
           </p>
         </div>
 
@@ -437,7 +437,7 @@ export default function RegisterPage() {
                 )}
                 <button
                   type="submit"
-                  className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200"
+                  className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200"
                 >
                   Continuer <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </button>
@@ -454,11 +454,11 @@ export default function RegisterPage() {
               />
               <span>
                 J&apos;accepte les{" "}
-                <Link to="/cgu" target="_blank" className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors">
+                <Link to="/cgu" target="_blank" className="text-white font-semibold hover:text-indigo-200 hover:underline transition-colors">
                   Conditions Générales d&apos;Utilisation
                 </Link>{" "}
                 et la{" "}
-                <Link to="/confidentialite" target="_blank" className="text-white font-semibold hover:text-purple-200 hover:underline transition-colors">
+                <Link to="/confidentialite" target="_blank" className="text-white font-semibold hover:text-indigo-200 hover:underline transition-colors">
                   Politique de Confidentialité
                 </Link>
               </span>
@@ -480,7 +480,7 @@ export default function RegisterPage() {
               aria-describedby={!acceptedTerms ? "aide-cgu" : undefined}
               whileHover={acceptedTerms && !loading ? { scale: 1.02, y: -2 } : undefined}
               whileTap={acceptedTerms && !loading ? { scale: 0.98 } : undefined}
-              className="flex-1 whitespace-nowrap py-3.5 px-3 sm:px-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-40 disabled:saturate-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 whitespace-nowrap py-3.5 px-3 sm:px-4 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-900/50 transition-all duration-200 disabled:opacity-40 disabled:saturate-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -509,7 +509,7 @@ export default function RegisterPage() {
             Déjà un compte ?{" "}
             <Link
               to={avecRedirection("/connexion", params)}
-              className="text-white font-semibold hover:text-purple-200  hover:underline transition-colors"
+              className="text-white font-semibold hover:text-indigo-200  hover:underline transition-colors"
             >
               Se connecter
             </Link>

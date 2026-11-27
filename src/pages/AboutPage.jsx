@@ -60,7 +60,7 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white">
       {/* JOLI HERO SECTION - Premium Gradient & Blobs */}
-      <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white overflow-hidden py-20 md:py-28">
+      <section className="relative bg-gradient-to-br from-indigo-600 via-indigo-600 to-indigo-800 text-white overflow-hidden py-20 md:py-28">
         {/* Motif de fond (points) */}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, #ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
         
@@ -75,12 +75,12 @@ export default function AboutPage() {
             transition={{ duration: 0.6 }}
             className="max-w-3xl"
           >
-            <p className="text-sm font-semibold text-purple-200 mb-3 uppercase tracking-wider">
+            <p className="text-sm font-semibold text-indigo-200 mb-3 uppercase tracking-wider">
               À propos de Bricolibe
             </p>
             <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight drop-shadow-lg mb-6">
               Rapprocher les clients des bons artisans,<br />
-              <span className="text-purple-200">sans complication.</span>
+              <span className="text-indigo-200">sans complication.</span>
             </h1>
             <p className="text-indigo-100 text-lg leading-relaxed max-w-2xl mb-8">
               Bricolibe aide les particuliers a trouver rapidement un artisan disponible et proche de chez eux.
@@ -106,7 +106,7 @@ export default function AboutPage() {
       </section>
 
       {/* VALEURS - Section Premium */}
-      <section className="bg-gradient-to-br from-indigo-50/30 to-purple-50/30 border-y border-gray-100/80 py-16 md:py-20 px-4">
+      <section className="bg-gradient-to-br from-indigo-50/30 to-indigo-50/30 border-y border-gray-100/80 py-16 md:py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <motion.div 
             variants={containerVariants}
@@ -161,7 +161,7 @@ export default function AboutPage() {
                 variants={itemVariants}
                 className="flex gap-4 bg-white/80 backdrop-blur-sm border border-gray-100/80 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200"
               >
-                <span className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-semibold flex items-center justify-center flex-shrink-0 text-sm shadow-md shadow-indigo-500/30">
+                <span className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-700 text-white font-semibold flex items-center justify-center flex-shrink-0 text-sm shadow-md shadow-indigo-500/30">
                   {index + 1}
                 </span>
                 <p className="text-gray-700 text-sm leading-relaxed pt-2">{step}</p>
@@ -176,7 +176,7 @@ export default function AboutPage() {
           viewport={{ once: true }}
           className="bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-100/80 shadow-2xl shadow-gray-200/60 p-6"
         >
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
             <Target className="w-6 h-6" />
           </div>
           <h2 className="font-display font-semibold text-xl text-gray-900 mb-3">Notre objectif</h2>
@@ -186,7 +186,7 @@ export default function AboutPage() {
           </p>
           <Link 
             to="/contact" 
-            className="inline-flex items-center gap-2 mt-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-5 py-2.5 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+            className="inline-flex items-center gap-2 mt-5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium px-5 py-2.5 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
           >
             Nous contacter
           </Link>

@@ -289,7 +289,7 @@ export default function DemandeEntreprisePage() {
       </section>
 
       {demande.statut === 'A_INSPECTER' && (
-        <p className="text-sm bg-violet-50 text-violet-800 rounded-xl p-4 mb-4">
+        <p className="text-sm bg-indigo-50 text-indigo-800 rounded-xl p-4 mb-4">
           L’intervention est terminée. L’inspecteur Bricolibe contrôle le travail avant de clôturer la prestation.
         </p>
       )}

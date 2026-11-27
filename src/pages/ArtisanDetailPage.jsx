@@ -49,7 +49,7 @@ import {
 // Sans position exacte, la carte montre le centre du quartier : le cercle signale
 // que l'artisan se trouve quelque part dans cette zone, pas à ce point précis.
 const RAYON_APPROXIMATIF_M = 600;
-const CERCLE_APPROXIMATIF = { color: "#4f46e5", fillColor: "#6366f1", fillOpacity: 0.12, weight: 1 };
+const CERCLE_APPROXIMATIF = { color: "#1257cc", fillColor: "#2f6be3", fillOpacity: 0.12, weight: 1 };
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -70,7 +70,7 @@ const makePinIcon = (color) => L.divIcon({
   popupAnchor: [0, -36],
 });
 
-const artisanIcon = makePinIcon("#4f46e5");
+const artisanIcon = makePinIcon("#1257cc");
 const clientIcon = makePinIcon("#10b981");
 
 function FitBounds({ artisanPos, clientPos }) {
@@ -311,7 +311,7 @@ export default function ArtisanDetailPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 py-8 px-4">
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, x: -10 }}

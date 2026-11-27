@@ -139,7 +139,7 @@ export default function IdentitePiecePage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 flex items-center justify-center">
+      <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 flex items-center justify-center">
         <Spinner size="lg" />
       </main>
     )
@@ -150,7 +150,7 @@ export default function IdentitePiecePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 py-8 px-4">
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Header */}
         <motion.div

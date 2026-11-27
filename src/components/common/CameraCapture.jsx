@@ -122,7 +122,7 @@ export default function CameraCapture({ onCapture, onClose }) {
             <button
               type="button"
               onClick={handleCapture}
-              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+              className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
             >
               <Camera className="w-5 h-5" />
               Capturer

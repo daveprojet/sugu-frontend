@@ -80,7 +80,7 @@ export default function AvisArtisanPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-8 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, x: -10 }}

@@ -404,7 +404,7 @@ export default function DevenirPartenairePage() {
     <main className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <img src={bgImage} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-purple-800/75 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/85 via-indigo-600/60 to-indigo-900/75 mix-blend-multiply" />
       </div>
 
       <motion.div
@@ -418,7 +418,7 @@ export default function DevenirPartenairePage() {
             Devenir partenaire
           </h1>
           <p className="text-indigo-200 text-sm mt-2 font-medium drop-shadow-sm">
-            Travaillons ensemble avec <span className="text-purple-300 font-semibold">Bricolibe</span>
+            Travaillons ensemble avec <span className="text-indigo-300 font-semibold">Bricolibe</span>
           </p>
         </div>
 

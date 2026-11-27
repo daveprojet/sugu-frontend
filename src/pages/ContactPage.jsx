@@ -96,7 +96,7 @@ export default function ContactPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-purple-50/30 py-12 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50/30 via-white to-indigo-50/30 py-12 px-4">
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -112,7 +112,7 @@ export default function ContactPage() {
               className="w-full h-full object-cover"
             />
             {/* Overlay clair pour que le texte reste lisible et s'intègre au thème clair */}
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/85 via-white/80 to-purple-50/85" />
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/85 via-white/80 to-indigo-50/85" />
           </div>
 
           {/* Contenu du Hero */}
@@ -234,7 +234,7 @@ export default function ContactPage() {
                   disabled={createContact.isLoading}
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium px-8 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium px-8 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {createContact.isLoading ? (
                     <span className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export default function ContactPage() {
 
             <motion.section
               variants={itemVariants}
-              className="bg-gradient-to-br from-indigo-50/70 to-purple-50/70 backdrop-blur-sm p-6 rounded-3xl border border-indigo-200/40 shadow-2xl shadow-gray-200/60"
+              className="bg-gradient-to-br from-indigo-50/70 to-indigo-50/70 backdrop-blur-sm p-6 rounded-3xl border border-indigo-200/40 shadow-2xl shadow-gray-200/60"
             >
               <h2 className="font-display text-lg font-semibold text-gray-900 mb-3">
                 Besoin rapide ?

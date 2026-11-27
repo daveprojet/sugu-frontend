@@ -93,7 +93,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="group flex items-center gap-2.5 rounded-full pl-1 pr-3 py-1 hover:shadow-md hover:ring-2 hover:ring-indigo-500/20 transition-all duration-200 bg-transparent hover:bg-gray-50/80"
               >
-                <div className="w-9 h-9 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center text-indigo-700 font-semibold text-sm uppercase shadow-sm">
+                <div className="w-9 h-9 bg-gradient-to-br from-indigo-100 to-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-semibold text-sm uppercase shadow-sm">
                   {user.prenom?.[0]}
                   {user.nom?.[0]}
                 </div>
@@ -171,7 +171,7 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/inscription"
-                className="inline-flex items-center justify-center px-3 md:px-4 py-2 md:py-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium shadow-md shadow-indigo-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                className="inline-flex items-center justify-center px-3 md:px-4 py-2 md:py-2.5 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-medium shadow-md shadow-indigo-500/30 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
               >
                 S'inscrire
               </Link>
@@ -238,7 +238,7 @@ export default function Navbar() {
                   <Link
                     to="/inscription"
                     onClick={() => setBurgerOpen(false)}
-                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md shadow-indigo-500/30 transition-all duration-200"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-md shadow-indigo-500/30 transition-all duration-200"
                   >
                     S'inscrire
                   </Link>
