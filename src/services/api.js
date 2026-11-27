@@ -394,6 +394,9 @@ export const marketplaceService = {
   supprimerPhotoOeuvre: (uid, photoId) => api.delete(`/marketplace/mes-oeuvres/${uid}/photos/${photoId}/`),
   actionOeuvre: (uid, action, data = {}) => api.post(`/marketplace/mes-oeuvres/${uid}/${action}/`, data),
   mesCredits:  () => api.get('/marketplace/mes-credits/'),
+  acheterCredits: (data) => api.post('/marketplace/acheter-credits/', data),
+  statistiques: (uid) => api.get(`/marketplace/mes-oeuvres/${uid}/statistiques/`),
+  artistesADecouvrir: () => api.get('/marketplace/artistes-a-decouvrir/'),
   envoyerPiece: ({ type_piece, recto, verso }) =>
     api.put('/marketplace/mon-profil/piece-identite/', enFormData({ type_piece, recto, verso }), multipart),
   ajouterRealisations: (photos) => api.post('/marketplace/mon-profil/realisations/', enFormData({}, photos), multipart),

@@ -29,6 +29,7 @@ export default function PaymentSuccessPage() {
   const reponse = verify.data
   const typePaiement = reponse?.data?.paiement?.type
   const estAbonnement = typePaiement === 'badge' || typePaiement === 'boost' || typePaiement === 'abonnement_ent'
+  const estCredits = typePaiement === 'credits_mp'
   // 202 : PayTech n'a pas encore confirmé, le paiement n'est donc pas acquis.
   const error = verify.isError
     ? extractApiError(verify.error, 'Impossible de confirmer le paiement.')
@@ -74,7 +75,9 @@ export default function PaymentSuccessPage() {
           <>
             <h1 className="font-display text-2xl font-bold text-gray-900">Paiement effectué !</h1>
             <p className="text-sm text-gray-500">
-              {typePaiement === 'facture_ent'
+              {estCredits
+                ? 'Vos crédits ont été ajoutés à votre espace artiste. Merci pour votre confiance.'
+                : typePaiement === 'facture_ent'
                 ? 'Votre facture est réglée. Merci pour votre confiance.'
                 : estAbonnement
                 ? 'Votre abonnement est activé. Merci pour votre confiance.'
@@ -86,7 +89,14 @@ export default function PaymentSuccessPage() {
         )}
 
         <div className="flex flex-col gap-3 pt-2">
-          {isEntreprise ? (
+          {estCredits ? (
+            <Link
+              to="/espace-artiste"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"
+            >
+              Mon espace artiste
+            </Link>
+          ) : isEntreprise ? (
             <Link
               to={typePaiement === 'facture_ent' ? '/espace-entreprise/factures' : '/espace-entreprise/abonnement'}
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-sky-600 text-white font-medium px-6 py-3 rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all duration-200"

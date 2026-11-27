@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from 'react-query'
 import { toast } from 'react-toastify'
 import {
   Plus, Eye, Phone, MessageCircle, Coins, Rocket, Star, Tag, ArrowUpCircle, CheckCircle2,
-  Pencil, Trash2, EyeOff, RefreshCcw, ExternalLink, Clock, Sparkles,
+  Pencil, Trash2, EyeOff, RefreshCcw, ExternalLink, Clock, Sparkles, BarChart3,
 } from 'lucide-react'
 import { marketplaceService } from '@/services/api'
 import { extractApiError } from '@/utils/errors'
@@ -12,6 +12,8 @@ import { prixFCFA } from '@/utils/helpers'
 import Modale from '@/components/common/Modale'
 import Spinner from '@/components/common/Spinner'
 import DevenirArtistePage, { EtapeProfil } from '@/pages/DevenirArtistePage'
+import PacksCredits from '@/components/marketplace/PacksCredits'
+import StatistiquesOeuvre from '@/components/marketplace/StatistiquesOeuvre'
 
 const dateFr = (d) => (d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '')
 const joursRestants = (d) => Math.ceil((new Date(d) - Date.now()) / 86400000)
@@ -123,7 +125,7 @@ function ModaleVisibilite({ oeuvre, solde, couts, onClose, onFait }) {
           )
         })}
       </div>
-      {solde < 1 && <p className="mt-4 text-xs text-muted">L’achat de crédits ouvre très bientôt dans l’onglet « Crédits ».</p>}
+      {solde < 3 && <p className="mt-4 text-xs text-muted">Besoin de crédits ? Achetez un pack dans l’onglet « Crédits ».</p>}
     </Modale>
   )
 }
@@ -164,7 +166,7 @@ function ModaleVente({ oeuvre, onClose, onFait }) {
 }
 
 // ── Carte d'une œuvre de l'artiste ──────────────────────────────────────────
-function CarteMonOeuvre({ o, onAction }) {
+function CarteMonOeuvre({ o, onAction, stats }) {
   const [libelle, couleur] = statutOeuvre(o)
   const enLigne = o.est_visible
   const restant = enLigne ? joursRestants(o.expire_le) : null
@@ -222,6 +224,11 @@ function CarteMonOeuvre({ o, onAction }) {
               </Link>
             </>
           )}
+          {stats && o.publiee_le && (
+            <button type="button" onClick={() => onAction('stats', o)} className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-canvas-soft">
+              <BarChart3 className="h-3.5 w-3.5" />Statistiques
+            </button>
+          )}
           {o.statut !== 'MASQUEE' && o.statut !== 'VENDUE' && (
             <Link to={`/espace-artiste/oeuvres/${o.uid}/modifier`} className="inline-flex items-center gap-1 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-ink hover:bg-canvas-soft">
               <Pencil className="h-3.5 w-3.5" />Modifier
@@ -252,7 +259,7 @@ function OngletOeuvres({ credits }) {
   const rafraichir = () => { setModale(null); qc.invalidateQueries('mp-mes-oeuvres'); qc.invalidateQueries('mp-mes-credits') }
 
   const action = async (type, o) => {
-    if (['publier', 'visibilite', 'vendue'].includes(type)) return setModale({ type, oeuvre: o })
+    if (['publier', 'visibilite', 'vendue', 'stats'].includes(type)) return setModale({ type, oeuvre: o })
     if (type === 'supprimer' && !window.confirm(`Supprimer définitivement « ${o.titre} » ?`)) return
     if (type === 'retirer' && !window.confirm(`Retirer « ${o.titre} » du catalogue ? Vous pourrez la remettre en ligne tant que sa période de visibilité court.`)) return
     try {
@@ -295,12 +302,13 @@ function OngletOeuvres({ credits }) {
             <Link to="/espace-artiste/oeuvres/nouvelle" className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-5 py-3 text-sm font-bold text-white hover:bg-indigo-700"><Plus className="h-4 w-4" />Ajouter une œuvre</Link>
           </div>
         ) : visibles.length ? (
-          <div className="grid gap-3 lg:grid-cols-2">{visibles.map((o) => <CarteMonOeuvre key={o.uid} o={o} onAction={action} />)}</div>
+          <div className="grid gap-3 lg:grid-cols-2">{visibles.map((o) => <CarteMonOeuvre key={o.uid} o={o} onAction={action} stats={credits?.avantages?.statistiques_detaillees} />)}</div>
         ) : <p className="rounded-xl border border-line bg-white p-8 text-center text-sm text-muted">Aucune œuvre dans cette liste.</p>}
 
       {modale?.type === 'publier' && <ModalePublication oeuvre={modale.oeuvre} solde={solde} onClose={() => setModale(null)} onFait={rafraichir} />}
       {modale?.type === 'visibilite' && <ModaleVisibilite oeuvre={modale.oeuvre} solde={solde} couts={credits?.couts || {}} onClose={() => setModale(null)} onFait={rafraichir} />}
       {modale?.type === 'vendue' && <ModaleVente oeuvre={modale.oeuvre} onClose={() => setModale(null)} onFait={rafraichir} />}
+      {modale?.type === 'stats' && <StatistiquesOeuvre oeuvre={modale.oeuvre} onClose={() => setModale(null)} />}
     </div>
   )
 }
@@ -324,8 +332,7 @@ function OngletCredits({ credits }) {
         {credits.prochaine_expiration && (
           <p className="mt-2 text-xs text-amber-700">{credits.prochaine_expiration.credits} crédit(s) expirent le {dateFr(credits.prochaine_expiration.date)}.</p>
         )}
-        <button type="button" disabled className="mt-4 w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-bold text-white opacity-60">Acheter des crédits</button>
-        <p className="mt-2 text-center text-xs text-muted">L’achat de crédits ouvre très bientôt.</p>
+        <a href="#packs-credits" className="mt-4 block w-full rounded-lg bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white hover:bg-indigo-700">Acheter des crédits</a>
       </div>
       <div className="rounded-xl border border-line bg-white p-5 lg:col-span-2">
         <h3 className="mb-3 font-bold text-ink">Ce que coûtent les options</h3>
@@ -339,6 +346,9 @@ function OngletCredits({ credits }) {
             ? 'Phase de lancement : la mise en ligne est gratuite pour 6 mois. Seules les options de visibilité se paient.'
             : `Vos 3 premières œuvres sont gratuites (visibles 2 semaines, renouvelables) : il vous en reste ${credits.publications_gratuites_restantes}.`}
         </p>
+      </div>
+      <div id="packs-credits" className="scroll-mt-24 lg:col-span-3">
+        <PacksCredits />
       </div>
       <div className="rounded-xl border border-line bg-white p-5 lg:col-span-3">
         <h3 className="mb-3 font-bold text-ink">Historique</h3>

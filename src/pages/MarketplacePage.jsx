@@ -18,6 +18,7 @@ export default function MarketplacePage() {
   const [plusDeFiltres, setPlusDeFiltres] = useState(Boolean(filtres.prix_min || filtres.prix_max || filtres.ville))
 
   const { data: categories = [] } = useQuery('marketplace-categories', () => marketplaceService.categories().then((r) => r.data), { staleTime: 30 * 60 * 1000 })
+  const { data: decouvrir = [] } = useQuery('marketplace-a-decouvrir', () => marketplaceService.artistesADecouvrir().then((r) => r.data), { staleTime: 10 * 60 * 1000 })
   const actifs = Object.fromEntries(Object.entries(filtres).filter(([, v]) => v))
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery(
     ['marketplace-catalogue', actifs],
@@ -97,6 +98,26 @@ export default function MarketplacePage() {
           </div>
         </div>
       </section>
+
+      {/* Artistes à découvrir (avantage du pack Galerie) : sans filtre seulement */}
+      {!Object.keys(actifs).length && decouvrir.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pt-6">
+          <h2 className="mb-3 font-display text-lg font-bold text-ink">Artistes à découvrir</h2>
+          <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+            {decouvrir.map((a) => (
+              <Link key={a.uid} to={a.chemin} className="flex w-56 shrink-0 items-center gap-3 rounded-xl border border-line bg-white p-3 hover:border-indigo-300">
+                {a.photo
+                  ? <img src={a.photo} alt="" className="h-12 w-12 rounded-full object-cover" />
+                  : <span className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-lg font-extrabold uppercase text-indigo-700">{a.nom?.[0]}</span>}
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-bold text-ink">{a.nom}</span>
+                  <span className="block truncate text-xs text-muted">{[a.specialites?.slice(0, 2).join(' · '), a.ville].filter(Boolean).join(' · ')}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Résultats */}
       <section className="mx-auto max-w-6xl px-4 py-6">
