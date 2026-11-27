@@ -380,7 +380,20 @@ export const marketplaceService = {
   categories:  () => api.get('/marketplace/categories/'),
   monProfil:   () => api.get('/marketplace/mon-profil/'),
   creerProfil: (data) => api.post('/marketplace/mon-profil/', data),
-  modifierProfil: (data) => api.patch('/marketplace/mon-profil/', data),
+  // Avec une photo de profil, la modification part en multipart.
+  modifierProfil: (data) => (data.photo instanceof File
+    ? api.patch('/marketplace/mon-profil/', enFormData(data), multipart)
+    : api.patch('/marketplace/mon-profil/', data)),
+  mesOeuvres:  () => api.get('/marketplace/mes-oeuvres/'),
+  monOeuvre:   (uid) => api.get(`/marketplace/mes-oeuvres/${uid}/`),
+  creerOeuvre: ({ photos = [], video = null, ...data }) =>
+    api.post('/marketplace/mes-oeuvres/', enFormData(data, photos, video), multipart),
+  modifierOeuvre: (uid, { photos = [], video = null, ...data }) =>
+    api.patch(`/marketplace/mes-oeuvres/${uid}/`, enFormData(data, photos, video), multipart),
+  supprimerOeuvre: (uid) => api.delete(`/marketplace/mes-oeuvres/${uid}/`),
+  supprimerPhotoOeuvre: (uid, photoId) => api.delete(`/marketplace/mes-oeuvres/${uid}/photos/${photoId}/`),
+  actionOeuvre: (uid, action, data = {}) => api.post(`/marketplace/mes-oeuvres/${uid}/${action}/`, data),
+  mesCredits:  () => api.get('/marketplace/mes-credits/'),
   envoyerPiece: ({ type_piece, recto, verso }) =>
     api.put('/marketplace/mon-profil/piece-identite/', enFormData({ type_piece, recto, verso }), multipart),
   ajouterRealisations: (photos) => api.post('/marketplace/mon-profil/realisations/', enFormData({}, photos), multipart),

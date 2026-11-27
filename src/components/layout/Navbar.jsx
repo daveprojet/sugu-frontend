@@ -148,6 +148,16 @@ export default function Navbar() {
                       <User className="w-4 h-4" />
                       Mon profil
                     </Link>
+                    {["client", "artisan"].includes(user.role) && (
+                      <Link
+                        to="/espace-artiste"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-500 transition-colors"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <Palette className="w-4 h-4" />
+                        Espace artiste
+                      </Link>
+                    )}
                     {artisanIndependant && (
                       <Link
                         to="/dashboard-artisan/abonnements"

@@ -42,6 +42,8 @@ const DevenirArtistePage = lazy(() => import('@/pages/DevenirArtistePage'))
 const MarketplacePage = lazy(() => import('@/pages/MarketplacePage'))
 const OeuvrePage = lazy(() => import('@/pages/OeuvrePage'))
 const ArtisteMarketplacePage = lazy(() => import('@/pages/ArtisteMarketplacePage'))
+const EspaceArtistePage = lazy(() => import('@/pages/EspaceArtistePage'))
+const OeuvreFormPage = lazy(() => import('@/pages/OeuvreFormPage'))
 const ConfirmerEmailArtistePage = lazy(() => import('@/pages/ConfirmerEmailArtistePage'))
 const ConfidentialitePage = lazy(() => import('@/pages/ConfidentialitePage'))
 const CommissionDashboardPage = lazy(() => import('@/pages/CommissionDashboardPage'))
@@ -142,7 +144,9 @@ function AppRoutes() {
           <Route path="/marketplace/artistes/:segment" element={<ArtisteMarketplacePage />} />
           <Route path="/marketplace/devenir-artiste" element={<DevenirArtistePage />} />
           <Route path="/marketplace/confirmer-email" element={<ConfirmerEmailArtistePage />} />
-          <Route path="/espace-artiste" element={<PrivateRoute><DevenirArtistePage /></PrivateRoute>} />
+          <Route path="/espace-artiste" element={<PrivateRoute><EspaceArtistePage /></PrivateRoute>} />
+          <Route path="/espace-artiste/oeuvres/nouvelle" element={<PrivateRoute><OeuvreFormPage /></PrivateRoute>} />
+          <Route path="/espace-artiste/oeuvres/:uid/modifier" element={<PrivateRoute><OeuvreFormPage /></PrivateRoute>} />
           <Route path="/mon-profil" element={
             <PrivateRoute><MonProfil /></PrivateRoute>
           } />

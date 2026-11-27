@@ -110,7 +110,7 @@ function EtapeCompte() {
 }
 
 // ── Étape 2 : profil d'artiste ───────────────────────────────────────────────
-function EtapeProfil({ profil, onTermine }) {
+export function EtapeProfil({ profil, onTermine }) {
   const qc = useQueryClient()
   const { data: categories = [] } = useQuery('marketplace-categories', () => marketplaceService.categories().then((r) => r.data), { staleTime: 30 * 60 * 1000 })
   const [form, setForm] = useState(() => ({
@@ -118,6 +118,7 @@ function EtapeProfil({ profil, onTermine }) {
     quartier: profil?.quartier || '', whatsapp: profil?.whatsapp || '', bio: profil?.bio || '',
     specialites: profil?.specialites || [],
   }))
+  const [photo, setPhoto] = useState([])
   const [envoi, setEnvoi] = useState(false)
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
   const basculer = (slug) => set('specialites', form.specialites.includes(slug) ? form.specialites.filter((s) => s !== slug) : [...form.specialites, slug])
@@ -130,7 +131,9 @@ function EtapeProfil({ profil, onTermine }) {
     }
     setEnvoi(true)
     try {
-      const { data } = profil ? await marketplaceService.modifierProfil(form) : await marketplaceService.creerProfil(form)
+      let { data } = profil ? await marketplaceService.modifierProfil(form) : await marketplaceService.creerProfil(form)
+      if (photo.length) data = (await marketplaceService.modifierProfil({ photo: photo[0] })).data
+      setPhoto([])
       qc.setQueryData('marketplace-mon-profil', data)
       if (!profil || profil.email !== data.email) toast.success(`Un lien de confirmation a été envoyé à ${data.email}.`)
       onTermine?.()
@@ -179,6 +182,13 @@ function EtapeProfil({ profil, onTermine }) {
       <div>
         <label className={libelle}>Numéro WhatsApp (s’il est différent de votre téléphone)</label>
         <PhoneField value={form.whatsapp} onChange={(v) => set('whatsapp', v)} />
+      </div>
+      <div>
+        <p className={libelle}>Photo de profil (vous ou votre atelier)</p>
+        <div className="flex items-center gap-4">
+          {profil?.photo && !photo.length && <img src={profil.photo} alt="" className="h-20 w-20 rounded-full border border-line object-cover" />}
+          <PhotosPicker photos={photo} onChange={setPhoto} max={1} label={profil?.photo ? 'Changer la photo' : 'Ajouter une photo'} />
+        </div>
       </div>
       <div>
         <label className={libelle} htmlFor="mp-bio">Présentation</label>
