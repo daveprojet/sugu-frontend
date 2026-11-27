@@ -376,6 +376,7 @@ export const marketplaceService = {
   oeuvre:      (segment) => api.get(`/marketplace/oeuvres/${segment}/`),
   artiste:     (segment) => api.get(`/marketplace/artistes/${segment}/`),
   contact:     (segment, canal) => api.post(`/marketplace/oeuvres/${segment}/contact/`, { canal }),
+  signaler:    (segment, data) => api.post(`/marketplace/oeuvres/${segment}/signaler/`, data),
   regles:      () => api.get('/marketplace/regles/'),
   categories:  () => api.get('/marketplace/categories/'),
   monProfil:   () => api.get('/marketplace/mon-profil/'),

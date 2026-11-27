@@ -8,6 +8,7 @@ import { prixFCFA } from '@/utils/helpers'
 import BackLink from '@/components/common/BackLink'
 import BoutonPartage from '@/components/common/BoutonPartage'
 import Spinner from '@/components/common/Spinner'
+import SignalerOeuvre from '@/components/marketplace/SignalerOeuvre'
 
 const chiffres = (tel) => (tel || '').replace(/\D/g, '')
 
@@ -145,6 +146,8 @@ export default function OeuvrePage() {
             </span>
             <span className="text-sm font-semibold text-indigo-700">Voir ses œuvres</span>
           </Link>
+
+          <SignalerOeuvre segment={segment} />
         </div>
       </div>
     </main>
